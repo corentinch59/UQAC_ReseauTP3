@@ -18,6 +18,16 @@ add_installfiles("assets/**", {prefixdir = "bin"})
 
 add_cxflags("/wd4251")
 
+if is_mode("distrib") then
+    set_optimize("fastest")
+    set_symbols("none")
+else
+    add_defines("WITH_SCE_EDITOR")
+    if is_mode("debug") then
+    set_suffixname("-debug")
+    end
+end
+
 target("UQAC_ReseauTP3")
     set_kind("binary")
     add_files("src/DuoBoloNetwork/*.cpp")

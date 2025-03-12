@@ -1,0 +1,1 @@
+xmake config -m release -a x64 && xmake project -k cmake

@@ -15,7 +15,7 @@ int main()
     spdlog::info("Hello!");
 
     InitWindow(1280, 720, "DuoBolo TP3");
-    // SetTargetFPS(144);
+    SetTargetFPS(60);
     DisableCursor();
 
     entt::registry world{};
@@ -43,23 +43,26 @@ int main()
     {
         for (int j = 0; j < 10; j++)
         {
-            auto cubeEntity = world.create();
-            auto& cubeTransform = world.emplace_or_replace<Transform>(cubeEntity);
-            cubeTransform.scale = {1, 1, 1};
-            cubeTransform.translation = Vector3(-5 + j, 2, -5 + i);
-            cubeTransform.rotation = QuaternionIdentity();
+            for (int k = 0; k < 10; k++)
+            {
+                auto cubeEntity = world.create();
+                auto& cubeTransform = world.emplace_or_replace<Transform>(cubeEntity);
+                cubeTransform.scale = {1, 1, 1};
+                cubeTransform.translation = Vector3(-5 + j, 2 + k, -5 + i);
+                cubeTransform.rotation = QuaternionIdentity();
 
-            auto& cubeRenderable = world.emplace_or_replace<Renderable>(cubeEntity);
-            cubeRenderable.model = cube;
-            cubeRenderable.tint = Color(
-                GetRandomValue(0, 255),
-                GetRandomValue(0, 255),
-                GetRandomValue(0, 255),
-                255
-            );
+                auto& cubeRenderable = world.emplace_or_replace<Renderable>(cubeEntity);
+                cubeRenderable.model = cube;
+                cubeRenderable.tint = Color(
+                    GetRandomValue(0, 255),
+                    GetRandomValue(0, 255),
+                    GetRandomValue(0, 255),
+                    255
+                );
 
-            Vector3 cubeShapeExtent{1, 1, 1};
-            world.emplace_or_replace<Rigidbody>(cubeEntity, 1.f, cubeShapeExtent);
+                Vector3 cubeShapeExtent{1, 1, 1};
+                world.emplace_or_replace<Rigidbody>(cubeEntity, 1.f, cubeShapeExtent);
+            }
         }
     }
 

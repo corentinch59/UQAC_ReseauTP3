@@ -1,3 +1,8 @@
+# Xmake cache
+.xmake/
+build/
+vs*/
+
 # Created by https://www.toptal.com/developers/gitignore/api/cmake,clion+all,linux,macos,windows,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,clion+all,linux,macos,windows,c++
 

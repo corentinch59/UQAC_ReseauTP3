@@ -218,3 +218,8 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake,clion+all,linux,macos,windows,c++
 
+CMakeLists.txt
+cmake-*/
+.idea/
+.xmake/
+build/

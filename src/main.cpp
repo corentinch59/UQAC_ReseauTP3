@@ -99,7 +99,7 @@ int main()
         if (GetTime() - lastPrintTime > 1.0f)
         {
             lastPrintTime = GetTime();
-            spdlog::info("Frametime: {}s", deltaTime);
+            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
         }
 
         // spawn a sphere

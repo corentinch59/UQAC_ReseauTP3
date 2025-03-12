@@ -42,6 +42,7 @@ private:
     int mShadowMapLoc;
     int mAmbientLoc;
     int mShadowMapResolutionLoc;
+    Model mSkyboxModel;
 
     void UpdateLightCam();
     void SetShaderUniforms();

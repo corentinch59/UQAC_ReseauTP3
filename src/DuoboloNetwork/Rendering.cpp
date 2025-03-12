@@ -4,6 +4,7 @@
 
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ShadowShaders.h>
+#include <DuoBoloNetwork/SkyboxShaders.h>
 
 #include <raymath.h>
 #include <rlgl.h>
@@ -17,7 +18,8 @@ void UnloadShadowmapRenderTexture(RenderTexture2D target);
 
 Renderer::Renderer()
 {
-    mLightDir = Vector3Normalize({ 0.35f, -1.0f, -0.35f });
+    // Shadow
+    mLightDir = Vector3Normalize({0.35f, -1.0f, -0.35f});
     mLightColor = WHITE;
     mLightColorNormalized = ColorNormalize(mLightColor);
     mAmbient[0] = mAmbient[1] = mAmbient[2] = mAmbient[3] = 0.1f;
@@ -35,10 +37,34 @@ Renderer::Renderer()
     mShadowMapResolutionLoc = GetShaderLocation(mShadowShader, "shadowMapResolution");
 
     mShadowMap = LoadShadowmapRenderTexture(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
+
+
+    // Cubemap
+    mSkyboxModel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
+
+    mSkyboxModel.materials[0].shader = LoadShaderFromMemory(gSkyboxVertexShader, gSkyboxFragmentShader);
+
+    int environmentMap = MATERIAL_MAP_CUBEMAP;
+    int doGamma = 0;
+    int vflipped = 0;
+    SetShaderValue(mSkyboxModel.materials[0].shader,
+                   GetShaderLocation(mSkyboxModel.materials[0].shader, "environmentMap"),
+                   &environmentMap, SHADER_UNIFORM_INT);
+    SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "doGamma"),
+                   &doGamma, SHADER_UNIFORM_INT);
+    SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "vflipped"),
+                   &vflipped, SHADER_UNIFORM_INT);
+
+    Image img = LoadImage("assets/skybox.png");
+    mSkyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
+    // CUBEMAP_LAYOUT_PANORAMA
+    UnloadImage(img);
 }
 
 Renderer::~Renderer()
 {
+    UnloadShader(mSkyboxModel.materials[0].shader);
+    UnloadModel(mSkyboxModel);
     UnloadShader(mShadowShader);
     UnloadShadowmapRenderTexture(mShadowMap);
 }
@@ -86,6 +112,12 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
 
     BeginMode3D(camera);
 
+    rlDisableBackfaceCulling();
+    rlDisableDepthMask();
+    DrawModel(mSkyboxModel, {0, 0, 0}, 1.0f, WHITE);
+    rlEnableBackfaceCulling();
+    rlEnableDepthMask();
+
     for (auto&& [entity, transform, renderable] : view.each())
     {
         Vector3 axis;
@@ -110,7 +142,7 @@ void Renderer::UpdateLightCam()
 {
     mLightCam.target = mLightCam.position + mLightDir;
     mLightCam.projection = CAMERA_ORTHOGRAPHIC;
-    mLightCam.up = { 0.0f, 1.0f, 0.0f };
+    mLightCam.up = {0.0f, 1.0f, 0.0f};
     mLightCam.fovy = SHADOW_DISTANCE;
 }
 
@@ -124,7 +156,7 @@ void Renderer::SetShaderUniforms()
 
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
 {
-    RenderTexture2D target = { 0 };
+    RenderTexture2D target = {0};
 
     target.id = rlLoadFramebuffer(); // Load an empty framebuffer
     target.texture.width = width;
@@ -141,14 +173,15 @@ RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
         rlTextureParameters(target.depth.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_CLAMP);
         target.depth.width = width;
         target.depth.height = height;
-        target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?
+        target.depth.format = 19; //DEPTH_COMPONENT_24BIT?
         target.depth.mipmaps = 1;
 
         // Attach depth texture to FBO
         rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
 
         // Check if fbo is complete with attachments (valid)
-        if (rlFramebufferComplete(target.id)) TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
+        if (rlFramebufferComplete(target.id))
+            TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
         rlDisableFramebuffer();
     }

@@ -10,6 +10,8 @@
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
 
+#include <imgui.h>
+
 int main()
 {
     spdlog::info("Hello!");
@@ -39,11 +41,11 @@ int main()
     Model sphere = LoadModelFromMesh(GenMeshSphere(.5f, 16, 32));
     renderer.UpdateMeshMaterialsToUseCorrectShader(sphere);
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 5; i++)
     {
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < 5; j++)
         {
-            for (int k = 0; k < 10; k++)
+            for (int k = 0; k < 50; k++)
             {
                 auto cubeEntity = world.create();
                 auto& cubeTransform = world.emplace_or_replace<Transform>(cubeEntity);

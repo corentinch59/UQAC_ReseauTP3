@@ -9,7 +9,8 @@
 #include <rlgl.h>
 #include <spdlog/spdlog.h>
 
-#define SHADOWMAP_RESOLUTION 1024
+#define SHADOWMAP_RESOLUTION 4096
+#define SHADOW_DISTANCE 60.0f
 
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
 void UnloadShadowmapRenderTexture(RenderTexture2D target);
@@ -33,11 +34,7 @@ Renderer::Renderer()
     mAmbientLoc = GetShaderLocation(mShadowShader, "ambient");
     mShadowMapResolutionLoc = GetShaderLocation(mShadowShader, "shadowMapResolution");
 
-    SetShaderUniforms();
-
     mShadowMap = LoadShadowmapRenderTexture(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
-
-    UpdateLightCam();
 }
 
 Renderer::~Renderer()
@@ -48,6 +45,12 @@ Renderer::~Renderer()
 
 void Renderer::Render(entt::registry& world, const Camera& camera)
 {
+    mLightDir = Vector3Normalize(mLightDir);
+    mLightCam.position = camera.position + Vector3Scale(mLightDir, -15.0f);
+    UpdateLightCam();
+
+    SetShaderUniforms();
+
     auto view = world.view<Transform, Renderable>();
 
     Matrix lightView;
@@ -64,7 +67,7 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.translation, axis, angle, transform.scale, WHITE);
+        DrawModelEx(renderable.model, transform.translation, axis, angle * RAD2DEG, transform.scale, renderable.tint);
     }
 
     EndMode3D();
@@ -72,10 +75,8 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
     Matrix lightViewProj = MatrixMultiply(lightView, lightProj);
 
     SetShaderValue(mShadowShader, mShadowShader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position, SHADER_UNIFORM_VEC3);
-
-    SetShaderUniforms();
-
     SetShaderValueMatrix(mShadowShader, mLightVPLoc, lightViewProj);
+    SetShaderUniforms();
 
     rlEnableShader(mShadowShader.id);
     int slot = 10; // Can be anything 0 to 15, but 0 will probably be taken up
@@ -91,7 +92,7 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.translation, axis, angle, transform.scale, WHITE);
+        DrawModelEx(renderable.model, transform.translation, axis, angle * RAD2DEG, transform.scale, renderable.tint);
     }
 
     EndMode3D();
@@ -107,18 +108,14 @@ void Renderer::UpdateMeshMaterialsToUseCorrectShader(Model& model)
 
 void Renderer::UpdateLightCam()
 {
-    mLightCam.position = Vector3Scale(mLightDir, -15.0f);
-    mLightCam.target = Vector3Zero();
+    mLightCam.target = mLightCam.position + mLightDir;
     mLightCam.projection = CAMERA_ORTHOGRAPHIC;
     mLightCam.up = { 0.0f, 1.0f, 0.0f };
-    mLightCam.fovy = 20.0f;
+    mLightCam.fovy = SHADOW_DISTANCE;
 }
 
 void Renderer::SetShaderUniforms()
 {
-    mLightDir = Vector3Normalize(mLightDir);
-    mLightCam.position = Vector3Scale(mLightDir, -15.0f);
-
     SetShaderValue(mShadowShader, mLightDirLoc, &mLightDir, SHADER_UNIFORM_VEC3);
     SetShaderValue(mShadowShader, mLightColLoc, &mLightColorNormalized, SHADER_UNIFORM_VEC4);
     SetShaderValue(mShadowShader, mAmbientLoc, mAmbient, SHADER_UNIFORM_VEC4);
@@ -140,6 +137,8 @@ RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
         // Create depth texture
         // We don't need a color texture for the shadowmap
         target.depth.id = rlLoadTextureDepth(width, height, false);
+        rlTextureParameters(target.depth.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_CLAMP);
+        rlTextureParameters(target.depth.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_CLAMP);
         target.depth.width = width;
         target.depth.height = height;
         target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?

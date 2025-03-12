@@ -17,24 +17,40 @@ struct Rigidbody
     std::unique_ptr<btMotionState> mMotionState;
     std::unique_ptr<btRigidBody> mRigidbody;
 
-    template<class Shape, typename... Args>
-    static Rigidbody Create(float mass, Args ...args)
+    // Box rigidbody constructor
+    explicit Rigidbody(float mass, Vector3 boxExtent)
     {
-        Rigidbody rb{};
-        rb.mShape = std::make_unique<Shape>(std::forward<Args>(args)...);
-        rb.mMotionState = std::make_unique<btDefaultMotionState>();
+        btVector3 extent = {boxExtent.x, boxExtent.y, boxExtent.z};
+        mShape = std::make_unique<btBoxShape>(extent / 2.0f);
+        mMotionState = std::make_unique<btDefaultMotionState>();
 
         btVector3 bInertia(0.0f, 0.0f, 0.0f);
-        if(mass != 0.0f)
-            rb.mShape->calculateLocalInertia(mass, bInertia);
+        if (mass != 0.0f)
+            mShape->calculateLocalInertia(mass, bInertia);
 
-        rb.mRigidbody = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{
+        mRigidbody = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{
             mass,
-            rb.mMotionState.get(),
-            rb.mShape.get(),
+            mMotionState.get(),
+            mShape.get(),
             bInertia
         });
-        return rb;
+    }
+
+    explicit Rigidbody(float mass, float radius)
+    {
+        mShape = std::make_unique<btSphereShape>(radius);
+        mMotionState = std::make_unique<btDefaultMotionState>();
+
+        btVector3 bInertia(0.0f, 0.0f, 0.0f);
+        if (mass != 0.0f)
+            mShape->calculateLocalInertia(mass, bInertia);
+
+        mRigidbody = std::make_unique<btRigidBody>(btRigidBody::btRigidBodyConstructionInfo{
+            mass,
+            mMotionState.get(),
+            mShape.get(),
+            bInertia
+        });
     }
 };
 

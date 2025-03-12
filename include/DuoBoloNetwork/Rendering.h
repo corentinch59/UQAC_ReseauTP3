@@ -11,7 +11,7 @@
 struct Renderable
 {
     Model model;
-    Material material;
+    Color tint = WHITE;
 };
 
 class Renderer

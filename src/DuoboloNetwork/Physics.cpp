@@ -4,7 +4,11 @@
 
 #include <DuoBoloNetwork/Physics.h>
 
+#include <raymath.h>
+
 #define GRAVITY (-9.8f)
+
+#define DEFAULT_DESTROY_DISTANCE_FROM_CENTER 100.0f
 
 PhysicsSolver::PhysicsSolver() :
     mDefaultCollisionConfiguration(std::make_unique<btDefaultCollisionConfiguration>()),
@@ -32,6 +36,18 @@ bool IsEqual(Quaternion rVec, btQuaternion btVec)
 void PhysicsSolver::Solve(entt::registry& world, float delta)
 {
     auto view = world.view<Rigidbody, Transform>();
+
+    // first destroy out of bounds entities
+    for (auto&& [entity, physicComponent, transformComponent] : view.each())
+    {
+        if (Vector3LengthSqr(transformComponent.translation) > DEFAULT_DESTROY_DISTANCE_FROM_CENTER * DEFAULT_DESTROY_DISTANCE_FROM_CENTER)
+        {
+            if (physicComponent.mRigidbody->isInWorld())
+                mWorld->removeRigidBody(physicComponent.mRigidbody.get());
+
+            world.destroy(entity);
+        }
+    }
 
     for (auto&& [entity, physicComponent, transformComponent] : view.each())
     {

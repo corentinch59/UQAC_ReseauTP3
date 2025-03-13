@@ -5,15 +5,17 @@
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ShadowShaders.h>
 #include <DuoBoloNetwork/SkyboxShaders.h>
+#include <DuoBoloNetwork/Helpers.h>
+#include <DuoBoloNetwork/Transform.h>
 
 #include <raymath.h>
+#include <rcamera.h>
 #include <rlgl.h>
 #include <spdlog/spdlog.h>
 
-#include "DuoBoloNetwork/Transform.h"
 
 #define SHADOWMAP_RESOLUTION 4096
-#define SHADOW_DISTANCE 60.0f
+#define SHADOW_DISTANCE 75.0f
 
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
 void UnloadShadowmapRenderTexture(RenderTexture2D target);
@@ -91,6 +93,10 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
 
     for (auto&& [entity, transform, renderable] : view.each())
     {
+        BoundingBox bb = GetModelBoundingBox(renderable.model);
+        float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
+        if (!IsSphereInsideCameraFrustum(mLightCam, radius, transform.position, 1.0f)) continue;
+
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
@@ -116,12 +122,19 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
 
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
-    DrawModel(mSkyboxModel, {0, 0, 0}, 1.0f, WHITE);
+    DrawModel(mSkyboxModel, camera.position, 1.0f, WHITE);
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
+    float aspect = (float)GetScreenWidth() / (float)GetScreenHeight();
     for (auto&& [entity, transform, renderable] : view.each())
     {
+
+        // culling
+        BoundingBox bb = GetModelBoundingBox(renderable.model);
+        float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
+        if (!IsSphereInsideCameraFrustum(camera, radius, transform.position, aspect)) continue;
+
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);

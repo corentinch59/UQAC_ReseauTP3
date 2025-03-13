@@ -18,14 +18,15 @@ add_installfiles("assets/**", {prefixdir = "bin"})
 
 add_cxflags("/wd4251")
 
-if is_mode("distrib") then
-    set_optimize("fastest")
-    set_symbols("none")
-else
+if is_mode("rel-editor") then
     add_defines("WITH_SCE_EDITOR")
-    if is_mode("debug") then
-    set_suffixname("-debug")
-    end
+    set_symbols("hidden")
+    set_optimize("fastest")
+    set_strip("all")
+elseif is_mode("deb-editor") then
+    add_defines("WITH_SCE_EDITOR")
+    set_symbols("debug")
+    set_optimize("none")
 end
 
 target("UQAC_ReseauTP3")
@@ -33,7 +34,7 @@ target("UQAC_ReseauTP3")
     add_files("src/DuoBoloNetwork/*.cpp")
     add_files("src/main.cpp")
     add_headerfiles("include/DuoBoloNetwork/**.hpp","include/DuoBoloNetwork/**.inl", "include/DuoBoloNetwork/**.h")
-    add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt")
+    add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "rlimgui")
     after_build(function (target)
             os.cp("assets", path.join(target:targetdir(), "assets"))
     end)

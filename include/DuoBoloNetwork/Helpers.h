@@ -21,3 +21,5 @@ inline bool IsEqual(Quaternion rVec, btQuaternion btVec)
 {
     return rVec.x == btVec.getX() && rVec.y == btVec.getY() && rVec.z == btVec.getZ() && rVec.w == btVec.getW();
 }
+
+bool IsSphereInsideCameraFrustum(Camera3D camera, float radius, Vector3 position, float aspect);

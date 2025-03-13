@@ -132,8 +132,6 @@ void PhysicsSolver::HandleRigidbodyCreate(entt::registry& registry, entt::entity
 
 void PhysicsSolver::HandleRigidbodyDestroy(entt::registry& registry, entt::entity entity)
 {
-    auto& comp = registry.get<RigidbodyComponent>(entity);
-
     if (mRigidbodies.contains(entity))
     {
         mWorld->removeRigidBody(mRigidbodies[entity].get());

@@ -11,7 +11,12 @@
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/Transform.h>
 
+#ifdef WITH_SCE_EDITOR
 #include <imgui.h>
+#include <rlImGui.h>
+#endif
+
+#define OBJECT_DESTROY_DISTANCE 1000
 
 int main()
 {
@@ -22,6 +27,11 @@ int main()
     InitWindow(1280, 720, "DuoBolo TP3");
     SetTargetFPS(60);
     DisableCursor();
+#ifdef WITH_SCE_EDITOR
+    rlImGuiSetup(true);
+    ImGui::GetIO().MouseDrawCursor = false;
+#endif
+
 
     entt::registry world{};
 
@@ -37,22 +47,25 @@ int main()
     Renderer renderer;
     PhysicsSolver solver(world);
 
-    Model cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
+    Mesh cubeMesh = GenMeshCube(1, 1, 1);
+    Model cube = LoadModelFromMesh(cubeMesh);
     renderer.UpdateMeshMaterialsToUseCorrectShader(cube);
-    Model plane = LoadModelFromMesh(GenMeshCube(100, 1, 100));
+    Mesh planeMesh = GenMeshCube(100, 1, 100);
+    Model plane = LoadModelFromMesh(planeMesh);
     renderer.UpdateMeshMaterialsToUseCorrectShader(plane);
-    Model sphere = LoadModelFromMesh(GenMeshSphere(.5f, 16, 32));
+    Mesh sphereMesh = GenMeshSphere(.5f, 16, 32);
+    Model sphere = LoadModelFromMesh(sphereMesh);
     renderer.UpdateMeshMaterialsToUseCorrectShader(sphere);
 
-    for (int i = 0; i < 10; i++)
+    for (int i = -5; i <= 5; i++)
     {
-        for (int j = 0; j < 10; j++)
+        for (int j = -5; j <= 5; j++)
         {
-            for (int k = 0; k < 10; k++)
+            for (int k = 0; k < 2; k++)
             {
                 auto cubeEntity = world.create();
                 auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = Vector3(-5 + j, 2 + k, -5 + i);
+                cubeTransform.position = Vector3(j, 2 + k, i);
                 cubeTransform.rotation = QuaternionIdentity();
 
                 auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
@@ -87,6 +100,13 @@ int main()
     {
         float deltaTime = GetFrameTime();
 
+        // needed for imgui
+        BeginDrawing();
+#ifdef WITH_SCE_EDITOR
+        rlImGuiBegin();
+        ImGui::ShowDemoWindow();
+#endif
+
         const Vector2 mouseDelta = GetMouseDelta();
         CameraYaw(&camera, -mouseDelta.x * cameraMouseSens, false);
         CameraPitch(&camera, -mouseDelta.y * cameraMouseSens, true, false, false);
@@ -103,6 +123,17 @@ int main()
             spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
         }
 
+        // destroy objects that are too far
+        {
+            auto view = world.view<TransformComponent>();
+
+            for (auto&& [entity, transform] : view.each())
+            {
+                if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE) world.
+                    destroy(entity);
+            }
+        }
+
         // spawn a sphere
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
@@ -115,18 +146,19 @@ int main()
             sphereRenderable.model = sphere;
             sphereRenderable.tint = RED;
 
-            auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 1.f, SphereShape{.5f});
+            auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 10.f, SphereShape{.5f});
             sphereRigidbody.velocity = Vector3Normalize(camera.target - camera.position) * 50.0f;
         }
 
         solver.Solve(deltaTime);
 
-        BeginDrawing();
-
         ClearBackground(SKYBLUE);
 
         renderer.Render(world, camera);
 
+#ifdef WITH_SCE_EDITOR
+        rlImGuiEnd();
+#endif
         EndDrawing();
     }
 
@@ -137,6 +169,9 @@ int main()
     UnloadModel(plane);
     UnloadModel(sphere);
 
+#ifdef WITH_SCE_EDITOR
+    rlImGuiShutdown();
+#endif
     CloseWindow();
 
     return 0;

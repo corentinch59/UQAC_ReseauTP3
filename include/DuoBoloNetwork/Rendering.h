@@ -8,9 +8,9 @@
 
 #include <entt/entity/registry.hpp>
 
-struct Renderable
+struct RenderableComponent
 {
-    Model model;
+    Model model{};
     Color tint = WHITE;
 };
 

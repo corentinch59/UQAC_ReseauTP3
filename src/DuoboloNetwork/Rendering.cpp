@@ -10,6 +10,8 @@
 #include <rlgl.h>
 #include <spdlog/spdlog.h>
 
+#include "DuoBoloNetwork/Transform.h"
+
 #define SHADOWMAP_RESOLUTION 4096
 #define SHADOW_DISTANCE 60.0f
 
@@ -77,7 +79,7 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
 
     SetShaderUniforms();
 
-    auto view = world.view<Transform, Renderable>();
+    auto view = world.view<TransformComponent, RenderableComponent>();
 
     Matrix lightView;
     Matrix lightProj;
@@ -93,7 +95,7 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.translation, axis, angle * RAD2DEG, transform.scale, renderable.tint);
+        DrawModelEx(renderable.model, transform.position, axis, angle * RAD2DEG, {1, 1, 1}, renderable.tint);
     }
 
     EndMode3D();
@@ -124,7 +126,7 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.translation, axis, angle * RAD2DEG, transform.scale, renderable.tint);
+        DrawModelEx(renderable.model, transform.position, axis, angle * RAD2DEG, {1, 1, 1}, renderable.tint);
     }
 
     EndMode3D();

@@ -9,12 +9,15 @@
 #include <DuoBoloNetwork/Helpers.h>
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
+#include <DuoBoloNetwork/Transform.h>
 
 #include <imgui.h>
 
 int main()
 {
     spdlog::info("Hello!");
+
+    spdlog::set_level(spdlog::level::debug);
 
     InitWindow(1280, 720, "DuoBolo TP3");
     SetTargetFPS(60);
@@ -32,7 +35,7 @@ int main()
     float cameraSpeed = 5.4f;
 
     Renderer renderer;
-    PhysicsSolver solver;
+    PhysicsSolver solver(world);
 
     Model cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
     renderer.UpdateMeshMaterialsToUseCorrectShader(cube);
@@ -41,19 +44,18 @@ int main()
     Model sphere = LoadModelFromMesh(GenMeshSphere(.5f, 16, 32));
     renderer.UpdateMeshMaterialsToUseCorrectShader(sphere);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 10; i++)
     {
-        for (int j = 0; j < 5; j++)
+        for (int j = 0; j < 10; j++)
         {
-            for (int k = 0; k < 50; k++)
+            for (int k = 0; k < 10; k++)
             {
                 auto cubeEntity = world.create();
-                auto& cubeTransform = world.emplace_or_replace<Transform>(cubeEntity);
-                cubeTransform.scale = {1, 1, 1};
-                cubeTransform.translation = Vector3(-5 + j, 2 + k, -5 + i);
+                auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
+                cubeTransform.position = Vector3(-5 + j, 2 + k, -5 + i);
                 cubeTransform.rotation = QuaternionIdentity();
 
-                auto& cubeRenderable = world.emplace_or_replace<Renderable>(cubeEntity);
+                auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = cube;
                 cubeRenderable.tint = Color(
                     GetRandomValue(0, 255),
@@ -62,25 +64,22 @@ int main()
                     255
                 );
 
-                Vector3 cubeShapeExtent{1, 1, 1};
-                world.emplace_or_replace<Rigidbody>(cubeEntity, 1.f, cubeShapeExtent);
+                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{{1, 1, 1}});
             }
         }
     }
 
     // ground
     auto planeEntity = world.create();
-    auto& planeTransform = world.emplace_or_replace<Transform>(planeEntity);
-    planeTransform.scale = {1, 1, 1};
-    planeTransform.translation = {0, -.5f, 0};
+    auto& planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
+    planeTransform.position = {0, -.5f, 0};
     planeTransform.rotation = QuaternionIdentity();
 
-    auto& planeRenderable = world.emplace_or_replace<Renderable>(planeEntity);
+    auto& planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
     planeRenderable.model = plane;
     planeRenderable.tint = GREEN;
 
-    Vector3 planeBoxExtent{100, 1, 100};
-    world.emplace_or_replace<Rigidbody>(planeEntity, 0.f, planeBoxExtent);
+    world.emplace_or_replace<RigidbodyComponent>(planeEntity, 0.f, BoxShape{{100, 1, 100}});
 
     float lastPrintTime = GetTime();
 
@@ -89,14 +88,14 @@ int main()
         float deltaTime = GetFrameTime();
 
         const Vector2 mouseDelta = GetMouseDelta();
-        CameraYaw(&camera, -mouseDelta.x*cameraMouseSens, false);
-        CameraPitch(&camera, -mouseDelta.y*cameraMouseSens, true, false, false);
-        if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraSpeed*deltaTime, true);
-        if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraSpeed*deltaTime, true);
-        if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraSpeed*deltaTime, true);
-        if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraSpeed*deltaTime, true);
-        if (IsKeyDown(KEY_Q)) CameraMoveUp(&camera, cameraSpeed*deltaTime);
-        if (IsKeyDown(KEY_E)) CameraMoveUp(&camera, -cameraSpeed*deltaTime);
+        CameraYaw(&camera, -mouseDelta.x * cameraMouseSens, false);
+        CameraPitch(&camera, -mouseDelta.y * cameraMouseSens, true, false, false);
+        if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraSpeed * deltaTime, true);
+        if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraSpeed * deltaTime, true);
+        if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraSpeed * deltaTime, true);
+        if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraSpeed * deltaTime, true);
+        if (IsKeyDown(KEY_Q)) CameraMoveUp(&camera, cameraSpeed * deltaTime);
+        if (IsKeyDown(KEY_E)) CameraMoveUp(&camera, -cameraSpeed * deltaTime);
 
         if (GetTime() - lastPrintTime > 1.0f)
         {
@@ -108,20 +107,19 @@ int main()
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             auto sphereEntity = world.create();
-            auto& sphereTransform = world.emplace_or_replace<Transform>(sphereEntity);
-            sphereTransform.scale = {1, 1, 1};
-            sphereTransform.translation = camera.position;
+            auto& sphereTransform = world.emplace_or_replace<TransformComponent>(sphereEntity);
+            sphereTransform.position = camera.position;
             sphereTransform.rotation = QuaternionIdentity();
 
-            auto& sphereRenderable = world.emplace_or_replace<Renderable>(sphereEntity);
+            auto& sphereRenderable = world.emplace_or_replace<RenderableComponent>(sphereEntity);
             sphereRenderable.model = sphere;
             sphereRenderable.tint = RED;
 
-            auto& sphereRigidbody = world.emplace_or_replace<Rigidbody>(sphereEntity, 1.f, .5f);
-            sphereRigidbody.mRigidbody->setLinearVelocity( ToBtVector3(Vector3Normalize(camera.target - camera.position)) * 50.0f);
+            auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 1.f, SphereShape{.5f});
+            sphereRigidbody.velocity = Vector3Normalize(camera.target - camera.position) * 50.0f;
         }
 
-        solver.Solve(world, deltaTime);
+        solver.Solve(deltaTime);
 
         BeginDrawing();
 
@@ -131,6 +129,9 @@ int main()
 
         EndDrawing();
     }
+
+    // clear rigidbodies to avoid errors on bullet deinit
+    world.clear<RigidbodyComponent>();
 
     UnloadModel(cube);
     UnloadModel(plane);

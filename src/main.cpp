@@ -25,6 +25,7 @@ int main()
     spdlog::set_level(spdlog::level::debug);
 
     InitWindow(1280, 720, "DuoBolo TP3");
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
     DisableCursor();
 #ifdef WITH_SCE_EDITOR
@@ -100,22 +101,32 @@ int main()
     {
         float deltaTime = GetFrameTime();
 
+        // unlock/lock mouse
+        if (IsKeyDown(KEY_F10))
+        {
+            if (IsCursorHidden())
+            {
+                ShowCursor();
+                EnableCursor();
+            } else
+            {
+                HideCursor();
+                DisableCursor();
+            }
+        }
+
+        // toggle borderless fullscreen
+        if (IsKeyDown(KEY_F11))
+        {
+            ToggleBorderlessWindowed();
+        }
+
         // needed for imgui
         BeginDrawing();
 #ifdef WITH_SCE_EDITOR
         rlImGuiBegin();
         ImGui::ShowDemoWindow();
 #endif
-
-        const Vector2 mouseDelta = GetMouseDelta();
-        CameraYaw(&camera, -mouseDelta.x * cameraMouseSens, false);
-        CameraPitch(&camera, -mouseDelta.y * cameraMouseSens, true, false, false);
-        if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraSpeed * deltaTime, true);
-        if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraSpeed * deltaTime, true);
-        if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraSpeed * deltaTime, true);
-        if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraSpeed * deltaTime, true);
-        if (IsKeyDown(KEY_Q)) CameraMoveUp(&camera, cameraSpeed * deltaTime);
-        if (IsKeyDown(KEY_E)) CameraMoveUp(&camera, -cameraSpeed * deltaTime);
 
         if (GetTime() - lastPrintTime > 1.0f)
         {
@@ -134,20 +145,33 @@ int main()
             }
         }
 
-        // spawn a sphere
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if (IsCursorHidden())
         {
-            auto sphereEntity = world.create();
-            auto& sphereTransform = world.emplace_or_replace<TransformComponent>(sphereEntity);
-            sphereTransform.position = camera.position;
-            sphereTransform.rotation = QuaternionIdentity();
+            const Vector2 mouseDelta = GetMouseDelta();
+            CameraYaw(&camera, -mouseDelta.x * cameraMouseSens, false);
+            CameraPitch(&camera, -mouseDelta.y * cameraMouseSens, true, false, false);
+            if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraSpeed * deltaTime, true);
+            if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraSpeed * deltaTime, true);
+            if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraSpeed * deltaTime, true);
+            if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraSpeed * deltaTime, true);
+            if (IsKeyDown(KEY_Q)) CameraMoveUp(&camera, cameraSpeed * deltaTime);
+            if (IsKeyDown(KEY_E)) CameraMoveUp(&camera, -cameraSpeed * deltaTime);
 
-            auto& sphereRenderable = world.emplace_or_replace<RenderableComponent>(sphereEntity);
-            sphereRenderable.model = sphere;
-            sphereRenderable.tint = RED;
+            // spawn a sphere
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                auto sphereEntity = world.create();
+                auto& sphereTransform = world.emplace_or_replace<TransformComponent>(sphereEntity);
+                sphereTransform.position = camera.position;
+                sphereTransform.rotation = QuaternionIdentity();
 
-            auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 10.f, SphereShape{.5f});
-            sphereRigidbody.velocity = Vector3Normalize(camera.target - camera.position) * 50.0f;
+                auto& sphereRenderable = world.emplace_or_replace<RenderableComponent>(sphereEntity);
+                sphereRenderable.model = sphere;
+                sphereRenderable.tint = RED;
+
+                auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 10.f, SphereShape{.5f});
+                sphereRigidbody.velocity = Vector3Normalize(camera.target - camera.position) * 50.0f;
+            }
         }
 
         solver.Solve(deltaTime);

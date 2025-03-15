@@ -2,7 +2,6 @@
 
 #include <raylib.h>
 #include <raymath.h>
-#include <rcamera.h>
 
 #include <entt/entt.hpp>
 
@@ -12,41 +11,42 @@
 #include <DuoBoloNetwork/Transform.h>
 
 #ifdef WITH_SCE_EDITOR
-#include <imgui.h>
 #include <rlImGui.h>
+#include <imgui.h>
+#include <DuoBoloNetwork/WorldEditor.h>
 #endif
 
 #define OBJECT_DESTROY_DISTANCE 1000
 
-int main()
-{
+int main() {
     spdlog::info("Hello!");
 
     spdlog::set_level(spdlog::level::debug);
 
     InitWindow(1280, 720, "DuoBolo TP3");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);
+    // SetTargetFPS(60);
     DisableCursor();
+
 #ifdef WITH_SCE_EDITOR
     rlImGuiSetup(true);
-    ImGui::GetIO().MouseDrawCursor = false;
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
-
 
     entt::registry world{};
 
     Camera camera{};
     camera.position = {0.0f, 4.0f, 10.0f}; // Camera position
-    camera.target = {0.0f, 0.0f, 0.0f}; // Camera looking at point
-    camera.up = {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f; // Camera field-of-view Y
+    camera.target = {0.0f, 0.0f, 0.0f};    // Camera looking at point
+    camera.up = {0.0f, 1.0f, 0.0f};        // Camera up vector (rotation towards target)
+    camera.fovy = 60.0f;                   // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
-    float cameraMouseSens = 0.003f;
-    float cameraSpeed = 5.4f;
 
     Renderer renderer;
     PhysicsSolver solver(world);
+#ifdef WITH_SCE_EDITOR
+    WorldEditor worldEditor(world);
+#endif
 
     Mesh cubeMesh = GenMeshCube(1, 1, 1);
     Model cube = LoadModelFromMesh(cubeMesh);
@@ -58,25 +58,25 @@ int main()
     Model sphere = LoadModelFromMesh(sphereMesh);
     renderer.UpdateMeshMaterialsToUseCorrectShader(sphere);
 
-    for (int i = -5; i <= 5; i++)
-    {
-        for (int j = -5; j <= 5; j++)
-        {
-            for (int k = 0; k < 2; k++)
-            {
+#ifdef WITH_SCE_EDITOR
+    renderer.SetRenderIntoTexture(true);
+#endif
+
+    for (int i = -5; i <= 5; i++) {
+        for (int j = -5; j <= 5; j++) {
+            for (int k = 0; k < 2; k++) {
                 auto cubeEntity = world.create();
-                auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
+                auto &cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
                 cubeTransform.position = Vector3(j, 2 + k, i);
                 cubeTransform.rotation = QuaternionIdentity();
 
-                auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
+                auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = cube;
                 cubeRenderable.tint = Color(
                     GetRandomValue(0, 255),
                     GetRandomValue(0, 255),
                     GetRandomValue(0, 255),
-                    255
-                );
+                    255);
 
                 world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{{1, 1, 1}});
             }
@@ -85,11 +85,11 @@ int main()
 
     // ground
     auto planeEntity = world.create();
-    auto& planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
+    auto &planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
     planeTransform.position = {0, -.5f, 0};
     planeTransform.rotation = QuaternionIdentity();
 
-    auto& planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
+    auto &planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
     planeRenderable.model = plane;
     planeRenderable.tint = GREEN;
 
@@ -97,27 +97,29 @@ int main()
 
     float lastPrintTime = GetTime();
 
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
+        if (GetTime() - lastPrintTime > 1.0f) {
+            lastPrintTime = GetTime();
+            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
+        }
+
+#ifndef WITH_SCE_EDITOR
         // unlock/lock mouse
-        if (IsKeyDown(KEY_F10))
-        {
-            if (IsCursorHidden())
-            {
+        if (IsKeyPressed(KEY_F10)) {
+            if (IsCursorHidden()) {
                 ShowCursor();
                 EnableCursor();
-            } else
-            {
+            } else {
                 HideCursor();
                 DisableCursor();
             }
         }
+#endif
 
         // toggle borderless fullscreen
-        if (IsKeyDown(KEY_F11))
-        {
+        if (IsKeyPressed(KEY_F11)) {
             ToggleBorderlessWindowed();
         }
 
@@ -125,63 +127,33 @@ int main()
         BeginDrawing();
 #ifdef WITH_SCE_EDITOR
         rlImGuiBegin();
-        ImGui::ShowDemoWindow();
 #endif
 
-        if (GetTime() - lastPrintTime > 1.0f)
-        {
-            lastPrintTime = GetTime();
-            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
-        }
-
+#ifndef WITH_SCE_EDITOR
         // destroy objects that are too far
         {
             auto view = world.view<TransformComponent>();
 
-            for (auto&& [entity, transform] : view.each())
-            {
-                if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE) world.
-                    destroy(entity);
-            }
-        }
-
-        if (IsCursorHidden())
-        {
-            const Vector2 mouseDelta = GetMouseDelta();
-            CameraYaw(&camera, -mouseDelta.x * cameraMouseSens, false);
-            CameraPitch(&camera, -mouseDelta.y * cameraMouseSens, true, false, false);
-            if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraSpeed * deltaTime, true);
-            if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraSpeed * deltaTime, true);
-            if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraSpeed * deltaTime, true);
-            if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraSpeed * deltaTime, true);
-            if (IsKeyDown(KEY_Q)) CameraMoveUp(&camera, cameraSpeed * deltaTime);
-            if (IsKeyDown(KEY_E)) CameraMoveUp(&camera, -cameraSpeed * deltaTime);
-
-            // spawn a sphere
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                auto sphereEntity = world.create();
-                auto& sphereTransform = world.emplace_or_replace<TransformComponent>(sphereEntity);
-                sphereTransform.position = camera.position;
-                sphereTransform.rotation = QuaternionIdentity();
-
-                auto& sphereRenderable = world.emplace_or_replace<RenderableComponent>(sphereEntity);
-                sphereRenderable.model = sphere;
-                sphereRenderable.tint = RED;
-
-                auto& sphereRigidbody = world.emplace_or_replace<RigidbodyComponent>(sphereEntity, 10.f, SphereShape{.5f});
-                sphereRigidbody.velocity = Vector3Normalize(camera.target - camera.position) * 50.0f;
+            for (auto && [ entity, transform ] : view.each()) {
+                if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE)
+                    world.destroy(entity);
             }
         }
 
         solver.Solve(deltaTime);
+#endif
 
-        ClearBackground(SKYBLUE);
+        ClearBackground(BLACK);
+
+#ifdef WITH_SCE_EDITOR
+        worldEditor.Update(deltaTime, &renderer, &camera);
+#endif
 
         renderer.Render(world, camera);
 
 #ifdef WITH_SCE_EDITOR
         rlImGuiEnd();
+        DrawFPS(GetScreenWidth() - 95, 10);
 #endif
         EndDrawing();
     }

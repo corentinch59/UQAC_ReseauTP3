@@ -11,17 +11,15 @@
 #include <raymath.h>
 #include <rcamera.h>
 #include <rlgl.h>
-#include <spdlog/spdlog.h>
 
 
 #define SHADOWMAP_RESOLUTION 4096
 #define SHADOW_DISTANCE 75.0f
 
-RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
-void UnloadShadowmapRenderTexture(RenderTexture2D target);
+RenderTexture2D LoadDepthRenderTexture(int width, int height);
+void UnloadDepthRenderTexture(RenderTexture2D target);
 
-Renderer::Renderer()
-{
+Renderer::Renderer() {
     // Shadow
     mLightDir = Vector3Normalize({0.35f, -1.0f, -0.35f});
     mLightColor = WHITE;
@@ -40,8 +38,7 @@ Renderer::Renderer()
     mAmbientLoc = GetShaderLocation(mShadowShader, "ambient");
     mShadowMapResolutionLoc = GetShaderLocation(mShadowShader, "shadowMapResolution");
 
-    mShadowMap = LoadShadowmapRenderTexture(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
-
+    mShadowMap = LoadDepthRenderTexture(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
 
     // Cubemap
     mSkyboxModel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
@@ -63,18 +60,26 @@ Renderer::Renderer()
     mSkyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
     // CUBEMAP_LAYOUT_PANORAMA
     UnloadImage(img);
+
+    // RT
+    mRTWidth = DEFAULT_RENDERER_WIDTH;
+    mRTHeight = DEFAULT_RENDERER_HEIGHT;
+
+    mShouldRenderIntoTexture = false;
+
+    mRenderTexture = {};
+    mRenderTextureInitialized = false;
 }
 
-Renderer::~Renderer()
-{
+Renderer::~Renderer() {
+    DestroyRenderTexture();
     UnloadShader(mSkyboxModel.materials[0].shader);
     UnloadModel(mSkyboxModel);
     UnloadShader(mShadowShader);
-    UnloadShadowmapRenderTexture(mShadowMap);
+    UnloadDepthRenderTexture(mShadowMap);
 }
 
-void Renderer::Render(entt::registry& world, const Camera& camera)
-{
+void Renderer::Render(entt::registry &world, const Camera &camera) {
     mLightDir = Vector3Normalize(mLightDir);
     mLightCam.position = camera.position + Vector3Scale(mLightDir, -15.0f);
     UpdateLightCam();
@@ -91,11 +96,11 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
     lightView = rlGetMatrixModelview();
     lightProj = rlGetMatrixProjection();
 
-    for (auto&& [entity, transform, renderable] : view.each())
-    {
+    for (auto && [ entity, transform, renderable ] : view.each()) {
         BoundingBox bb = GetModelBoundingBox(renderable.model);
         float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
-        if (!IsSphereInsideCameraFrustum(mLightCam, radius, transform.position, 1.0f)) continue;
+        if (!IsSphereInsideCameraFrustum(mLightCam, radius, transform.position, 1.0f))
+            continue;
 
         Vector3 axis;
         float angle;
@@ -106,6 +111,13 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
 
     EndMode3D();
     EndTextureMode();
+
+    if (mShouldRenderIntoTexture && mRenderTextureInitialized)
+    {
+        BeginTextureMode(mRenderTexture);
+        ClearBackground(WHITE);
+    }
+
     Matrix lightViewProj = MatrixMultiply(lightView, lightProj);
 
     SetShaderValue(mShadowShader, mShadowShader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position, SHADER_UNIFORM_VEC3);
@@ -126,14 +138,19 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
-    float aspect = (float)GetScreenWidth() / (float)GetScreenHeight();
-    for (auto&& [entity, transform, renderable] : view.each())
-    {
+    float aspect = 1.0;
+    if (mShouldRenderIntoTexture && mRenderTextureInitialized) {
+        aspect = (float)mRTWidth / (float)mRTHeight;
+    } else {
+        aspect = (float)GetScreenWidth() / (float)GetScreenHeight();
+    }
+    for (auto && [ entity, transform, renderable ] : view.each()) {
 
         // culling
         BoundingBox bb = GetModelBoundingBox(renderable.model);
         float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
-        if (!IsSphereInsideCameraFrustum(camera, radius, transform.position, aspect)) continue;
+        if (!IsSphereInsideCameraFrustum(camera, radius, transform.position, aspect))
+            continue;
 
         Vector3 axis;
         float angle;
@@ -143,42 +160,82 @@ void Renderer::Render(entt::registry& world, const Camera& camera)
     }
 
     EndMode3D();
+
+    if (mShouldRenderIntoTexture && mRenderTextureInitialized)
+    {
+        EndTextureMode();
+    }
 }
 
-void Renderer::UpdateMeshMaterialsToUseCorrectShader(Model& model)
-{
-    for (int i = 0; i < model.materialCount; i++)
-    {
+void Renderer::UpdateMeshMaterialsToUseCorrectShader(Model &model) {
+    for (int i = 0; i < model.materialCount; i++) {
         model.materials[i].shader = GetShader();
     }
 }
 
-void Renderer::UpdateLightCam()
-{
+void Renderer::SetRenderIntoTexture(bool renderIntoTexture) {
+    mShouldRenderIntoTexture = renderIntoTexture;
+
+    if (mShouldRenderIntoTexture) {
+        BuildRenderTexture();
+    } else {
+        DestroyRenderTexture();
+    }
+}
+
+void Renderer::SetRenderSize(int width, int height) {
+    mRTWidth = width;
+    mRTHeight = height;
+
+    if (mShouldRenderIntoTexture) {
+        DestroyRenderTexture();
+        BuildRenderTexture();
+    }
+}
+
+void Renderer::BuildRenderTexture() {
+    if (mRenderTextureInitialized) {
+        spdlog::error("Render texture already initialized!");
+        return;
+    }
+
+    mRenderTexture = LoadRenderTexture(mRTWidth, mRTHeight);
+    mRenderTextureInitialized = true;
+}
+
+void Renderer::DestroyRenderTexture() {
+    if (!mRenderTextureInitialized) {
+        spdlog::error("Render texture not initialized!");
+        return;
+    }
+
+    UnloadRenderTexture(mRenderTexture);
+    mRenderTexture = {};
+    mRenderTextureInitialized = false;
+}
+
+void Renderer::UpdateLightCam() {
     mLightCam.target = mLightCam.position + mLightDir;
     mLightCam.projection = CAMERA_ORTHOGRAPHIC;
     mLightCam.up = {0.0f, 1.0f, 0.0f};
     mLightCam.fovy = SHADOW_DISTANCE;
 }
 
-void Renderer::SetShaderUniforms()
-{
+void Renderer::SetShaderUniforms() {
     SetShaderValue(mShadowShader, mLightDirLoc, &mLightDir, SHADER_UNIFORM_VEC3);
     SetShaderValue(mShadowShader, mLightColLoc, &mLightColorNormalized, SHADER_UNIFORM_VEC4);
     SetShaderValue(mShadowShader, mAmbientLoc, mAmbient, SHADER_UNIFORM_VEC4);
     SetShaderValue(mShadowShader, mShadowMapResolutionLoc, &mShadowMapResolution, SHADER_UNIFORM_INT);
 }
 
-RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
-{
+RenderTexture2D LoadDepthRenderTexture(int width, int height) {
     RenderTexture2D target = {0};
 
     target.id = rlLoadFramebuffer(); // Load an empty framebuffer
     target.texture.width = width;
     target.texture.height = height;
 
-    if (target.id > 0)
-    {
+    if (target.id > 0) {
         rlEnableFramebuffer(target.id);
 
         // Create depth texture
@@ -199,17 +256,15 @@ RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
             TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
         rlDisableFramebuffer();
-    }
-    else spdlog::warn("FBO: Framebuffer object can not be created");
+    } else
+        spdlog::warn("FBO: Framebuffer object can not be created");
 
     return target;
 }
 
 // Unload shadowmap render texture from GPU memory (VRAM)
-void UnloadShadowmapRenderTexture(RenderTexture2D target)
-{
-    if (target.id > 0)
-    {
+void UnloadDepthRenderTexture(RenderTexture2D target) {
+    if (target.id > 0) {
         // NOTE: Depth texture/renderbuffer is automatically
         // queried and deleted before deleting framebuffer
         rlUnloadFramebuffer(target.id);

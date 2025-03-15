@@ -7,6 +7,10 @@
 #include <raylib.h>
 
 #include <entt/entity/registry.hpp>
+#include <spdlog/spdlog.h>
+
+#define DEFAULT_RENDERER_WIDTH 1280
+#define DEFAULT_RENDERER_HEIGHT 720
 
 struct RenderableComponent
 {
@@ -27,6 +31,18 @@ public:
 
     void UpdateMeshMaterialsToUseCorrectShader(Model& model);
 
+    void SetRenderIntoTexture(bool renderIntoTexture);
+
+    void SetRenderSize(int width, int height);
+
+    RenderTexture2D GetRenderTexture() {
+        if (!mRenderTextureInitialized)
+        {
+            spdlog::error("Retrieving unitialized render texture!");
+        }
+        return mRenderTexture;
+    }
+
 private:
     Shader mShadowShader;
     RenderTexture2D mShadowMap;
@@ -43,6 +59,13 @@ private:
     int mAmbientLoc;
     int mShadowMapResolutionLoc;
     Model mSkyboxModel;
+    RenderTexture2D mRenderTexture;
+    bool mRenderTextureInitialized;
+    bool mShouldRenderIntoTexture;
+    int mRTWidth, mRTHeight;
+
+    void BuildRenderTexture();
+    void DestroyRenderTexture();
 
     void UpdateLightCam();
     void SetShaderUniforms();

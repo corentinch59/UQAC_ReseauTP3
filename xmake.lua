@@ -5,7 +5,7 @@ if is_plat("windows") then
     add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
 end
 
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui", "raylib")
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "raylib")
 
 set_project("DuoBoloNetwork")
 

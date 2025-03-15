@@ -228,3 +228,5 @@ cmake-*/
 .idea/
 .xmake/
 build/
+imgui.ini
+.cache/

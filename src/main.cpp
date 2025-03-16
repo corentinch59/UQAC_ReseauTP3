@@ -35,17 +35,19 @@ int main() {
 
     entt::registry world{};
 
+#ifndef WITH_SCE_EDITOR
     Camera camera{};
     camera.position = {0.0f, 4.0f, 10.0f}; // Camera position
     camera.target = {0.0f, 0.0f, 0.0f};    // Camera looking at point
     camera.up = {0.0f, 1.0f, 0.0f};        // Camera up vector (rotation towards target)
     camera.fovy = 60.0f;                   // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
+#endif
 
     Renderer renderer;
     PhysicsSolver solver(world);
 #ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world);
+    WorldEditor worldEditor(world, &renderer);
 #endif
 
     Mesh cubeMesh = GenMeshCube(1, 1, 1);
@@ -100,7 +102,7 @@ int main() {
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-        if (GetTime() - lastPrintTime > 1.0f) {
+        if (GetTime() - lastPrintTime > 1.f) {
             lastPrintTime = GetTime();
             spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
         }
@@ -146,10 +148,10 @@ int main() {
         ClearBackground(BLACK);
 
 #ifdef WITH_SCE_EDITOR
-        worldEditor.Update(deltaTime, &renderer, &camera);
-#endif
-
+        worldEditor.Update(deltaTime);
+#else
         renderer.Render(world, camera);
+#endif
 
 #ifdef WITH_SCE_EDITOR
         rlImGuiEnd();

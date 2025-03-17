@@ -1,10 +1,13 @@
 #pragma once
 
+#ifdef WITH_SCE_EDITOR
+
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ImGuiSpdlogSink.h>
 
 #include <imgui.h>
 #include <entt/entt.hpp>
+#include <entt/entity/fwd.hpp>
 #include <raylib.h>
 
 #include <memory>
@@ -28,10 +31,12 @@ class WorldEditor {
     int mNewWidth = 1280;
     int mNewHeight = 720;
     bool mAutoAdapt = true;
+    entt::entity mSelected = entt::null;
 
     static inline const char *gViewportWindowName = "Viewport";
     static inline const char *gConsoleWindowName = "Console";
     static inline const char *gHierarchyWindowName = "Hierarchy";
+    static inline const char *gInspectorWindowName = "Inspector";
 
     void CameraMovement(float dt, Camera *camera);
 
@@ -45,6 +50,8 @@ class WorldEditor {
 
     void HierarchyWindow();
 
+    void InspectorWindow();
+
     void LoadScene();
 
     void SaveScene();
@@ -52,3 +59,5 @@ class WorldEditor {
     // logs
     std::shared_ptr<ImGuiSpdlogSinkMt> mSink;
 };
+
+#endif

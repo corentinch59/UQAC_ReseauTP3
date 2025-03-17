@@ -256,6 +256,17 @@ bool Renderer::PreloadModel(const std::string &model) {
     }
 }
 
+Model Renderer::GetModel(const std::string &model) {
+    Model m;
+    if (PreloadModel(model)) {
+        m = mModels[model];
+    } else {
+        m = mModels["cube"];
+    }
+
+    return m;
+}
+
 void Renderer::BuildRenderTexture() {
     if (mRenderTextureInitialized) {
         spdlog::error("Render texture already initialized!");

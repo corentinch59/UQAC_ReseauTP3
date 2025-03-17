@@ -90,7 +90,7 @@ int main() {
                 cubeTransform.position = {(float)j, (float)2 + k, (float)i};
 
                 auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
-                cubeRenderable.model = "assets/monkey.obj";
+                cubeRenderable.model = "cube";
                 cubeRenderable.tint = {
                     (unsigned char)GetRandomValue(0, 255),
                     (unsigned char)GetRandomValue(0, 255),
@@ -114,15 +114,15 @@ int main() {
 
     world.emplace_or_replace<RigidbodyComponent>(planeEntity, 0.f, BoxShape{{100, 1, 100}});
 
-    float lastPrintTime = GetTime();
+//    float lastPrintTime = GetTime();
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-        if (GetTime() - lastPrintTime > 1.f) {
-            lastPrintTime = GetTime();
-            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
-        }
+//        if (GetTime() - lastPrintTime > 1.f) {
+//            lastPrintTime = GetTime();
+//            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
+//        }
 
 #ifndef WITH_SCE_EDITOR
         // unlock/lock mouse

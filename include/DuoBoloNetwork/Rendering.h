@@ -47,6 +47,12 @@ public:
 
     bool PreloadModel(const std::string& model);
 
+    Model GetModel(const std::string& model);
+
+    int GetWidth() const { if (mShouldRenderIntoTexture) return mRTWidth; else return GetRenderWidth(); }
+
+    int GetHeight() const { if (mShouldRenderIntoTexture) return mRTHeight; else return GetRenderHeight(); }
+
 private:
     Shader mShadowShader;
     RenderTexture2D mShadowMap;

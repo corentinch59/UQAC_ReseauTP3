@@ -1,13 +1,20 @@
 
-#include "DuoBoloNetwork/WorldEditor.h"
+#ifdef WITH_SCE_EDITOR
+
+#include <DuoBoloNetwork/WorldEditor.h>
+#include <DuoBoloNetwork/Rendering.h>
+#include <DuoBoloNetwork/Transform.h>
 #include <DuoBoloNetwork/WorldEditor.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <rlImGui.h>
+#include <raylib.h>
+#include <rlgl.h>
 #include <rcamera.h>
 
 #include <spdlog/spdlog.h>
+#include <fmt/format.h>
 
 #define ImGuiWindowFlags_NoInputIfCamera (mInCameraMode ? ImGuiWindowFlags_NoInputs : ImGuiWindowFlags_None)
 
@@ -47,11 +54,42 @@ void WorldEditor::Update(float dt) {
 
     HierarchyWindow();
 
+    InspectorWindow();
+
     if (mInCameraMode) {
         CameraMovement(dt, &mCamera);
     }
 
     mRenderer->Render(mEnttWorld, mCamera);
+
+    if (mSelected != entt::null) {
+        // render selected icon
+        if (mEnttWorld.any_of<TransformComponent>(mSelected)) {
+            auto &transform = mEnttWorld.get<TransformComponent>(mSelected);
+            if (mEnttWorld.any_of<RenderableComponent>(mSelected)) {
+                auto &renderable = mEnttWorld.get<RenderableComponent>(mSelected);
+
+                Vector3 axis;
+                float angle;
+                QuaternionToAxisAngle(transform.rotation, &axis, &angle);
+
+                BeginTextureMode(mRenderer->GetRenderTexture());
+                BeginMode3D(mCamera);
+                rlDisableDepthTest();
+                DrawModelWiresEx(mRenderer->GetModel(renderable.model), transform.position, axis, angle * RAD2DEG, transform.scale, RED);
+                rlEnableDepthTest();
+                EndMode3D();
+                EndTextureMode();
+            }
+            
+            Vector2 positionOnScreen = GetWorldToScreenEx(transform.position, mCamera, mRenderer->GetWidth(), mRenderer->GetHeight());
+
+            BeginTextureMode(mRenderer->GetRenderTexture());
+            DrawCircle(positionOnScreen.x, positionOnScreen.y, 10.f, BLACK);
+            DrawCircle(positionOnScreen.x, positionOnScreen.y, 9.f, WHITE);
+            EndTextureMode();
+        }
+    }
 
     mSink->DrawConsole(dt, gConsoleWindowName, ImGuiWindowFlags_NoInputIfCamera);
 }
@@ -112,11 +150,14 @@ void WorldEditor::FullscreenDockingSpace() {
         ImGui::DockBuilderSetNodeSize(dockspaceID, viewport->Size);
 
         ImGuiID bottomID;
-        ImGuiID topID = ImGui::DockBuilderSplitNode(dockspaceID, ImGuiDir_Up, 0.7f, nullptr, &bottomID);
+        ImGuiID topID = ImGui::DockBuilderSplitNode(dockspaceID, ImGuiDir_Up, 0.8f, nullptr, &bottomID);
         ImGuiID topLeftID;
         ImGuiID topRightID = ImGui::DockBuilderSplitNode(topID, ImGuiDir_Right, 0.8f, nullptr, &topLeftID);
+        ImGuiID topMiddleID;
+        topRightID = ImGui::DockBuilderSplitNode(topRightID, ImGuiDir_Right, 0.2f, nullptr, &topMiddleID);
 
-        ImGui::DockBuilderDockWindow(gViewportWindowName, topRightID);
+        ImGui::DockBuilderDockWindow(gInspectorWindowName, topRightID);
+        ImGui::DockBuilderDockWindow(gViewportWindowName, topMiddleID);
         ImGui::DockBuilderDockWindow(gHierarchyWindowName, topLeftID);
         ImGui::DockBuilderDockWindow(gConsoleWindowName, bottomID);
 
@@ -142,15 +183,13 @@ void WorldEditor::ViewportWindow() {
     ImGui::Begin(gViewportWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera | ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Options"))
-        {
+        if (ImGui::BeginMenu("Options")) {
             ImGui::Checkbox("Auto adapt renderer size", &mAutoAdapt);
             if (mAutoAdapt)
                 ImGui::BeginDisabled();
             ImGui::InputInt("Width", &mNewWidth, 1);
             ImGui::InputInt("Height", &mNewHeight, 1);
-            if (ImGui::Button("Apply"))
-            {
+            if (ImGui::Button("Apply")) {
                 mRenderer->SetRenderSize(mNewWidth, mNewHeight);
             }
             if (mAutoAdapt)
@@ -160,8 +199,7 @@ void WorldEditor::ViewportWindow() {
         ImGui::EndMenuBar();
     }
 
-    if (mAutoAdapt)
-    {
+    if (mAutoAdapt) {
         auto size = ImGui::GetWindowSize();
         mNewWidth = size.x;
         mNewHeight = size.y;
@@ -175,5 +213,30 @@ void WorldEditor::ViewportWindow() {
 
 void WorldEditor::HierarchyWindow() {
     ImGui::Begin(gHierarchyWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
+
+    for (auto entity : mEnttWorld.view<entt::entity>()) {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+        if (mSelected == entity) {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+
+        bool open = ImGui::TreeNodeEx(fmt::format("Entity {}", (uint32_t)entity).c_str(), flags);
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+            spdlog::info("Selected entity {}", (uint32_t)entity);
+            mSelected = entity;
+        }
+
+        if (open) {
+            ImGui::TreePop();
+        }
+    }
+
     ImGui::End();
 }
+
+void WorldEditor::InspectorWindow()  {
+    ImGui::Begin(gInspectorWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
+    ImGui::End();
+}
+
+#endif

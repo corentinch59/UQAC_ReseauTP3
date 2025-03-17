@@ -80,16 +80,6 @@ int main() {
     WorldEditor worldEditor(world, &renderer);
 #endif
 
-    Mesh cubeMesh = GenMeshCube(1, 1, 1);
-    Model cube = LoadModelFromMesh(cubeMesh);
-    renderer.UpdateMeshMaterialsToUseCorrectShader(cube);
-    Mesh planeMesh = GenMeshCube(100, 1, 100);
-    Model plane = LoadModelFromMesh(planeMesh);
-    renderer.UpdateMeshMaterialsToUseCorrectShader(plane);
-    Mesh sphereMesh = GenMeshSphere(.5f, 16, 32);
-    Model sphere = LoadModelFromMesh(sphereMesh);
-    renderer.UpdateMeshMaterialsToUseCorrectShader(sphere);
-
 #ifdef WITH_SCE_EDITOR
     renderer.SetRenderIntoTexture(true);
 #endif
@@ -100,10 +90,9 @@ int main() {
                 auto cubeEntity = world.create();
                 auto &cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
                 cubeTransform.position = Vector3(j, 2 + k, i);
-                cubeTransform.rotation = QuaternionIdentity();
 
                 auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
-                cubeRenderable.model = cube;
+                cubeRenderable.model = "assets/monkey.obj";
                 cubeRenderable.tint = Color(
                     GetRandomValue(0, 255),
                     GetRandomValue(0, 255),
@@ -119,10 +108,10 @@ int main() {
     auto planeEntity = world.create();
     auto &planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
     planeTransform.position = {0, -.5f, 0};
-    planeTransform.rotation = QuaternionIdentity();
+    planeTransform.scale = {100, 1, 100};
 
     auto &planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
-    planeRenderable.model = plane;
+    planeRenderable.model = "cube";
     planeRenderable.tint = GREEN;
 
     world.emplace_or_replace<RigidbodyComponent>(planeEntity, 0.f, BoxShape{{100, 1, 100}});
@@ -186,10 +175,6 @@ int main() {
 
     // clear rigidbodies to avoid errors on bullet deinit
     world.clear<RigidbodyComponent>();
-
-    UnloadModel(cube);
-    UnloadModel(plane);
-    UnloadModel(sphere);
 
 #ifdef WITH_SCE_EDITOR
     rlImGuiShutdown();

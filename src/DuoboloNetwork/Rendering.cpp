@@ -2,6 +2,7 @@
 // Created by theo on 11/03/2025.
 //
 
+#include "raylib.h"
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ShadowShaders.h>
 #include <DuoBoloNetwork/SkyboxShaders.h>
@@ -69,9 +70,29 @@ Renderer::Renderer() {
 
     mRenderTexture = {};
     mRenderTextureInitialized = false;
+
+    // preload models
+    Mesh cubeMesh = GenMeshCube(1, 1, 1);
+    mModels["cube"] = LoadModelFromMesh(cubeMesh);
+    UpdateMeshMaterialsToUseCorrectShader(mModels["cube"]);
+    mBoundingBoxes["cube"] = GetModelBoundingBox(mModels["cube"]);
+
+    Mesh planeMesh = GenMeshPlane(1, 1, 1, 1);
+    mModels["plane"] = LoadModelFromMesh(planeMesh);
+    UpdateMeshMaterialsToUseCorrectShader(mModels["plane"]);
+    mBoundingBoxes["plane"] = GetModelBoundingBox(mModels["plane"]);
+
+    Mesh sphereMesh = GenMeshSphere(1.f, 16, 32);
+    mModels["sphere"] = LoadModelFromMesh(sphereMesh);
+    UpdateMeshMaterialsToUseCorrectShader(mModels["sphere"]);
+    mBoundingBoxes["sphere"] = GetModelBoundingBox(mModels["sphere"]);
 }
 
 Renderer::~Renderer() {
+    for (auto[key, value] : mModels) {
+        UnloadModel(value);
+    }
+
     DestroyRenderTexture();
     UnloadShader(mSkyboxModel.materials[0].shader);
     UnloadModel(mSkyboxModel);
@@ -97,7 +118,16 @@ void Renderer::Render(entt::registry &world, const Camera &camera) {
     lightProj = rlGetMatrixProjection();
 
     for (auto && [ entity, transform, renderable ] : view.each()) {
-        BoundingBox bb = GetModelBoundingBox(renderable.model);
+        Model m;
+        BoundingBox bb;
+        if (PreloadModel(renderable.model)) {
+            m = mModels[renderable.model];
+            bb = mBoundingBoxes[renderable.model];
+        } else {
+            m = mModels["cube"];
+            bb = mBoundingBoxes["cube"];
+        }
+
         float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
         if (!IsSphereInsideCameraFrustum(mLightCam, radius, transform.position, 1.0f))
             continue;
@@ -106,7 +136,7 @@ void Renderer::Render(entt::registry &world, const Camera &camera) {
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.position, axis, angle * RAD2DEG, {1, 1, 1}, renderable.tint);
+        DrawModelEx(m, transform.position, axis, angle * RAD2DEG, transform.scale, renderable.tint);
     }
 
     EndMode3D();
@@ -143,19 +173,27 @@ void Renderer::Render(entt::registry &world, const Camera &camera) {
     } else {
         aspect = (float)GetScreenWidth() / (float)GetScreenHeight();
     }
-    for (auto && [ entity, transform, renderable ] : view.each()) {
 
-        // culling
-        BoundingBox bb = GetModelBoundingBox(renderable.model);
+    for (auto && [ entity, transform, renderable ] : view.each()) {
+        Model m;
+        BoundingBox bb;
+        if (PreloadModel(renderable.model)) {
+            m = mModels[renderable.model];
+            bb = mBoundingBoxes[renderable.model];
+        } else {
+            m = mModels["cube"];
+            bb = mBoundingBoxes["cube"];
+        }
+
         float radius = std::max(Vector3Length(bb.min), Vector3Length(bb.max));
-        if (!IsSphereInsideCameraFrustum(camera, radius, transform.position, aspect))
+        if (!IsSphereInsideCameraFrustum(mLightCam, radius, transform.position, aspect))
             continue;
 
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(transform.rotation, &axis, &angle);
 
-        DrawModelEx(renderable.model, transform.position, axis, angle * RAD2DEG, {1, 1, 1}, renderable.tint);
+        DrawModelEx(m, transform.position, axis, angle * RAD2DEG, transform.scale, renderable.tint);
     }
 
     EndMode3D();
@@ -186,7 +224,8 @@ void Renderer::SetRenderIntoTexture(bool renderIntoTexture) {
 }
 
 void Renderer::SetRenderSize(int width, int height) {
-    if (mRTWidth == width && mRTHeight == height) return;
+    if (mRTWidth == width && mRTHeight == height)
+        return;
 
     mRTWidth = width;
     mRTHeight = height;
@@ -194,6 +233,26 @@ void Renderer::SetRenderSize(int width, int height) {
     if (mShouldRenderIntoTexture) {
         DestroyRenderTexture();
         BuildRenderTexture();
+    }
+}
+
+bool Renderer::PreloadModel(const std::string &model) {
+    if (mUnknownModels.contains(model))
+        return false;
+
+    if (mModels.contains(model))
+        return true;
+
+    Model m = LoadModel(model.c_str());
+
+    if (IsModelValid(m)) {
+        mModels[model] = m;
+        UpdateMeshMaterialsToUseCorrectShader(mModels[model]);
+        mBoundingBoxes[model] = GetModelBoundingBox(mModels[model]);
+        return true;
+    } else {
+        mUnknownModels.insert(model);
+        return false;
     }
 }
 

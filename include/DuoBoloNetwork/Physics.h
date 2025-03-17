@@ -6,14 +6,15 @@
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
+
 #include <raylib.h>
+
+#include <DuoBoloNetwork/Transform.h>
 
 #include <entt/entity/registry.hpp>
 #include <spdlog/spdlog.h>
 
 #include <entt/entt.hpp>
-
-#include "Transform.h"
 
 struct BoxShape
 {
@@ -27,9 +28,9 @@ struct SphereShape
 
 struct RigidbodyComponent
 {
-    float mass;
-    entt::any shape;
-    Vector3 velocity;
+    float mass = 1.f;
+    entt::any shape = BoxShape{{1, 1, 1}};
+    Vector3 velocity = {0, 0, 0};
 };
 
 class PhysicsSolver

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "entt/container/dense_map.hpp"
+#include "entt/container/dense_set.hpp"
 #include <raylib.h>
 
 #include <entt/entity/registry.hpp>
@@ -14,7 +16,7 @@
 
 struct RenderableComponent
 {
-    Model model{};
+    std::string model;
     Color tint = WHITE;
 };
 
@@ -43,6 +45,8 @@ public:
         return mRenderTexture;
     }
 
+    bool PreloadModel(const std::string& model);
+
 private:
     Shader mShadowShader;
     RenderTexture2D mShadowMap;
@@ -63,6 +67,10 @@ private:
     bool mRenderTextureInitialized;
     bool mShouldRenderIntoTexture;
     int mRTWidth, mRTHeight;
+
+    entt::dense_map<std::string, Model> mModels;
+    entt::dense_map<std::string, BoundingBox> mBoundingBoxes;
+    entt::dense_set<std::string> mUnknownModels;
 
     void BuildRenderTexture();
     void DestroyRenderTexture();

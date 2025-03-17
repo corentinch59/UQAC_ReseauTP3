@@ -92,9 +92,9 @@ int main() {
                 auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = "assets/monkey.obj";
                 cubeRenderable.tint = {
-                    GetRandomValue(0, 255),
-                    GetRandomValue(0, 255),
-                    GetRandomValue(0, 255),
+                    (unsigned char)GetRandomValue(0, 255),
+                    (unsigned char)GetRandomValue(0, 255),
+                    (unsigned char)GetRandomValue(0, 255),
                     255};
 
                 world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{{1, 1, 1}});

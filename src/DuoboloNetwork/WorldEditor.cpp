@@ -41,17 +41,17 @@ void WorldEditor::Update(float dt) {
         }
     }
 
-    if (mInCameraMode) {
-        CameraMovement(dt, &mCamera);
-    }
-
-    mRenderer->Render(mEnttWorld, mCamera);
-
     FullscreenDockingSpace();
 
     ViewportWindow();
 
     HierarchyWindow();
+
+    if (mInCameraMode) {
+        CameraMovement(dt, &mCamera);
+    }
+
+    mRenderer->Render(mEnttWorld, mCamera);
 
     mSink->DrawConsole(dt, gConsoleWindowName, ImGuiWindowFlags_NoInputIfCamera);
 }
@@ -139,7 +139,35 @@ void WorldEditor::MainMenuBar() {
 }
 
 void WorldEditor::ViewportWindow() {
-    ImGui::Begin(gViewportWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
+    ImGui::Begin(gViewportWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera | ImGuiWindowFlags_MenuBar);
+
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Options"))
+        {
+            ImGui::Checkbox("Auto adapt renderer size", &mAutoAdapt);
+            if (mAutoAdapt)
+                ImGui::BeginDisabled();
+            ImGui::InputInt("Width", &mNewWidth, 16);
+            ImGui::InputInt("Height", &mNewHeight, 16);
+            if (ImGui::Button("Apply"))
+            {
+                mRenderer->SetRenderSize(mNewWidth, mNewHeight);
+            }
+            if (mAutoAdapt)
+                ImGui::EndDisabled();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    if (mAutoAdapt)
+    {
+        auto size = ImGui::GetWindowSize();
+        mNewWidth = size.x;
+        mNewHeight = size.y;
+        mRenderer->SetRenderSize(mNewWidth, mNewHeight);
+    }
+
     RenderTexture2D rt = mRenderer->GetRenderTexture();
     rlImGuiImageRenderTextureFit(&rt, true);
     ImGui::End();

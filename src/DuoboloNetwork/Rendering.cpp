@@ -112,8 +112,7 @@ void Renderer::Render(entt::registry &world, const Camera &camera) {
     EndMode3D();
     EndTextureMode();
 
-    if (mShouldRenderIntoTexture && mRenderTextureInitialized)
-    {
+    if (mShouldRenderIntoTexture && mRenderTextureInitialized) {
         BeginTextureMode(mRenderTexture);
         ClearBackground(WHITE);
     }
@@ -161,8 +160,11 @@ void Renderer::Render(entt::registry &world, const Camera &camera) {
 
     EndMode3D();
 
-    if (mShouldRenderIntoTexture && mRenderTextureInitialized)
-    {
+#ifdef WITH_SCE_EDITOR
+    DrawFPS(mRTWidth - 95, 10);
+#endif
+
+    if (mShouldRenderIntoTexture && mRenderTextureInitialized) {
         EndTextureMode();
     }
 }
@@ -184,6 +186,8 @@ void Renderer::SetRenderIntoTexture(bool renderIntoTexture) {
 }
 
 void Renderer::SetRenderSize(int width, int height) {
+    if (mRTWidth == width && mRTHeight == height) return;
+
     mRTWidth = width;
     mRTHeight = height;
 

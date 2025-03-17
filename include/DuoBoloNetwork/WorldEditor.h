@@ -10,33 +10,36 @@
 #include <memory>
 
 class WorldEditor {
-public:
-  WorldEditor(entt::registry &world, Renderer *renderer);
+  public:
+    WorldEditor(entt::registry &world, Renderer *renderer);
 
-  void Update(float dt);
+    void Update(float dt);
 
-private:
-  entt::registry &mEnttWorld;
-  Renderer *mRenderer;
-  bool mInCameraMode;
-  Camera3D mCamera;
+  private:
+    entt::registry &mEnttWorld;
+    Renderer *mRenderer;
+    bool mInCameraMode;
+    Camera3D mCamera;
+    int mNewWidth = 1280;
+    int mNewHeight = 720;
+    bool mAutoAdapt = true;
 
-  static inline const char *gViewportWindowName = "Viewport";
-  static inline const char *gConsoleWindowName = "Console";
-  static inline const char *gHierarchyWindowName = "Hierarchy";
+    static inline const char *gViewportWindowName = "Viewport";
+    static inline const char *gConsoleWindowName = "Console";
+    static inline const char *gHierarchyWindowName = "Hierarchy";
 
-  void CameraMovement(float dt, Camera *camera);
+    void CameraMovement(float dt, Camera *camera);
 
-  void FullscreenDockingSpace();
+    void FullscreenDockingSpace();
 
-  bool mDockingSpaceCreated;
+    bool mDockingSpaceCreated;
 
-  void MainMenuBar();
+    void MainMenuBar();
 
-  void ViewportWindow();
+    void ViewportWindow();
 
-  void HierarchyWindow();
+    void HierarchyWindow();
 
-  // logs
-  std::shared_ptr<ImGuiSpdlogSinkMt> mSink;
+    // logs
+    std::shared_ptr<ImGuiSpdlogSinkMt> mSink;
 };

@@ -18,10 +18,40 @@
 
 #define OBJECT_DESTROY_DISTANCE 1000
 
-int main() {
-    spdlog::info("Hello!");
+void CustomLogCallback(int logLevel, const char *text, va_list args)
+{
+    // Format the log message using the variable arguments
+    char buffer[512];
+    vsnprintf(buffer, sizeof(buffer), text, args);
 
+    // Use spdlog to log the message depending on log level
+    switch (logLevel)
+    {
+    case LOG_FATAL:
+        spdlog::critical("[raylib] {}", buffer); // Critical logs for fatal errors
+        break;
+    case LOG_ERROR:
+        spdlog::error("[raylib] {}", buffer); // Error logs
+        break;
+    case LOG_WARNING:
+        spdlog::warn("[raylib] {}", buffer); // Warning logs
+        break;
+    case LOG_INFO:
+        spdlog::info("[raylib] {}", buffer); // Informational logs
+        break;
+    case LOG_DEBUG:
+        spdlog::debug("[raylib] {}", buffer); // Debug logs
+        break;
+    default:
+        spdlog::info("[raylib] Unknown log level: {}", buffer); // Default case
+        break;
+    }
+}
+
+int main() {
     spdlog::set_level(spdlog::level::debug);
+
+    SetTraceLogCallback(CustomLogCallback);
 
     InitWindow(1280, 720, "DuoBolo TP3");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
@@ -120,11 +150,6 @@ int main() {
         }
 #endif
 
-        // toggle borderless fullscreen
-        if (IsKeyPressed(KEY_F11)) {
-            ToggleBorderlessWindowed();
-        }
-
         // needed for imgui
         BeginDrawing();
 #ifdef WITH_SCE_EDITOR
@@ -155,7 +180,6 @@ int main() {
 
 #ifdef WITH_SCE_EDITOR
         rlImGuiEnd();
-        DrawFPS(GetScreenWidth() - 95, 10);
 #endif
         EndDrawing();
     }

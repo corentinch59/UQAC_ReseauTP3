@@ -4,11 +4,20 @@
 
 #pragma once
 
-#include <raymath.h>
+#include <raylib.h>
+#include <entt/entt.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 struct TransformComponent
 {
-    Vector3 position = {0, 0, 0};
-    Quaternion rotation = QuaternionIdentity();
-    Vector3 scale = {1, 1, 1}; // only affects rendering !!
+    Vector3 position;
+    Quaternion rotation;
+    Vector3 scale = { 1, 1, 1 }; // only affects rendering !!
+
+    void BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray);
+    static void BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray);
+
+    nlohmann::json JsonSerialize(const entt::handle entity) const;
+    static void JsonUnserialize(entt::handle entity, const nlohmann::json& doc);
+
 };

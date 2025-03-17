@@ -5,7 +5,7 @@ if is_plat("windows") then
     add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
 end
 
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "raylib")
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "raylib", "nlohmann_json")
 
 set_project("DuoBoloNetwork")
 
@@ -34,7 +34,7 @@ target("UQAC_ReseauTP3")
     add_files("src/DuoBoloNetwork/*.cpp")
     add_files("src/main.cpp")
     add_headerfiles("include/DuoBoloNetwork/**.hpp","include/DuoBoloNetwork/**.inl", "include/DuoBoloNetwork/**.h")
-    add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "rlimgui")
+    add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "rlimgui", "nlohmann_json")
     after_build(function (target)
             os.cp("assets", path.join(target:targetdir(), "assets"))
     end)

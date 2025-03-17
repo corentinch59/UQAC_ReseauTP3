@@ -12,6 +12,11 @@
 class WorldEditor {
   public:
     WorldEditor(entt::registry &world, Renderer *renderer);
+    WorldEditor(const WorldEditor&) = delete;
+    WorldEditor(WorldEditor&&) = delete;
+
+    WorldEditor& operator=(const WorldEditor&) = delete;
+    WorldEditor& operator=(WorldEditor&&) = delete;
 
     void Update(float dt);
 
@@ -39,6 +44,10 @@ class WorldEditor {
     void ViewportWindow();
 
     void HierarchyWindow();
+
+    void LoadScene();
+
+    void SaveScene();
 
     // logs
     std::shared_ptr<ImGuiSpdlogSinkMt> mSink;

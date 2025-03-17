@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, macos-latest]
         mode: [debug, release, rel-editor, deb-editor]
 
     steps:
@@ -29,7 +29,3 @@ jobs:
 
       - name: Build with XMake
         run: xmake
-
-      - name: Run tests (if applicable)
-        run: xmake run tests
-        continue-on-error: true

@@ -1,0 +1,35 @@
+name: XMake CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        mode: [debug, release, rel-editor, deb-editor]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XMake
+        uses: xmake-io/github-action-setup-xmake@v1
+
+      - name: Configure XMake
+        run: xmake f -m ${{ matrix.mode }}
+
+      - name: Build with XMake
+        run: xmake
+
+      - name: Run tests (if applicable)
+        run: xmake run tests
+        continue-on-error: true

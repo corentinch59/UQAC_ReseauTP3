@@ -18,15 +18,13 @@
 
 #define OBJECT_DESTROY_DISTANCE 1000
 
-void CustomLogCallback(int logLevel, const char *text, va_list args)
-{
+void CustomLogCallback(int logLevel, const char *text, va_list args) {
     // Format the log message using the variable arguments
     char buffer[512];
     vsnprintf(buffer, sizeof(buffer), text, args);
 
     // Use spdlog to log the message depending on log level
-    switch (logLevel)
-    {
+    switch (logLevel) {
     case LOG_FATAL:
         spdlog::critical("[raylib] {}", buffer); // Critical logs for fatal errors
         break;
@@ -89,7 +87,7 @@ int main() {
             for (int k = 0; k < 2; k++) {
                 auto cubeEntity = world.create();
                 auto &cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = {j, 2 + k, i};
+                cubeTransform.position = {(float)j, (float)2 + k, (float)i};
 
                 auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = "assets/monkey.obj";

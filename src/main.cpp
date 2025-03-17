@@ -89,7 +89,7 @@ int main() {
             for (int k = 0; k < 2; k++) {
                 auto cubeEntity = world.create();
                 auto &cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = Vector3(j, 2 + k, i);
+                cubeTransform.position = {j, 2 + k, i};
 
                 auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = "assets/monkey.obj";

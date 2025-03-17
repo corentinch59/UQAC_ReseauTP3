@@ -86,7 +86,7 @@ void PhysicsSolver::Solve(float delta)
         btTransform transform = mRigidbodies[entity]->getWorldTransform();
 
         auto position = transform.getOrigin();
-        transformComponent.position = {position.getX(), position.getY(), position.getZ();
+        transformComponent.position = {position.getX(), position.getY(), position.getZ()};
         auto rotation = transform.getRotation();
         transformComponent.rotation = {rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW()};
         rigidbodyComponent.velocity = ToVector3(mRigidbodies[entity]->getLinearVelocity());

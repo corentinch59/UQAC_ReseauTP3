@@ -147,8 +147,8 @@ void WorldEditor::ViewportWindow() {
             ImGui::Checkbox("Auto adapt renderer size", &mAutoAdapt);
             if (mAutoAdapt)
                 ImGui::BeginDisabled();
-            ImGui::InputInt("Width", &mNewWidth, 16);
-            ImGui::InputInt("Height", &mNewHeight, 16);
+            ImGui::InputInt("Width", &mNewWidth, 1);
+            ImGui::InputInt("Height", &mNewHeight, 1);
             if (ImGui::Button("Apply"))
             {
                 mRenderer->SetRenderSize(mNewWidth, mNewHeight);

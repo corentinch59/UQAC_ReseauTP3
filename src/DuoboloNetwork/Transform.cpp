@@ -1,5 +1,6 @@
 #include <DuoBoloNetwork/Transform.h>
 #include <DuoBoloNetwork/BinarySerializer.h>
+#include <DuoBoloNetwork/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
 
@@ -26,9 +27,18 @@ void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vecto
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const
 {
-	return nlohmann::json::object();
+	nlohmann::json doc;
+	doc["Position"] = position;
+	doc["Rotation"] = rotation;
+	doc["Scale"] = scale;
+
+	return doc;
 }
 
 void TransformComponent::JsonUnserialize(entt::handle entity, const nlohmann::json& doc)
 {
+	auto& node = entity.emplace<TransformComponent>();
+	node.position = doc.value("Position", Vector3{0.f,0.f,0.f});
+	node.rotation = doc.value("Rotation", QuaternionIdentity());
+	node.scale = doc.value("Scale", Vector3{ 1.f,1.f,1.f });
 }

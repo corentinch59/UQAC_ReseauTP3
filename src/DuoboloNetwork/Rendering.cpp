@@ -2,12 +2,13 @@
 // Created by theo on 11/03/2025.
 //
 
-#include "raylib.h"
+#include <raylib.h>
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ShadowShaders.h>
 #include <DuoBoloNetwork/SkyboxShaders.h>
 #include <DuoBoloNetwork/Helpers.h>
 #include <DuoBoloNetwork/Transform.h>
+#include <DuoBoloNetwork/RenderableComponent.h>
 
 #include <raymath.h>
 #include <rcamera.h>

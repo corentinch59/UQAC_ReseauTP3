@@ -14,12 +14,6 @@
 #define DEFAULT_RENDERER_WIDTH 1280
 #define DEFAULT_RENDERER_HEIGHT 720
 
-struct RenderableComponent
-{
-    std::string model = "cube";
-    Color tint = WHITE;
-};
-
 class Renderer
 {
 public:

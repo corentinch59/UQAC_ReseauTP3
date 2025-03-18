@@ -39,6 +39,6 @@ void TransformComponent::JsonUnserialize(entt::handle entity, const nlohmann::js
 {
 	auto& node = entity.emplace<TransformComponent>();
 	node.position = doc.value("Position", Vector3{0.f,0.f,0.f});
-	node.rotation = doc.value("Rotation", QuaternionIdentity());
+	node.rotation = doc.value("Rotation", Quaternion{0,0,0,1});
 	node.scale = doc.value("Scale", Vector3{ 1.f,1.f,1.f });
 }

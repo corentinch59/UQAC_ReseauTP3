@@ -10,6 +10,7 @@
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/Transform.h>
 #include <DuoBoloNetwork/DllLoader.h>
+#include <DuoBoloNetwork/RenderableComponent.h>
 
 #include <DuoBoloGame/Game.h>
 #include <DuoBoloNetwork/ComponentRegistry.h>
@@ -125,6 +126,37 @@ int main() {
 #endif
 
     // init game
+    /*for (int i = -5; i <= 5; i++) {
+        for (int j = -5; j <= 5; j++) {
+            for (int k = 0; k < 2; k++) {
+                auto cubeEntity = world.create();
+                auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
+                cubeTransform.position = { (float)j, (float)2 + k, (float)i };
+
+                auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
+                cubeRenderable.model = "cube";
+                cubeRenderable.tint = {
+                    (unsigned char)GetRandomValue(0, 255),
+                    (unsigned char)GetRandomValue(0, 255),
+                    (unsigned char)GetRandomValue(0, 255),
+                    255 };
+
+                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{ {1, 1, 1} });
+            }
+        }
+    }*/
+
+    // ground
+    auto planeEntity = world.create();
+    auto& planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
+    planeTransform.position = { 0, -.5f, 0 };
+    planeTransform.scale = { 100, 1, 100 };
+    // init game
+
+    auto& planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
+    planeRenderable.model = "cube";
+    planeRenderable.tint = GREEN;
+
 
     if (gameLoaded)
         game->Init();

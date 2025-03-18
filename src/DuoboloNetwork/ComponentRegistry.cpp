@@ -1,5 +1,6 @@
 #include <DuoBoloNetwork/ComponentRegistry.h>
 
+#include "DuoBoloNetwork/RenderableComponent.h"
 #include "DuoBoloNetwork/Transform.h"
 
 ComponentRegistry::ComponentRegistry()
@@ -32,5 +33,17 @@ void ComponentRegistry::RegisterEngineComponent()
 		.binaryUnserialize = BuildBinaryUnserialize<TransformComponent>(),
 		.jsonSerialize = BuildJsonSerialize<TransformComponent>(),
 		.jsonUnserialize = BuildJsonUnserialize<TransformComponent>()
+		});
+
+	Register({
+		.id = "renderable",
+		.label = "Renderable",
+		.addComponent = BuildAddComponent<RenderableComponent>(),
+		.hasComponent = BuildHasComponent<RenderableComponent>(),
+		.removeComponent = BuildRemoveComponent<RenderableComponent>(),
+		.binarySerialize = BuildBinarySerialize<RenderableComponent>(),
+		.binaryUnserialize = BuildBinaryUnserialize<RenderableComponent>(),
+		.jsonSerialize = BuildJsonSerialize<RenderableComponent>(),
+		.jsonUnserialize = BuildJsonUnserialize<RenderableComponent>()
 		});
 }

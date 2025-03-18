@@ -9,6 +9,9 @@
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/Transform.h>
+#include <DuoBoloNetwork/DllLoader.h>
+
+#include <DuoBoloGame/Game.h>
 
 #ifdef WITH_SCE_EDITOR
 #include <rlImGui.h>
@@ -53,8 +56,45 @@ int main() {
 
     InitWindow(1280, 720, "DuoBolo TP3");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-    // SetTargetFPS(60);
+    SetTargetFPS(60);
     DisableCursor();
+
+    // Game dll loading phase
+    DllLoader loader("Game");
+
+    bool isGameDllLoaded = loader.IsDllLoaded();
+
+    if (!isGameDllLoaded)
+    {
+        spdlog::error("Couldn't load game library");
+    } else {
+        spdlog::info("Loaded game library");
+    }
+
+    using CreateGameFunc = BaseGame *(*)();
+    using DestroyGameFunc = void (*)(BaseGame *);
+
+    bool isGameFunctionsLoaded = false;
+    CreateGameFunc createGameFunc = nullptr;
+    DestroyGameFunc destroyGameFunc = nullptr;
+    if (isGameDllLoaded) {
+        createGameFunc = loader.LoadFunction<CreateGameFunc>("CreateGameClass");
+        destroyGameFunc = loader.LoadFunction<DestroyGameFunc>("DestroyGameClass");
+
+        if (createGameFunc && destroyGameFunc) {
+            spdlog::info("Game functions loaded successfully.");
+            isGameFunctionsLoaded = true;
+        } else {
+            spdlog::error("Failed to load game functions!");
+        }
+    }
+
+    bool gameLoaded = false;
+    BaseGame *game = nullptr;
+    if (isGameFunctionsLoaded) {
+        game = createGameFunc();
+        gameLoaded = true;
+    }
 
 #ifdef WITH_SCE_EDITOR
     rlImGuiSetup(true);
@@ -82,47 +122,13 @@ int main() {
     renderer.SetRenderIntoTexture(true);
 #endif
 
-    for (int i = -5; i <= 5; i++) {
-        for (int j = -5; j <= 5; j++) {
-            for (int k = 0; k < 2; k++) {
-                auto cubeEntity = world.create();
-                auto &cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = {(float)j, (float)2 + k, (float)i};
+    // init game
 
-                auto &cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
-                cubeRenderable.model = "cube";
-                cubeRenderable.tint = {
-                    (unsigned char)GetRandomValue(0, 255),
-                    (unsigned char)GetRandomValue(0, 255),
-                    (unsigned char)GetRandomValue(0, 255),
-                    255};
-
-                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{{1, 1, 1}});
-            }
-        }
-    }
-
-    // ground
-    auto planeEntity = world.create();
-    auto &planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
-    planeTransform.position = {0, -.5f, 0};
-    planeTransform.scale = {100, 1, 100};
-
-    auto &planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
-    planeRenderable.model = "cube";
-    planeRenderable.tint = GREEN;
-
-    world.emplace_or_replace<RigidbodyComponent>(planeEntity, 0.f, BoxShape{{100, 1, 100}});
-
-//    float lastPrintTime = GetTime();
+    if (gameLoaded)
+        game->Init();
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
-
-//        if (GetTime() - lastPrintTime > 1.f) {
-//            lastPrintTime = GetTime();
-//            spdlog::info("Frametime: {}ms", deltaTime * 1000.0f);
-//        }
 
 #ifndef WITH_SCE_EDITOR
         // unlock/lock mouse
@@ -154,6 +160,9 @@ int main() {
             }
         }
 
+        if (gameLoaded)
+            game->GlobalUpdate(deltaTime);
+
         solver.Solve(deltaTime);
 #endif
 
@@ -173,6 +182,14 @@ int main() {
 
     // clear rigidbodies to avoid errors on bullet deinit
     world.clear<RigidbodyComponent>();
+
+    if (gameLoaded)
+        game->Shutdown();
+
+
+    if (gameLoaded && isGameFunctionsLoaded) {
+        destroyGameFunc(game);
+    }
 
 #ifdef WITH_SCE_EDITOR
     rlImGuiShutdown();

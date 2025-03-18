@@ -16,7 +16,7 @@
 
 struct RenderableComponent
 {
-    std::string model;
+    std::string model = "cube";
     Color tint = WHITE;
 };
 

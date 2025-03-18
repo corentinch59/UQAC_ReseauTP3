@@ -48,6 +48,7 @@ void WorldEditor::Update(float dt) {
         }
     }
 
+
     FullscreenDockingSpace();
 
     ViewportWindow();
@@ -81,7 +82,7 @@ void WorldEditor::Update(float dt) {
                 EndMode3D();
                 EndTextureMode();
             }
-            
+
             Vector2 positionOnScreen = GetWorldToScreenEx(transform.position, mCamera, mRenderer->GetWidth(), mRenderer->GetHeight());
 
             BeginTextureMode(mRenderer->GetRenderTexture());
@@ -200,14 +201,25 @@ void WorldEditor::ViewportWindow() {
     }
 
     if (mAutoAdapt) {
-        auto size = ImGui::GetWindowSize();
+        auto size = ImGui::GetContentRegionAvail();
         mNewWidth = size.x;
         mNewHeight = size.y;
         mRenderer->SetRenderSize(mNewWidth, mNewHeight);
     }
 
     RenderTexture2D rt = mRenderer->GetRenderTexture();
-    rlImGuiImageRenderTextureFit(&rt, true);
+    rlImGuiImageRenderTexture(&rt);
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
+        mInCameraMode = true;
+        HideCursor();
+        DisableCursor();
+    } else if (mInCameraMode && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        mInCameraMode = false;
+        ShowCursor();
+        EnableCursor();
+    }
+
     ImGui::End();
 }
 
@@ -234,7 +246,7 @@ void WorldEditor::HierarchyWindow() {
     ImGui::End();
 }
 
-void WorldEditor::InspectorWindow()  {
+void WorldEditor::InspectorWindow() {
     ImGui::Begin(gInspectorWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
     ImGui::End();
 }

@@ -197,6 +197,7 @@ void WorldEditor::ViewportWindow() {
                 ImGui::EndDisabled();
             ImGui::EndMenu();
         }
+        ImGui::Text("Framerate: %i FPS", GetFPS());
         ImGui::EndMenuBar();
     }
 
@@ -208,7 +209,31 @@ void WorldEditor::ViewportWindow() {
     }
 
     RenderTexture2D rt = mRenderer->GetRenderTexture();
-    rlImGuiImageRenderTexture(&rt);
+    // rlImGuiImageRenderTexture(&rt);
+
+    ImVec2 avail = ImGui::GetContentRegionAvail(); // Available space
+    float imgAspect = (float) mRenderer->GetWidth() / (float) mRenderer->GetHeight();
+    float availAspect = avail.x / avail.y;
+
+    ImVec2 imageSize;
+    if (imgAspect > availAspect) {
+        // Image is wider than available space
+        imageSize.x = avail.x;
+        imageSize.y = avail.x / imgAspect;
+    } else {
+        // Image is taller than available space
+        imageSize.y = avail.y;
+        imageSize.x = avail.y * imgAspect;
+    }
+
+    ImVec2 cursorPos = ImGui::GetCursorScreenPos(); // Get current cursor position
+    ImVec2 centerPos = ImVec2(
+        cursorPos.x + (avail.x - imageSize.x) * 0.5f,
+        cursorPos.y + (avail.y - imageSize.y) * 0.5f
+    );
+
+    ImGui::SetCursorScreenPos(centerPos);
+    ImGui::Image((ImTextureID) mRenderer->GetRenderTexture().texture.id, imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
         mInCameraMode = true;

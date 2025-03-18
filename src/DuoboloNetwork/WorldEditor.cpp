@@ -4,6 +4,7 @@
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/Transform.h>
 #include <DuoBoloNetwork/ComponentRegistry.h>
+#include <DuoBoloNetwork/RenderableComponent.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>

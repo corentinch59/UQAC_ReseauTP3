@@ -3,10 +3,7 @@
 #if defined(_WIN32) || defined(__WIN32__)
 
 DllLoader::~DllLoader() {
-    if (mDll)
-    {
-        FreeLibrary(mDll);
-    }
+    if (mDll) FreeLibrary(mDll);
 }
 
 DllLoader::DllLoader(const std::string &dllPath, bool appendPlatformExtension) {
@@ -38,5 +35,36 @@ bool DllLoader::IsDllLoaded() const {
 }
 
 #else
-#error "MacOS and Linux not yet implemented!!"
+
+DllLoader::~DllLoader() {
+    if (mLib) dlclose(mLib);
+}
+
+DllLoader::DllLoader(const std::string &dllPath, bool appendPlatformExtension) {
+    std::string finalPath = dllPath;
+#if defined(__linux)
+    if (appendPlatformExtension) {
+        finalPath.insert(0, "./lib");
+        finalPath.append(".so");
+    }
+#else
+    if (appendPlatformExtension) {
+        finalPath.insert(0, "./lib");
+        finalPath.append(".dylib");
+    }
+#endif
+
+    mLib = dlopen(finalPath.c_str(), RTLD_LAZY);
+
+    if (!mLib)
+    {
+        const char* error = dlerror();
+        spdlog::error("Failed to load library {}, error: {}", finalPath, error);
+    }
+}
+
+bool DllLoader::IsDllLoaded() const {
+    return mLib != nullptr;
+}
+
 #endif

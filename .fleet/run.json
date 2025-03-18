@@ -3,13 +3,13 @@
         {
             "type": "command",
             "name": "Build",
-            "program": "xmake.exe",
+            "program": "xmake",
             "args": ["build"]
         },
         {
             "type": "command",
             "name": "Run",
-            "program": "xmake.exe",
+            "program": "xmake",
             "args": ["run"],
             "dependsOn": ["Build"]
         }

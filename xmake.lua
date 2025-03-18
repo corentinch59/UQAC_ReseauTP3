@@ -42,7 +42,7 @@ target("Game")
 
 target("DuoBoloEngine")
     set_kind("binary")
-    add_files("src/DuoBoloNetwork/*.cpp")
+    add_files("src/DuoboloNetwork/**.cpp")
     add_files("src/main.cpp")
     add_headerfiles("include/DuoBoloNetwork/**.hpp","include/DuoBoloNetwork/**.inl", "include/DuoBoloNetwork/**.h")
     add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "nlohmann_json", "fmt")

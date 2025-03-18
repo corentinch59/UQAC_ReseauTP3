@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <cstring>
+
 template <typename T>
 void BinarySerializer::BinarySerializeType(std::vector<uint8_t>& byteArray, T data)
 {

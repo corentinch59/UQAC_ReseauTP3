@@ -6,6 +6,8 @@
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <windows.h>
+#else
+#include <dlfcn.h>
 #endif
 
 class DllLoader {
@@ -26,6 +28,17 @@ public:
         }
 
         return func;
+#else
+        Signature func = (Signature) dlsym(mLib, name.c_str());
+        const char* error = dlerror();
+
+        if (!func)
+        {
+            spdlog::error("Failed to load function {}: ", name, error);
+            return nullptr;
+        }
+
+        return func;
 #endif
     }
 
@@ -35,6 +48,6 @@ private:
 #if defined(_WIN32) || defined(__WIN32__)
   HMODULE mDll;
 #else
-#error "MacOS and Linux not yet implemented!!"
+  void* mLib;
 #endif
 };

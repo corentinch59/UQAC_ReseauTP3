@@ -4,21 +4,28 @@
 #include <DuoBoloNetwork/WorldEditor.h>
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/Transform.h>
-#include <DuoBoloNetwork/WorldEditor.h>
+#include <DuoBoloNetwork/ComponentRegistry.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <rlImGui.h>
+#include <misc/cpp/imgui_stdlib.h>
 #include <raylib.h>
 #include <rlgl.h>
 #include <rcamera.h>
 
+#include <fstream>
 #include <spdlog/spdlog.h>
 #include <fmt/format.h>
 
 #define ImGuiWindowFlags_NoInputIfCamera (mInCameraMode ? ImGuiWindowFlags_NoInputs : ImGuiWindowFlags_None)
+constexpr unsigned int FileVersion = 1;
 
-WorldEditor::WorldEditor(entt::registry &world, Renderer *renderer) : mEnttWorld(world), mRenderer(renderer) {
+WorldEditor::WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry) :
+mEnttWorld(world),
+mRenderer(renderer),
+mComponentRegistry(componentRegistry)
+{
     mInCameraMode = false;
 
     mCamera = {};
@@ -174,8 +181,25 @@ void WorldEditor::MainMenuBar() {
     // menu bar
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Edit")) {
+            
+            ImGui::Text("Path");
+
+            ImGui::SameLine();
+
+            ImGui::InputText("##pathInput", &mScenePath);
+            if (ImGui::Button("Save scene"))
+                SaveScene();
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Load scene"))
+                LoadScene();
+
             ImGui::EndMenu();
         }
+
+        
+
         ImGui::EndMenuBar();
     }
 }
@@ -274,6 +298,96 @@ void WorldEditor::HierarchyWindow() {
 void WorldEditor::InspectorWindow() {
     ImGui::Begin(gInspectorWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
     ImGui::End();
+}
+
+void WorldEditor::LoadScene()
+{
+    std::ifstream inputFile(mScenePath);
+    if (!inputFile)
+    {
+        spdlog::error("failed to open {}\n", mScenePath);
+        return;
+    }
+
+    nlohmann::json sceneDoc;
+    try
+    {
+        sceneDoc = nlohmann::json::parse(inputFile);
+    }
+    catch (const std::exception& e)
+    {
+        spdlog::error("failed to parse {}: {}\n", mScenePath, e.what());
+        return;
+    }
+
+    unsigned int version = sceneDoc["Version"];
+    if (version > FileVersion)
+    {
+        spdlog::error("{} has an unknown file version {}\n", mScenePath, version);
+        return;
+    }
+
+    // On réinitialise le monde pour créer les entités du document
+    mEnttWorld = entt::registry{};
+
+    std::vector<entt::entity> indexToEntity;
+    for (const nlohmann::json& entityDoc : sceneDoc["Entities"])
+    {
+        // Création de l'entité
+        entt::handle entityHandle(mEnttWorld, mEnttWorld.create());
+        indexToEntity.push_back(entityHandle);
+
+        mComponentRegistry.ForEachComponent([&](const ComponentRegistry::Entry& entry)
+            {
+                if (!entry.jsonUnserialize)
+                    return;
+
+                auto it = entityDoc.find(entry.id);
+                if (it != entityDoc.end())
+                    entry.jsonUnserialize(entityHandle, it.value());
+            });
+    }
+
+    spdlog::info("successfully loaded {}\n", mScenePath);
+}
+
+void WorldEditor::SaveScene()
+{
+    std::ofstream fileStream(mScenePath);
+    if (!fileStream)
+    {
+        spdlog::error("failed to open {}\n", mScenePath);
+        return;
+    }
+
+    std::unordered_map<entt::entity, unsigned int> entityToIndex;
+
+    // On sauvegarde tous les composants de toutes les entités
+    nlohmann::json entityArray;
+    for (auto [entity] : mEnttWorld.storage<entt::entity>().each())
+    {
+        entt::handle entityHandle(mEnttWorld, entity);
+
+        nlohmann::json entityDoc;
+        mComponentRegistry.ForEachComponent([&](const ComponentRegistry::Entry& entry)
+            {
+                assert(entry.hasComponent);
+                if (entry.hasComponent(entityHandle) && entry.jsonSerialize)
+                    entityDoc[entry.id] = entry.jsonSerialize(entityHandle);
+            });
+
+
+        entityToIndex[entity] = entityArray.size();
+        entityArray.push_back(std::move(entityDoc));
+    }
+
+    nlohmann::ordered_json sceneDoc;
+    sceneDoc["Version"] = FileVersion;
+    sceneDoc["Entities"] = std::move(entityArray);
+
+    fileStream << sceneDoc.dump(1, '\t');
+
+    spdlog::info("scene saved to {}\n", mScenePath);
 }
 
 #endif

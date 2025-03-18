@@ -12,6 +12,7 @@
 #include <DuoBoloNetwork/DllLoader.h>
 
 #include <DuoBoloGame/Game.h>
+#include <DuoBoloNetwork/ComponentRegistry.h>
 
 #ifdef WITH_SCE_EDITOR
 #include <rlImGui.h>
@@ -114,8 +115,9 @@ int main() {
 
     Renderer renderer;
     PhysicsSolver solver(world);
+    ComponentRegistry componentRegistry;
 #ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world, &renderer);
+    WorldEditor worldEditor(world, &renderer, componentRegistry);
 #endif
 
 #ifdef WITH_SCE_EDITOR

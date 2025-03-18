@@ -12,9 +12,11 @@
 
 #include <memory>
 
+class ComponentRegistry;
+
 class WorldEditor {
   public:
-    WorldEditor(entt::registry &world, Renderer *renderer);
+    WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry);
     WorldEditor(const WorldEditor&) = delete;
     WorldEditor(WorldEditor&&) = delete;
 
@@ -32,6 +34,8 @@ class WorldEditor {
     int mNewHeight = 720;
     bool mAutoAdapt = true;
     entt::entity mSelected = entt::null;
+    std::string mScenePath;
+    const ComponentRegistry& mComponentRegistry;
 
     static inline const char *gViewportWindowName = "Viewport";
     static inline const char *gConsoleWindowName = "Console";

@@ -1,4 +1,3 @@
-
 #ifdef WITH_SCE_EDITOR
 
 #include <DuoBoloNetwork/WorldEditor.h>
@@ -327,13 +326,13 @@ void WorldEditor::LoadScene()
         return;
     }
 
-    // On réinitialise le monde pour créer les entités du document
+    // On rï¿½initialise le monde pour crï¿½er les entitï¿½s du document
     mEnttWorld = entt::registry{};
 
     std::vector<entt::entity> indexToEntity;
     for (const nlohmann::json& entityDoc : sceneDoc["Entities"])
     {
-        // Création de l'entité
+        // Crï¿½ation de l'entitï¿½
         entt::handle entityHandle(mEnttWorld, mEnttWorld.create());
         indexToEntity.push_back(entityHandle);
 
@@ -362,7 +361,7 @@ void WorldEditor::SaveScene()
 
     std::unordered_map<entt::entity, unsigned int> entityToIndex;
 
-    // On sauvegarde tous les composants de toutes les entités
+    // On sauvegarde tous les composants de toutes les entitï¿½s
     nlohmann::json entityArray;
     for (auto [entity] : mEnttWorld.storage<entt::entity>().each())
     {

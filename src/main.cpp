@@ -163,7 +163,7 @@ int main() {
         }
 
         if (gameLoaded)
-            game->GlobalUpdate(deltaTime);
+            game->GlobalUpdate(world, deltaTime);
 
         solver.Solve(deltaTime);
 #endif

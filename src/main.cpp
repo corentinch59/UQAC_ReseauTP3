@@ -9,10 +9,14 @@
 
 #include <entt/entt.hpp>
 
-
 #ifdef WITH_SCE_EDITOR
 #include <DuoBoloNetwork/WorldEditor.h>
 #include <rlImGui.h>
+#else
+#include <raymath.h>
+#include <DuoBoloShared/CameraComponent.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloNetwork/Helpers.h>
 #endif
 
 #define OBJECT_DESTROY_DISTANCE 1000

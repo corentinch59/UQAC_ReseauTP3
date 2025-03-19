@@ -2,15 +2,16 @@
 
 #include <DuoBoloNetwork/WorldEditor.h>
 #include <DuoBoloNetwork/Rendering.h>
-#include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/ComponentRegistry.h>
+#include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/PhysicsComponent.h>
 #include <DuoBoloNetwork/SceneLoading.h>
 
 #include <imgui_internal.h>
 #include <misc/cpp/imgui_stdlib.h>
-#include <raylib.h>
 #include <rlgl.h>
+#include <raymath.h>
 #include <rcamera.h>
 
 #include <fstream>
@@ -180,8 +181,10 @@ bool WorldEditor::EntityInspector(entt::entity entity)
 void WorldEditor::MainMenuBar() {
     // menu bar
     if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Edit")) {
-            
+        if (ImGui::BeginMenu("File")) {
+
+            ImGui::Text(fmt::format("Loaded Scene : {}", mScenePath).c_str());
+
             ImGui::Text("Path");
 
             ImGui::SameLine();
@@ -336,34 +339,99 @@ void WorldEditor::SaveScene()
     SaveSceneToPath(mScenePath, mEnttWorld, mComponentRegistry);
 }
 
+// Inspector
+
 template<>
 void WorldEditor::PopulateInspector<TransformComponent>(entt::handle entity)
 {
+    ImGui::Text("Position");
+
+    ImGui::SameLine();
+
     auto& t = entity.get<TransformComponent>();
     float posArray[3] = { t.position.x, t.position.y, t.position.z };
-    if (ImGui::InputFloat3("Position", posArray))
+    if (ImGui::DragFloat3("##inputPosition", posArray, .05f))
     {
         t.position.x = posArray[0];
         t.position.y = posArray[1];
         t.position.z = posArray[2];
     }
 
-    float rotArray[4] = { t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w };
-    if (ImGui::InputFloat3("Rotation Quaternion", rotArray))
+    ImGui::Text("Rotation");
+
+    ImGui::SameLine();
+    Vector3 euler = QuaternionToEuler(t.rotation) * RAD2DEG;
+    float rotArray[3] = { euler.x, euler.y, euler.z };
+    if (ImGui::DragFloat3("##inputRotation", rotArray, .25f))
     {
-        t.rotation.x = rotArray[0];
-        t.rotation.y = rotArray[1];
-        t.rotation.z = rotArray[2];
-        t.rotation.w = rotArray[3];
+        t.rotation = QuaternionFromEuler(rotArray[0] * DEG2RAD, rotArray[1] * DEG2RAD, rotArray[2] * DEG2RAD);
     }
 
+    ImGui::Text("Scale");
+
+    ImGui::SameLine();
+
     float scaleArray[3] = { t.scale.x, t.scale.y, t.scale.z };
-    if (ImGui::InputFloat3("Scale", scaleArray))
+    if (ImGui::DragFloat3("##inputScale", scaleArray, .05f))
     {
         t.scale.x = scaleArray[0];
         t.scale.y = scaleArray[1];
         t.scale.z = scaleArray[2];
     }
 }
+
+template<>
+void WorldEditor::PopulateInspector<RenderableComponent>(entt::handle entity)
+{
+    auto& r = entity.get<RenderableComponent>();
+
+    ImGui::Text("Model");
+
+    ImGui::SameLine();
+		
+    ImGui::InputText("##modelInput", &r.model);
+
+    ImGui::Text("Tint");
+
+    ImGui::SameLine();
+    float color[4]{ (float)r.tint.r / 255.f, (float)r.tint.g / 255.f, (float)r.tint.b / 255.f , (float)r.tint.a / 255.f};
+    if(ImGui::ColorEdit4("##tintInput", color))
+    {
+        r.tint.r = static_cast<unsigned char>(color[0] * 255.f);
+        r.tint.g = static_cast<unsigned char>(color[1] * 255.f);
+        r.tint.b = static_cast<unsigned char>(color[2] * 255.f);
+        r.tint.a = static_cast<unsigned char>(color[3] * 255.f);
+    }
+}
+
+template <>
+void WorldEditor::PopulateInspector<RigidbodyComponent>(entt::handle entity)
+{
+    auto& r = entity.get<RigidbodyComponent>();
+
+    ImGui::Text("Mass");
+
+    ImGui::SameLine();
+
+    ImGui::DragFloat("##inputMass", &r.mass);
+
+    ImGui::Text("RigidBody Shape");
+
+    ImGui::SameLine();
+
+    int id;
+    if (r.shape.type().index() == entt::type_index<BoxShape>())
+        id = 0;
+    else
+        id = 1;
+
+    const char* shapes[]{ "Box","Sphere"};
+    if(ImGui::Combo("##inputRigidBodyshape", &id, shapes, IM_ARRAYSIZE(shapes)))
+    {
+	    
+    }
+
+}
+
 
 #endif

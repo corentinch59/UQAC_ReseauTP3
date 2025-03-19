@@ -31,7 +31,6 @@ void ComponentRegistry::RegisterEngineComponent()
 		.addComponent = BuildAddComponent<TransformComponent>(),
 		.hasComponent = BuildHasComponent<TransformComponent>(),
 		.removeComponent = BuildRemoveComponent<TransformComponent>(),
-
 		.binarySerialize = BuildBinarySerialize<TransformComponent>(),
 		.binaryUnserialize = BuildBinaryUnserialize<TransformComponent>(),
 		.jsonSerialize = BuildJsonSerialize<TransformComponent>(),
@@ -50,7 +49,10 @@ void ComponentRegistry::RegisterEngineComponent()
 		.binarySerialize = BuildBinarySerialize<RenderableComponent>(),
 		.binaryUnserialize = BuildBinaryUnserialize<RenderableComponent>(),
 		.jsonSerialize = BuildJsonSerialize<RenderableComponent>(),
-		.jsonUnserialize = BuildJsonUnserialize<RenderableComponent>()
+		.jsonUnserialize = BuildJsonUnserialize<RenderableComponent>(),
+		#ifdef WITH_SCE_EDITOR
+		.inspect = BuildInspect<RenderableComponent>(),
+#endif
 		});
 
 	Register({
@@ -62,7 +64,10 @@ void ComponentRegistry::RegisterEngineComponent()
 		.binarySerialize = BuildBinarySerialize<RigidbodyComponent>(),
 		.binaryUnserialize = BuildBinaryUnserialize<RigidbodyComponent>(),
 		.jsonSerialize = BuildJsonSerialize<RigidbodyComponent>(),
-		.jsonUnserialize = BuildJsonUnserialize<RigidbodyComponent>()
+		.jsonUnserialize = BuildJsonUnserialize<RigidbodyComponent>(),
+#ifdef WITH_SCE_EDITOR
+		.inspect = BuildInspect<RigidbodyComponent>(),
+#endif
 		});
 
 	Register({

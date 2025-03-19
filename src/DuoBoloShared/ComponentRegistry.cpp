@@ -2,6 +2,7 @@
 
 #include <DuoBoloShared/RenderableComponent.h>
 #include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/PhysicsComponent.h>
 
 ComponentRegistry::ComponentRegistry()
 {
@@ -45,5 +46,17 @@ void ComponentRegistry::RegisterEngineComponent()
 		.binaryUnserialize = BuildBinaryUnserialize<RenderableComponent>(),
 		.jsonSerialize = BuildJsonSerialize<RenderableComponent>(),
 		.jsonUnserialize = BuildJsonUnserialize<RenderableComponent>()
+		});
+
+	Register({
+		.id = "rigidBody",
+		.label = "RigidBody",
+		.addComponent = BuildAddComponent<RigidbodyComponent>(),
+		.hasComponent = BuildHasComponent<RigidbodyComponent>(),
+		.removeComponent = BuildRemoveComponent<RigidbodyComponent>(),
+		.binarySerialize = BuildBinarySerialize<RigidbodyComponent>(),
+		.binaryUnserialize = BuildBinaryUnserialize<RigidbodyComponent>(),
+		.jsonSerialize = BuildJsonSerialize<RigidbodyComponent>(),
+		.jsonUnserialize = BuildJsonUnserialize<RigidbodyComponent>()
 		});
 }

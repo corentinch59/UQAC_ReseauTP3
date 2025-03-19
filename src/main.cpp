@@ -134,7 +134,7 @@ int main() {
 #endif
 
     // init game
-    /*for (int i = -5; i <= 5; i++) {
+    for (int i = -5; i <= 5; i++) {
         for (int j = -5; j <= 5; j++) {
             for (int k = 0; k < 2; k++) {
                 auto cubeEntity = world.create();
@@ -152,7 +152,7 @@ int main() {
                 world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{ {1, 1, 1} });
             }
         }
-    }*/
+    }
 
     // ground
     auto planeEntity = world.create();

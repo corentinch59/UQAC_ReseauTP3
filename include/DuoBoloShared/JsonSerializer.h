@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 #include <nlohmann/json.hpp>
+#include <DuoBoloShared/PhysicsComponent.h>
 
 inline void from_json(const nlohmann::json& j, Vector3& vec)
 {
@@ -47,4 +48,24 @@ inline void to_json(nlohmann::json& j, const Color& color)
 	j["g"] = color.g;
 	j["b"] = color.b;
 	j["a"] = color.a;
+}
+
+inline void from_json(const nlohmann::json& j, BoxShape& shape)
+{
+	shape.extent = j.at("Extent");
+}
+
+inline void to_json(nlohmann::json& j, const BoxShape& shape)
+{
+	j["Extent"] = shape.extent;
+}
+
+inline void from_json(const nlohmann::json& j, SphereShape& shape)
+{
+	shape.radius = j.at("Radius");
+}
+
+inline void to_json(nlohmann::json& j, const SphereShape& shape)
+{
+	j["Radius"] = shape.radius;
 }

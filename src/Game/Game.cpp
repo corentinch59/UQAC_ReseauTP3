@@ -11,7 +11,7 @@ class DBGAME_API MyGame : public BaseGame {
   public:
 
     void RegisterComponent(ComponentRegistry& registry) {
-        spdlog::info("Registering custom components");
+        spdlog::warn("Registering custom components for MyGame");
     }
 
     void Init() override {

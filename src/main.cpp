@@ -8,7 +8,6 @@
 #include <DuoBoloNetwork/Helpers.h>
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
-#include <DuoBoloNetwork/DllLoader.h>
 
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>

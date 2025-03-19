@@ -25,6 +25,9 @@ class WorldEditor {
 
     void Update(float dt);
 
+    template<typename T>
+    void PopulateInspector(const entt::handle& entity);
+
   private:
     entt::registry &mEnttWorld;
     Renderer *mRenderer;
@@ -48,6 +51,8 @@ class WorldEditor {
 
     bool mDockingSpaceCreated;
 
+    bool EntityInspector(entt::entity entity);
+
     void MainMenuBar();
 
     void ViewportWindow();
@@ -63,5 +68,7 @@ class WorldEditor {
     // logs
     std::shared_ptr<ImGuiSpdlogSinkMt> mSink;
 };
+
+#include <DuoboloNetwork/WorldEditor.inl>
 
 #endif

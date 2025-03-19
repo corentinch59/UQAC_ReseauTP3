@@ -174,6 +174,11 @@ void WorldEditor::FullscreenDockingSpace() {
     ImGui::End();
 }
 
+bool WorldEditor::EntityInspector(entt::entity entity)
+{
+    return false;
+}
+
 void WorldEditor::MainMenuBar() {
     // menu bar
     if (ImGui::BeginMenuBar()) {
@@ -294,6 +299,32 @@ void WorldEditor::HierarchyWindow() {
 
 void WorldEditor::InspectorWindow() {
     ImGui::Begin(gInspectorWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
+
+    if(mSelected != entt::null)
+    {
+        entt::handle entityHandle(mEnttWorld, mSelected);
+        bool canAddComponent = false;
+        mComponentRegistry.ForEachComponent([&](const ComponentRegistry::Entry& entry)
+            {
+                assert(entry.hasComponent);
+                if (entry.hasComponent(entityHandle))
+                {
+                    if (!ImGui::TreeNode(entry.label.c_str()))
+                        return;
+
+                    if (entry.inspect)
+                        entry.inspect(*this, entityHandle);
+
+                    if (entry.removeComponent && ImGui::Button(fmt::format("Remove {} component", entry.label).c_str()))
+                        entry.removeComponent(entityHandle);
+
+                    ImGui::TreePop();
+                }
+                else if (entry.addComponent)
+                    canAddComponent = true;
+            });
+    }
+
     ImGui::End();
 }
 

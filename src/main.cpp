@@ -65,7 +65,6 @@ int main() {
 
     InitWindow(1280, 720, "DuoBolo TP3");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);
     DisableCursor();
 
     entt::registry world{};
@@ -96,38 +95,6 @@ int main() {
 
     renderer.SetRenderIntoTexture(true);
 #endif
-
-    // init game
-    for (int i = -0; i <= 0; i++) {
-        for (int j = -0; j <= 0; j++) {
-            for (int k = 0; k <= 0; k++) {
-                auto cubeEntity = world.create();
-                auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = { (float)j, (float)k, (float)i };
-
-                auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
-                cubeRenderable.model = "cube";
-                cubeRenderable.tint = {
-                    (unsigned char)GetRandomValue(0, 255),
-                    (unsigned char)GetRandomValue(0, 255),
-                    (unsigned char)GetRandomValue(0, 255),
-                    255 };
-
-//                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{ {1, 1, 1} });
-            }
-        }
-    }
-
-    // ground
-    auto planeEntity = world.create();
-    auto& planeTransform = world.emplace_or_replace<TransformComponent>(planeEntity);
-    planeTransform.position = { 0, -.5f, 0 };
-    planeTransform.scale = { 100, 1, 100 };
-    // init game
-
-    auto& planeRenderable = world.emplace_or_replace<RenderableComponent>(planeEntity);
-    planeRenderable.model = "cube";
-    planeRenderable.tint = GREEN;
 
     game->Init();
 

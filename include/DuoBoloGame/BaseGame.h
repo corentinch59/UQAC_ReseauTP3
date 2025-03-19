@@ -16,6 +16,8 @@ class DBGAME_API BaseGame {
 
     virtual void RegisterComponents(ComponentRegistry& registry) {}
 
+    virtual std::string GetStartupSceneName() { return ""; }
+
     virtual void Init() {}
 
     virtual void GlobalUpdate(float dt) {}

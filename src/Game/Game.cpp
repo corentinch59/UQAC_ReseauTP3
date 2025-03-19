@@ -10,8 +10,13 @@
 class DBGAME_API MyGame : public BaseGame {
   public:
 
-    void RegisterComponent(ComponentRegistry& registry) {
+    void RegisterComponents(ComponentRegistry& registry) override  {
         spdlog::warn("Registering custom components for MyGame");
+    }
+
+    std::string GetStartupSceneName() override 
+    { 
+        return "assets/Scene1.dbs"; 
     }
 
     void Init() override {

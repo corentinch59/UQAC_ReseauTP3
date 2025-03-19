@@ -71,44 +71,8 @@ int main() {
 
     entt::registry world{};
 
-    // Game dll loading phase
-    DllLoader loader("Game");
-
-    bool isGameDllLoaded = loader.IsDllLoaded();
-
-    if (!isGameDllLoaded)
-    {
-        spdlog::error("Couldn't load game library");
-    } else {
-        spdlog::info("Loaded game library");
-    }
-
-    using CreateGameFunc = BaseGame *(*)();
-    using DestroyGameFunc = void (*)(BaseGame *);
-
-    bool isGameFunctionsLoaded = false;
-    CreateGameFunc createGameFunc = nullptr;
-    DestroyGameFunc destroyGameFunc = nullptr;
-    if (isGameDllLoaded) {
-        createGameFunc = loader.LoadFunction<CreateGameFunc>("CreateGameClass");
-        destroyGameFunc = loader.LoadFunction<DestroyGameFunc>("DestroyGameClass");
-
-        if (createGameFunc && destroyGameFunc) {
-            spdlog::info("Game functions loaded successfully.");
-            isGameFunctionsLoaded = true;
-        } else {
-            spdlog::error("Failed to load game functions!");
-        }
-    }
-
-    bool gameLoaded = false;
-    BaseGame *game = nullptr;
-    if (isGameFunctionsLoaded) {
-        game = createGameFunc();
-        game->SetWorld(&world);
-        // TODO game->RegisterComponents()
-        gameLoaded = true;
-    }
+    BaseGame *game = CreateGameClass();
+    game->SetWorld(&world);
 
 #ifdef WITH_SCE_EDITOR
     rlImGuiSetup(true);
@@ -166,9 +130,7 @@ int main() {
     planeRenderable.model = "cube";
     planeRenderable.tint = GREEN;
 
-
-    if (gameLoaded)
-        game->Init();
+    game->Init();
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
@@ -198,8 +160,7 @@ int main() {
             }
         }
 
-        if (gameLoaded)
-            game->GlobalUpdate(deltaTime);
+        game->GlobalUpdate(deltaTime);
 
         solver.Solve(deltaTime);
 
@@ -237,13 +198,7 @@ int main() {
 
     world.clear();
 
-    if (gameLoaded)
-        game->Shutdown();
-
-
-    if (gameLoaded && isGameFunctionsLoaded) {
-        destroyGameFunc(game);
-    }
+    game->Shutdown();
 
 #ifdef WITH_SCE_EDITOR
     rlImGuiShutdown();

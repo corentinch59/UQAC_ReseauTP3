@@ -28,6 +28,9 @@ class DBGAME_API BaseGame {
       entt::registry* mWorld;
 };
 
+extern "C" DBGAME_API BaseGame* CreateGameClass();
+extern "C" DBGAME_API void DestroyGameClass(BaseGame* game);
+
 #define DECLARE_BASE_GAME_CLASS(c) \
-    extern "C" DBGAME_API BaseGame* CreateGameClass() { return new c(); } \
-    extern "C" DBGAME_API void DestroyGameClass(BaseGame* game) { delete game; }
+    BaseGame* CreateGameClass() { return new c(); } \
+    void DestroyGameClass(BaseGame* game) { delete game; }

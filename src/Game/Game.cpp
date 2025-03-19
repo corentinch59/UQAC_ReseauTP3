@@ -1,3 +1,4 @@
+#define DBGAME_EXPORT
 #include <DuoBoloGame/BaseGame.h>
 
 #include <DuoBoloShared/TransformComponent.h>
@@ -8,6 +9,11 @@
 
 class DBGAME_API MyGame : public BaseGame {
   public:
+
+    void RegisterComponent(ComponentRegistry& registry) {
+        spdlog::info("Registering custom components");
+    }
+
     void Init() override {
         spdlog::info("Started MyGame");
 
@@ -16,9 +22,6 @@ class DBGAME_API MyGame : public BaseGame {
         GetWorld()->emplace<TransformComponent>(entity);
 
         GetWorld()->emplace<CameraComponent>(entity);
-    }
-
-    void RegisterComponent(ComponentRegistry &registry) {
     }
 
     static inline float time = 0.f;

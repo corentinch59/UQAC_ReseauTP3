@@ -9,29 +9,13 @@
 
 #include <raylib.h>
 
-#include <DuoBoloNetwork/Transform.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/PhysicsComponent.h>
 
 #include <entt/entity/registry.hpp>
 #include <spdlog/spdlog.h>
 
 #include <entt/entt.hpp>
-
-struct BoxShape
-{
-    Vector3 extent;
-};
-
-struct SphereShape
-{
-    float radius;
-};
-
-struct RigidbodyComponent
-{
-    float mass = 1.f;
-    entt::any shape = BoxShape{{1, 1, 1}};
-    Vector3 velocity = {0, 0, 0};
-};
 
 class PhysicsSolver
 {

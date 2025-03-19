@@ -1,5 +1,5 @@
-#include <DuoBoloNetwork/RenderableComponent.h>
-#include <DuoBoloNetwork/JsonSerializer.h>
+#include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
 
@@ -15,7 +15,7 @@ void RenderableComponent::BinaryUnserialize(entt::handle handle, const std::vect
 nlohmann::json RenderableComponent::JsonSerialize(const entt::handle entity) const
 {
 	nlohmann::json doc;
-	
+
 	doc["Model"] = model;
 	doc["Tint"] = tint;
 

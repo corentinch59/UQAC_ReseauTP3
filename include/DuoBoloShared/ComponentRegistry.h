@@ -49,4 +49,4 @@ class ComponentRegistry
 		std::vector<Entry> mComponentTypes;
 };
 
-#include <DuoBoloNetwork/ComponentRegistry.inl>
+#include <DuoBoloShared/ComponentRegistry.inl>

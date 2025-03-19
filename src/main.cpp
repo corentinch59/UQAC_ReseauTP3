@@ -8,12 +8,13 @@
 #include <DuoBoloNetwork/Helpers.h>
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
-#include <DuoBoloNetwork/Transform.h>
 #include <DuoBoloNetwork/DllLoader.h>
-#include <DuoBoloNetwork/RenderableComponent.h>
+
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/ComponentRegistry.h>
 
 #include <DuoBoloGame/Game.h>
-#include <DuoBoloNetwork/ComponentRegistry.h>
 
 #ifdef WITH_SCE_EDITOR
 #include <rlImGui.h>

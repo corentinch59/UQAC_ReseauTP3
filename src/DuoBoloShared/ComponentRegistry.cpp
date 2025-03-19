@@ -1,7 +1,7 @@
-#include <DuoBoloNetwork/ComponentRegistry.h>
+#include <DuoBoloShared/ComponentRegistry.h>
 
-#include "DuoBoloNetwork/RenderableComponent.h"
-#include "DuoBoloNetwork/Transform.h"
+#include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/TransformComponent.h>
 
 ComponentRegistry::ComponentRegistry()
 {

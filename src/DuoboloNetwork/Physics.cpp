@@ -7,7 +7,7 @@
 #include <raymath.h>
 
 #include <DuoBoloNetwork/Helpers.h>
-#include <DuoBoloNetwork/Transform.h>
+#include <DuoBoloShared/TransformComponent.h>
 
 #define GRAVITY (-9.8f)
 

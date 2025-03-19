@@ -29,16 +29,24 @@ elseif is_mode("deb-editor") then
     set_optimize("none")
 end
 
+target("DuoBoloShared")
+    set_kind("static")
+    add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
+    add_files("src/DuoBoloShared/*.cpp")
+    add_packages("entt", "raylib", "spdlog", "nlohmann_json")
+
 target("DuoBoloGame")
     set_kind("headeronly")
     add_headerfiles("include/DuoBoloGame/**.hpp","include/DuoBoloGame/**.inl", "include/DuoBoloGame/**.h", {public = true})
     add_packages("entt", "raylib", "spdlog", "fmt", {public = true})
+    add_deps("DuoBoloShared", {public = true})
 
 target("Game")
     set_kind("shared")
     add_headerfiles("include/Game/**.hpp","include/Game/**.inl", "include/Game/**.h")
     add_files("src/Game/*.cpp")
     add_deps("DuoBoloGame")
+
 
 target("DuoBoloEngine")
     set_kind("binary")
@@ -48,6 +56,7 @@ target("DuoBoloEngine")
     add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "nlohmann_json", "fmt")
     includes("external/rlimgui", "external/rcamera")
     add_deps("rlimgui", "rcamera")
+    add_deps("DuoBoloShared")
     after_build(function (target)
             os.cp("assets", path.join(target:targetdir(), "assets"))
     end)

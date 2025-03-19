@@ -1,6 +1,6 @@
-#include <DuoBoloNetwork/Transform.h>
-#include <DuoBoloNetwork/BinarySerializer.h>
-#include <DuoBoloNetwork/JsonSerializer.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/BinarySerializer.h>
+#include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
 
@@ -22,7 +22,7 @@ void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_
 
 void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
 {
-	
+
 }
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const

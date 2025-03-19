@@ -11,4 +11,4 @@ class BinarySerializer
 		static void BinarySerializeType(std::vector<uint8_t>& byteArray, std::string& data);
 };
 
-#include <DuoBoloNetwork/BinarySerializer.inl>
+#include <DuoBoloShared/BinarySerializer.inl>

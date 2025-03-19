@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "entt/container/dense_map.hpp"
-#include "entt/container/dense_set.hpp"
 #include <raylib.h>
 
+#include <entt/container/dense_map.hpp>
+#include <entt/container/dense_set.hpp>
 #include <entt/entity/registry.hpp>
 #include <spdlog/spdlog.h>
 

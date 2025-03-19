@@ -2,9 +2,9 @@
 
 #include <DuoBoloNetwork/WorldEditor.h>
 #include <DuoBoloNetwork/Rendering.h>
-#include <DuoBoloNetwork/Transform.h>
-#include <DuoBoloNetwork/ComponentRegistry.h>
-#include <DuoBoloNetwork/RenderableComponent.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/ComponentRegistry.h>
+#include <DuoBoloShared/RenderableComponent.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>

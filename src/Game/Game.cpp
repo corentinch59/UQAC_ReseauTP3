@@ -12,7 +12,7 @@ public:
 
   void GlobalUpdate(entt::registry& world, float dt) override
   {
-
+      
   }
 
   void Shutdown() override

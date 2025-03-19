@@ -7,8 +7,8 @@
 #include <DuoBoloNetwork/ShadowShaders.h>
 #include <DuoBoloNetwork/SkyboxShaders.h>
 #include <DuoBoloNetwork/Helpers.h>
-#include <DuoBoloNetwork/Transform.h>
-#include <DuoBoloNetwork/RenderableComponent.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/RenderableComponent.h>
 
 #include <raymath.h>
 #include <rcamera.h>

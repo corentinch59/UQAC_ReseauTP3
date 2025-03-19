@@ -8,6 +8,7 @@
 #include <DuoBoloNetwork/Helpers.h>
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/Maths.h>
 
 #include <raylib.h>
 #include <raymath.h>

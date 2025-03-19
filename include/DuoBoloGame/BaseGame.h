@@ -1,37 +1,65 @@
-
 #pragma once
 
 #include <entt/entity/registry.hpp>
 #include <DuoBoloShared/ComponentRegistry.h>
-#include <DuoBoloShared/LibraryExport.h>
+#include <raylib.h>
 
-class DBGAME_API BaseGame {
-  public:
-    void SetWorld(entt::registry* world)
-    {
-        mWorld = world;
-    }
+#include <functional>
 
-    virtual ~BaseGame() = default;
+class BaseGame
+{
+public:
+	virtual void SetWorld(entt::registry* world)
+	{
+		mWorld = world;
+	}
 
-    virtual void RegisterComponents(ComponentRegistry& registry) {}
+	virtual ~BaseGame() = default;
 
-    virtual std::string GetStartupSceneName() { return ""; }
+	virtual void RegisterComponents(ComponentRegistry* registry)
+	{
+	}
 
-    virtual void Init() {}
+	virtual std::string GetStartupSceneName() { return ""; }
 
-    virtual void GlobalUpdate(float dt) {}
+	virtual void Init()
+	{
+	}
 
-    virtual void Shutdown() {}
+	virtual void GlobalUpdate(float dt)
+	{
+	}
 
-    entt::registry* GetWorld() const { return mWorld; }
+	virtual void Shutdown()
+	{
+	}
 
-    private:
-      entt::registry* mWorld;
+	virtual entt::registry* GetWorld() const { return mWorld; }
+
+	virtual void OnSceneLoaded()
+	{
+	}
+
+	virtual void LoadScene(const std::string& path)
+	{
+		if (mSceneLoadFunc) mSceneLoadFunc(path);
+		OnSceneLoaded();
+	}
+
+	virtual void SetLoadSceneFunc(std::function<void(const std::string&)> func)
+	{
+		mSceneLoadFunc = func;
+	}
+
+	virtual Camera GetCamera() { return {}; }
+
+protected:
+	entt::registry* mWorld;
+	std::function<void(const std::string&)> mSceneLoadFunc;
 };
 
-extern "C" DBGAME_API BaseGame* CreateGameClass();
-extern "C" DBGAME_API void DestroyGameClass(BaseGame* game);
+BaseGame* CreateGameClass();
+void DestroyGameClass(BaseGame* game);
 
 #define DECLARE_BASE_GAME_CLASS(c) \
     BaseGame* CreateGameClass() { return new c(); } \

@@ -5,7 +5,8 @@ if is_plat("windows") then
     add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
 end
 
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "raylib", "nlohmann_json", "fmt")
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt")
+add_requires("raylib")
 
 set_project("DuoBoloNetwork")
 
@@ -34,6 +35,7 @@ target("DuoBoloShared")
     add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
     add_files("src/DuoBoloShared/*.cpp")
     add_packages("entt", "raylib", "spdlog", "nlohmann_json", "imgui", {public = true})
+    add_deps("rcamera", {public = true})
 
 target("DuoBoloGame")
     set_kind("headeronly")
@@ -42,7 +44,7 @@ target("DuoBoloGame")
     add_deps("DuoBoloShared", {public = true})
 
 target("Game")
-    set_kind("shared")
+    set_kind("static")
     add_headerfiles("include/Game/**.hpp","include/Game/**.inl", "include/Game/**.h")
     add_files("src/Game/*.cpp")
     add_deps("DuoBoloGame")

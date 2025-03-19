@@ -14,7 +14,7 @@ set_exceptions("cxx")
 set_encodings("utf-8")
 -- set_rundir(".")
 add_includedirs("include")
-add_installfiles("assets/**", {prefixdir = "bin"})
+add_installfiles("(assets/**)", {prefixdir = "bin"})
 
 add_cxflags("/wd4251")
 

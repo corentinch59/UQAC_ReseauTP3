@@ -39,7 +39,7 @@
 				},
 				"Mass": 0.0,
 				"Shape": "Box"
-			},
+			}
 		},
 		{
 			"renderable": {

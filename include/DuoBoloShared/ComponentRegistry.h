@@ -20,11 +20,13 @@ class ComponentRegistry
 			std::function<void(entt::handle)> addComponent;
 			std::function<bool(entt::handle)> hasComponent;
 			std::function<void(entt::handle)> removeComponent;
-			std::function<void(WorldEditor&, entt::handle)> inspect;
 			std::function<void(entt::handle, std::vector<uint8_t>&)> binarySerialize;
 			std::function<void(entt::handle, const std::vector<uint8_t>&)> binaryUnserialize;
 			std::function<nlohmann::json(entt::handle)> jsonSerialize;
 			std::function<void(entt::handle, const nlohmann::json&)> jsonUnserialize;
+#ifdef WITH_SCE_EDITOR
+			std::function<void(WorldEditor&, entt::handle)> inspect;
+#endif
 		};
 
 		ComponentRegistry();

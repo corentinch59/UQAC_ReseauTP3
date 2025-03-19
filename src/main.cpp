@@ -1,5 +1,6 @@
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
+#include <DuoBoloNetwork/SceneLoading.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 #include <DuoBoloGame/BaseGame.h>
 
@@ -8,6 +9,7 @@
 #include <raylib.h>
 
 #include <entt/entt.hpp>
+
 
 #ifdef WITH_SCE_EDITOR
 #include <DuoBoloNetwork/WorldEditor.h>
@@ -87,6 +89,7 @@ int main() {
     Renderer renderer;
     PhysicsSolver solver(world);
     ComponentRegistry componentRegistry;
+    game->RegisterComponents(componentRegistry);
 
 #ifdef WITH_SCE_EDITOR
     WorldEditor worldEditor(world, &renderer, componentRegistry, logSink);
@@ -95,6 +98,8 @@ int main() {
 #endif
 
     game->Init();
+
+    LoadSceneFromPath(game->GetStartupSceneName(), world, componentRegistry);
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();

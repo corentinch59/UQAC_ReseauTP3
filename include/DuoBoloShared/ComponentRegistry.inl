@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include <type_traits>
 
 template<typename T>
@@ -26,6 +29,18 @@ std::function<void(entt::handle)> ComponentRegistry::BuildRemoveComponent()
 			return entity.erase<T>();
 		};
 }
+
+#ifdef WITH_SCE_EDITOR
+#include <DuoBoloNetwork/WorldEditor.h>
+template <typename T>
+auto ComponentRegistry::BuildInspect() -> std::function<void(WorldEditor&, entt::handle)>
+{
+	return [](WorldEditor& worldEditor, entt::handle entity)
+		{
+			worldEditor.PopulateInspector<T>(entity);
+		};
+}
+#endif
 
 template<typename T>
 std::function<void(entt::handle, std::vector<uint8_t>&)> ComponentRegistry::BuildBinarySerialize()
@@ -74,3 +89,4 @@ std::function<void(entt::handle, const nlohmann::json&)> ComponentRegistry::Buil
 				entity.emplace<T>();
 	};
 }
+

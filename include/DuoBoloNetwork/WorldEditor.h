@@ -25,7 +25,7 @@ class WorldEditor {
     void Update(float dt);
 
     template<typename T>
-    void PopulateInspector(const entt::handle& entity);
+    void PopulateInspector(entt::handle entity);
 
   private:
     entt::registry &mEnttWorld;
@@ -67,7 +67,5 @@ class WorldEditor {
     // logs
     std::shared_ptr<ImGuiSpdlogSinkMt> mSink;
 };
-
-#include <DuoboloNetwork/WorldEditor.inl>
 
 #endif

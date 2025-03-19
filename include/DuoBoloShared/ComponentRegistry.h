@@ -8,6 +8,8 @@
 #include <vector>
 #include <cstdint>
 
+class WorldEditor;
+
 class ComponentRegistry
 {
 	public:
@@ -18,6 +20,7 @@ class ComponentRegistry
 			std::function<void(entt::handle)> addComponent;
 			std::function<bool(entt::handle)> hasComponent;
 			std::function<void(entt::handle)> removeComponent;
+			std::function<void(WorldEditor&, entt::handle)> inspect;
 			std::function<void(entt::handle, std::vector<uint8_t>&)> binarySerialize;
 			std::function<void(entt::handle, const std::vector<uint8_t>&)> binaryUnserialize;
 			std::function<nlohmann::json(entt::handle)> jsonSerialize;
@@ -39,6 +42,9 @@ class ComponentRegistry
 		template<typename T> static std::function<void(entt::handle)> BuildAddComponent();
 		template<typename T> static std::function<bool(entt::handle)> BuildHasComponent();
 		template<typename T> static std::function<void(entt::handle)> BuildRemoveComponent();
+#ifdef WITH_SCE_EDITOR
+		template<typename T> static std::function<void(WorldEditor&, entt::handle)> BuildInspect();
+#endif
 		template<typename T> static std::function<void(entt::handle, std::vector<uint8_t>&)>  BuildBinarySerialize();
 		template<typename T> static std::function<void(entt::handle, const std::vector<uint8_t>&)> BuildBinaryUnserialize();
 		template<typename T> static std::function<nlohmann::json(entt::handle)> BuildJsonSerialize();

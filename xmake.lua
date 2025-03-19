@@ -33,7 +33,7 @@ target("DuoBoloShared")
     set_kind("static")
     add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
     add_files("src/DuoBoloShared/*.cpp")
-    add_packages("entt", "raylib", "spdlog", "nlohmann_json", {public = true})
+    add_packages("entt", "raylib", "spdlog", "nlohmann_json", "imgui", {public = true})
 
 target("DuoBoloGame")
     set_kind("headeronly")

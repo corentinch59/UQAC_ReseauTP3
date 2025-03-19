@@ -31,10 +31,14 @@ void ComponentRegistry::RegisterEngineComponent()
 		.addComponent = BuildAddComponent<TransformComponent>(),
 		.hasComponent = BuildHasComponent<TransformComponent>(),
 		.removeComponent = BuildRemoveComponent<TransformComponent>(),
+
 		.binarySerialize = BuildBinarySerialize<TransformComponent>(),
 		.binaryUnserialize = BuildBinaryUnserialize<TransformComponent>(),
 		.jsonSerialize = BuildJsonSerialize<TransformComponent>(),
-		.jsonUnserialize = BuildJsonUnserialize<TransformComponent>()
+		.jsonUnserialize = BuildJsonUnserialize<TransformComponent>(),
+#ifdef WITH_SCE_EDITOR
+		.inspect = BuildInspect<TransformComponent>(),
+#endif
 		});
 
 	Register({

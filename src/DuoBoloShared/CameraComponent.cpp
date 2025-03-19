@@ -3,6 +3,7 @@
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
+#include <entt/entt.hpp>
 
 void CameraComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {

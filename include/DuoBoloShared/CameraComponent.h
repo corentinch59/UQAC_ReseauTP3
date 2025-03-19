@@ -1,6 +1,8 @@
 #pragma once
 
 #include <raylib.h>
+#include <entt/fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 struct CameraComponent
 {

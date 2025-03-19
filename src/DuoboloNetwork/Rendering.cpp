@@ -2,7 +2,6 @@
 // Created by theo on 11/03/2025.
 //
 
-#include <raylib.h>
 #include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ShadowShaders.h>
 #include <DuoBoloNetwork/SkyboxShaders.h>
@@ -10,8 +9,8 @@
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
 
+#include <raylib.h>
 #include <raymath.h>
-#include <rcamera.h>
 #include <rlgl.h>
 
 

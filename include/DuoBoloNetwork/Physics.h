@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include <btBulletCollisionCommon.h>
-#include <btBulletDynamicsCommon.h>
-
-#include <raylib.h>
-
-#include <DuoBoloShared/TransformComponent.h>
-#include <DuoBoloShared/PhysicsComponent.h>
-
-#include <entt/entity/registry.hpp>
-#include <spdlog/spdlog.h>
-
 #include <entt/entt.hpp>
+
+struct TransformComponent;
+struct RigidbodyComponent;
+class btMotionState;
+class btRigidBody;
+class btCollisionShape;
+class btDynamicsWorld;
+class btConstraintSolver;
+class btBroadphaseInterface;
+class btCollisionDispatcher;
+class btDefaultCollisionConfiguration;
 
 class PhysicsSolver
 {

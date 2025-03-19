@@ -2,16 +2,15 @@
 
 #ifdef WITH_SCE_EDITOR
 
-#include <DuoBoloNetwork/Rendering.h>
 #include <DuoBoloNetwork/ImGuiSpdlogSink.h>
 
-#include <imgui.h>
-#include <entt/entt.hpp>
 #include <entt/entity/fwd.hpp>
+#include <entt/entity/entity.hpp>
 #include <raylib.h>
 
 #include <memory>
 
+class Renderer;
 class ComponentRegistry;
 
 class WorldEditor {

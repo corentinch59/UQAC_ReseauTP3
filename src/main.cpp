@@ -1,25 +1,18 @@
+#include <DuoBoloNetwork/Physics.h>
+#include <DuoBoloNetwork/Rendering.h>
+#include <DuoBoloShared/ComponentRegistry.h>
+#include <DuoBoloGame/BaseGame.h>
+
 #include <spdlog/spdlog.h>
 
 #include <raylib.h>
-#include <raymath.h>
 
 #include <entt/entt.hpp>
 
-#include <DuoBoloNetwork/Helpers.h>
-#include <DuoBoloNetwork/Physics.h>
-#include <DuoBoloNetwork/Rendering.h>
-
-#include <DuoBoloShared/TransformComponent.h>
-#include <DuoBoloShared/RenderableComponent.h>
-#include <DuoBoloShared/CameraComponent.h>
-#include <DuoBoloShared/ComponentRegistry.h>
-
-#include <DuoBoloGame/BaseGame.h>
 
 #ifdef WITH_SCE_EDITOR
-#include <rlImGui.h>
-#include <imgui.h>
 #include <DuoBoloNetwork/WorldEditor.h>
+#include <rlImGui.h>
 #endif
 
 #define OBJECT_DESTROY_DISTANCE 1000
@@ -78,6 +71,7 @@ int main() {
 #endif
 
 #ifndef WITH_SCE_EDITOR
+    // is updated using the values of the components
     Camera camera{};
     camera.position = {0.0f, 4.0f, 10.0f}; // Camera position
     camera.target = {0.0f, 0.0f, 0.0f};    // Camera looking at point

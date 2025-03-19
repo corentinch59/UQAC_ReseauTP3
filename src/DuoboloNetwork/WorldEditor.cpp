@@ -6,9 +6,7 @@
 #include <DuoBoloShared/ComponentRegistry.h>
 #include <DuoBoloShared/RenderableComponent.h>
 
-#include <imgui.h>
 #include <imgui_internal.h>
-#include <rlImGui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <raylib.h>
 #include <rlgl.h>

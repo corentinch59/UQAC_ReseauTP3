@@ -12,6 +12,7 @@
 
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
+#include <DuoBoloShared/CameraComponent.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 
 #include <DuoBoloGame/BaseGame.h>
@@ -104,7 +105,8 @@ int main() {
     BaseGame *game = nullptr;
     if (isGameFunctionsLoaded) {
         game = createGameFunc();
-        game->SetWorld(world);
+        game->SetWorld(&world);
+        // TODO game->RegisterComponents()
         gameLoaded = true;
     }
 
@@ -125,21 +127,20 @@ int main() {
     Renderer renderer;
     PhysicsSolver solver(world);
     ComponentRegistry componentRegistry;
-#ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world, &renderer, componentRegistry, logSink);
-#endif
 
 #ifdef WITH_SCE_EDITOR
+    WorldEditor worldEditor(world, &renderer, componentRegistry, logSink);
+
     renderer.SetRenderIntoTexture(true);
 #endif
 
     // init game
-    for (int i = -5; i <= 5; i++) {
-        for (int j = -5; j <= 5; j++) {
-            for (int k = 0; k < 2; k++) {
+    for (int i = -0; i <= 0; i++) {
+        for (int j = -0; j <= 0; j++) {
+            for (int k = 0; k <= 0; k++) {
                 auto cubeEntity = world.create();
                 auto& cubeTransform = world.emplace_or_replace<TransformComponent>(cubeEntity);
-                cubeTransform.position = { (float)j, (float)2 + k, (float)i };
+                cubeTransform.position = { (float)j, (float)k, (float)i };
 
                 auto& cubeRenderable = world.emplace_or_replace<RenderableComponent>(cubeEntity);
                 cubeRenderable.model = "cube";
@@ -149,7 +150,7 @@ int main() {
                     (unsigned char)GetRandomValue(0, 255),
                     255 };
 
-                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{ {1, 1, 1} });
+//                world.emplace_or_replace<RigidbodyComponent>(cubeEntity, 1.f, BoxShape{ {1, 1, 1} });
             }
         }
     }
@@ -201,6 +202,29 @@ int main() {
             game->GlobalUpdate(deltaTime);
 
         solver.Solve(deltaTime);
+
+        // sync camera
+        {
+            auto view = world.view<TransformComponent, CameraComponent>();
+
+            bool mainCameraFound = false;
+            for (auto && [ entity, transform, cameraComp ] : view.each()) {
+                if (cameraComp.isMainCamera && !mainCameraFound)
+                {
+                    mainCameraFound = true;
+                    camera.fovy = cameraComp.fovy;
+                    camera.projection = cameraComp.projection;
+                    camera.position = transform.position;
+
+                    camera.target = QuaternionForwardVector(transform.rotation);
+                    camera.up = QuaternionUpVector(transform.rotation);
+                } else if (cameraComp.isMainCamera)
+                {
+                    spdlog::warn("You have marked two cameras as main camera! We'll only pick the first we find");
+                }
+            }
+        }
+
         renderer.Render(world, camera);
 #else
         rlImGuiBegin();
@@ -211,8 +235,7 @@ int main() {
         EndDrawing();
     }
 
-    // clear rigidbodies to avoid errors on bullet deinit
-    world.clear<RigidbodyComponent>();
+    world.clear();
 
     if (gameLoaded)
         game->Shutdown();

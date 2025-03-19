@@ -95,3 +95,23 @@ bool IsSphereInsideCameraFrustum(Camera3D camera, float radius, Vector3 position
 
     return true;
 }
+
+Vector3 QuaternionUpVector(Quaternion q) {
+    Vector3 up;
+
+    up.x = 2.0f * (q.x * q.y + q.w * q.z);
+    up.y = 1.0f - 2.0f * (q.x * q.x + q.z * q.z);
+    up.z = 2.0f * (q.y * q.z - q.w * q.x);
+
+    return up;
+}
+
+Vector3 QuaternionForwardVector(Quaternion q) {
+    Vector3 forward;
+
+    forward.x = 2.0f * (q.x * q.z - q.w * q.y);
+    forward.y = 2.0f * (q.y * q.z + q.w * q.x);
+    forward.z = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+
+    return forward;
+}

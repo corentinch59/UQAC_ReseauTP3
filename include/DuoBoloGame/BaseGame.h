@@ -3,18 +3,13 @@
 
 #include <entt/entity/registry.hpp>
 #include <DuoBoloShared/ComponentRegistry.h>
-
-#ifdef _WIN32
-#define DBGAME_API __declspec(dllexport)
-#else
-#define DBGAME_API __attribute__((visibility("default")))
-#endif
+#include <DuoBoloShared/LibraryExport.h>
 
 class DBGAME_API BaseGame {
   public:
-    void SetWorld(entt::registry& world)
+    void SetWorld(entt::registry* world)
     {
-        mWorld = &world;
+        mWorld = world;
     }
 
     virtual ~BaseGame() = default;

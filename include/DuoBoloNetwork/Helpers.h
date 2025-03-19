@@ -23,3 +23,7 @@ inline bool IsEqual(Quaternion rVec, btQuaternion btVec)
 }
 
 bool IsSphereInsideCameraFrustum(Camera3D camera, float radius, Vector3 position, float aspect);
+
+Vector3 QuaternionUpVector(Quaternion q);
+
+Vector3 QuaternionForwardVector(Quaternion q);

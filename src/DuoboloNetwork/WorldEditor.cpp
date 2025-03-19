@@ -354,12 +354,12 @@ void WorldEditor::LoadScene()
     }
 
     // On r�initialise le monde pour cr�er les entit�s du document
-    mEnttWorld = entt::registry{};
+    mEnttWorld.clear();
 
     std::vector<entt::entity> indexToEntity;
     for (const nlohmann::json& entityDoc : sceneDoc["Entities"])
     {
-        // Cr�ation de l'entit�
+        // Creation de l'entite
         entt::handle entityHandle(mEnttWorld, mEnttWorld.create());
         indexToEntity.push_back(entityHandle);
 
@@ -374,7 +374,7 @@ void WorldEditor::LoadScene()
             });
     }
 
-    spdlog::info("successfully loaded {}\n", mScenePath);
+    spdlog::info("successfully loaded {}", mScenePath);
 }
 
 void WorldEditor::SaveScene()
@@ -382,7 +382,7 @@ void WorldEditor::SaveScene()
     std::ofstream fileStream(mScenePath);
     if (!fileStream)
     {
-        spdlog::error("failed to open {}\n", mScenePath);
+        spdlog::error("failed to open {}", mScenePath);
         return;
     }
 

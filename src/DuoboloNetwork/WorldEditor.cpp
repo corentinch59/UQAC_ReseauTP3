@@ -21,10 +21,11 @@
 #define ImGuiWindowFlags_NoInputIfCamera (mInCameraMode ? ImGuiWindowFlags_NoInputs : ImGuiWindowFlags_None)
 constexpr unsigned int FileVersion = 1;
 
-WorldEditor::WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry) :
+WorldEditor::WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry,  std::shared_ptr<ImGuiSpdlogSinkMt> logSink) :
 mEnttWorld(world),
 mRenderer(renderer),
-mComponentRegistry(componentRegistry)
+mComponentRegistry(componentRegistry),
+mSink(logSink)
 {
     mInCameraMode = false;
 
@@ -36,10 +37,6 @@ mComponentRegistry(componentRegistry)
     mCamera.projection = CAMERA_PERSPECTIVE;
 
     mDockingSpaceCreated = false;
-
-    mSink = std::make_shared<ImGuiSpdlogSinkMt>();
-
-    spdlog::default_logger()->sinks().push_back(mSink);
 }
 
 void WorldEditor::Update(float dt) {

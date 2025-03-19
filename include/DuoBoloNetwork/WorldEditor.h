@@ -16,7 +16,7 @@ class ComponentRegistry;
 
 class WorldEditor {
   public:
-    WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry);
+    WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry, std::shared_ptr<ImGuiSpdlogSinkMt> logSink);
     WorldEditor(const WorldEditor&) = delete;
     WorldEditor(WorldEditor&&) = delete;
 

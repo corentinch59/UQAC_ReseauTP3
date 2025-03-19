@@ -35,7 +35,7 @@ class ImGuiSpdlogSink : public spdlog::sinks::base_sink<Mutex> {
         case spdlog::level::err:
             color = ImColor(255, 0, 0, 255);
             break;
-        case spdlog::level::info:
+        case spdlog::level::debug:
             color = ImColor(0, 220, 255, 255);
             break;
         default:
@@ -74,7 +74,7 @@ class ImGuiSpdlogSink : public spdlog::sinks::base_sink<Mutex> {
     }
 
   private:
-    int mMaxLineCount = 256;
+    int mMaxLineCount = 2048;
     std::deque<Line> mLines;
 };
 

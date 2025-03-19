@@ -54,6 +54,12 @@ void CustomLogCallback(int logLevel, const char *text, va_list args) {
 int main() {
     spdlog::set_level(spdlog::level::debug);
 
+#ifdef WITH_SCE_EDITOR
+    // So we can see in the editor the previous logs
+    auto logSink = std::make_shared<ImGuiSpdlogSinkMt>();
+    spdlog::default_logger()->sinks().push_back(logSink);
+#endif
+
     SetTraceLogCallback(CustomLogCallback);
 
     InitWindow(1280, 720, "DuoBolo TP3");
@@ -118,7 +124,7 @@ int main() {
     PhysicsSolver solver(world);
     ComponentRegistry componentRegistry;
 #ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world, &renderer, componentRegistry);
+    WorldEditor worldEditor(world, &renderer, componentRegistry, logSink);
 #endif
 
 #ifdef WITH_SCE_EDITOR

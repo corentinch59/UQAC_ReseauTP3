@@ -14,7 +14,7 @@
 #include <DuoBoloShared/RenderableComponent.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 
-#include <DuoBoloGame/Game.h>
+#include <DuoBoloGame/BaseGame.h>
 
 #ifdef WITH_SCE_EDITOR
 #include <rlImGui.h>
@@ -68,6 +68,8 @@ int main() {
     SetTargetFPS(60);
     DisableCursor();
 
+    entt::registry world{};
+
     // Game dll loading phase
     DllLoader loader("Game");
 
@@ -102,6 +104,7 @@ int main() {
     BaseGame *game = nullptr;
     if (isGameFunctionsLoaded) {
         game = createGameFunc();
+        game->SetWorld(world);
         gameLoaded = true;
     }
 
@@ -109,8 +112,6 @@ int main() {
     rlImGuiSetup(true);
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
-
-    entt::registry world{};
 
 #ifndef WITH_SCE_EDITOR
     Camera camera{};
@@ -171,8 +172,6 @@ int main() {
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-#ifndef WITH_SCE_EDITOR
-        // unlock/lock mouse
         if (IsKeyPressed(KEY_F10)) {
             if (IsCursorHidden()) {
                 ShowCursor();
@@ -182,13 +181,10 @@ int main() {
                 DisableCursor();
             }
         }
-#endif
 
         // needed for imgui
         BeginDrawing();
-#ifdef WITH_SCE_EDITOR
-        rlImGuiBegin();
-#endif
+        ClearBackground(BLACK);
 
 #ifndef WITH_SCE_EDITOR
         // destroy objects that are too far
@@ -202,22 +198,16 @@ int main() {
         }
 
         if (gameLoaded)
-            game->GlobalUpdate(world, deltaTime);
+            game->GlobalUpdate(deltaTime);
 
         solver.Solve(deltaTime);
-#endif
-
-        ClearBackground(BLACK);
-
-#ifdef WITH_SCE_EDITOR
-        worldEditor.Update(deltaTime);
-#else
         renderer.Render(world, camera);
-#endif
-
-#ifdef WITH_SCE_EDITOR
+#else
+        rlImGuiBegin();
+        worldEditor.Update(deltaTime);
         rlImGuiEnd();
 #endif
+
         EndDrawing();
     }
 

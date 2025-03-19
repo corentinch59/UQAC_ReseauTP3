@@ -2,6 +2,7 @@
 #pragma once
 
 #include <entt/entity/registry.hpp>
+#include <DuoBoloShared/ComponentRegistry.h>
 
 #ifdef _WIN32
 #define DBGAME_API __declspec(dllexport)
@@ -10,14 +11,26 @@
 #endif
 
 class DBGAME_API BaseGame {
-public:
+  public:
+    void SetWorld(entt::registry& world)
+    {
+        mWorld = &world;
+    }
+
     virtual ~BaseGame() = default;
+
+    virtual void RegisterComponents(ComponentRegistry& registry) {}
 
     virtual void Init() {}
 
-    virtual void GlobalUpdate(entt::registry & world, float dt) {}
+    virtual void GlobalUpdate(float dt) {}
 
     virtual void Shutdown() {}
+
+    entt::registry* GetWorld() const { return mWorld; }
+
+    private:
+      entt::registry* mWorld;
 };
 
 #define DECLARE_BASE_GAME_CLASS(c) \

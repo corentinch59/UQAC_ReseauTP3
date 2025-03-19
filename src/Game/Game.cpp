@@ -1,4 +1,4 @@
-#include <DuoBoloGame/Game.h>
+#include <DuoBoloGame/BaseGame.h>
 
 #include <spdlog/spdlog.h>
 
@@ -10,7 +10,12 @@ public:
       spdlog::info("Started MyGame");
   }
 
-  void GlobalUpdate(entt::registry& world, float dt) override
+  void RegisterComponent(ComponentRegistry& registry)
+  {
+
+  }
+
+  void GlobalUpdate(float dt) override
   {
       
   }

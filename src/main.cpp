@@ -150,6 +150,8 @@ int main()
 
 
 		renderer.Render(world, game->GetCamera());
+
+		DrawFPS(20, 20);
 #else
         rlImGuiBegin();
         worldEditor.Update(deltaTime);

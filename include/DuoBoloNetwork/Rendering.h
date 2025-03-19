@@ -8,7 +8,7 @@
 
 #include <entt/container/dense_map.hpp>
 #include <entt/container/dense_set.hpp>
-#include <entt/entity/registry.hpp>
+#include <entt/fwd.hpp>
 #include <spdlog/spdlog.h>
 
 #define DEFAULT_RENDERER_WIDTH 1280

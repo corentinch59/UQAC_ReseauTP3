@@ -3,11 +3,16 @@
 //
 
 #include <DuoBoloNetwork/Physics.h>
+#include <DuoBoloNetwork/Helpers.h>
+#include <DuoBoloShared/TransformComponent.h>
+#include <DuoBoloShared/PhysicsComponent.h>
+
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include <raymath.h>
 
-#include <DuoBoloNetwork/Helpers.h>
-#include <DuoBoloShared/TransformComponent.h>
+#include <spdlog/spdlog.h>
 
 #define GRAVITY (-9.8f)
 

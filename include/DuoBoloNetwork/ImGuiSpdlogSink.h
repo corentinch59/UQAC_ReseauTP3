@@ -3,7 +3,6 @@
 #include <spdlog/common.h>
 #include <spdlog/sinks/base_sink.h>
 
-#include <sstream>
 #include <string>
 
 #include <imgui.h>

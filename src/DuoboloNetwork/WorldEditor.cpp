@@ -325,6 +325,39 @@ void WorldEditor::InspectorWindow() {
                     canAddComponent = true;
             });
 
+        if (canAddComponent)
+        {
+            if (ImGui::Button("Add component..."))
+                ImGui::OpenPopup("AddComponent");
+
+            if (ImGui::BeginPopup("AddComponent"))
+            {
+                bool closePopup = false;
+                if (ImGui::BeginCombo("Add component", "Choose..."))
+                {
+                    mComponentRegistry.ForEachComponent([&](const ComponentRegistry::Entry& entry)
+                        {
+                            assert(entry.hasComponent);
+                            if (entry.hasComponent(entityHandle))
+                                return;
+
+                            if (entry.addComponent && ImGui::Selectable(entry.label.c_str()))
+                            {
+                                entry.addComponent(entityHandle);
+                                closePopup = true;
+                            }
+                        });
+
+                    ImGui::EndCombo();
+                }
+
+                if (closePopup)
+                    ImGui::CloseCurrentPopup();
+
+                ImGui::EndPopup();
+            }
+        }
+
         std::string deleteModalId = fmt::format("Delete {}", static_cast<std::uint32_t>(mSelected));
         if (ImGui::Button("Delete entity"))
             ImGui::OpenPopup(deleteModalId.c_str());

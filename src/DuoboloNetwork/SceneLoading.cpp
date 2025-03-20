@@ -38,7 +38,7 @@ void LoadSceneFromPath(const std::string& path, entt::registry& world, const Com
     }
 
     // On r�initialise le monde pour cr�er les entit�s du document
-    world.clear();
+    world = entt::registry{};
 
     std::vector<entt::entity> indexToEntity;
     for (const nlohmann::json& entityDoc : sceneDoc["Entities"])

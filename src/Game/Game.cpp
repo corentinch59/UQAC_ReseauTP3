@@ -23,6 +23,9 @@ public:
 		return "assets/Scene1.dbs";
 	}
 
+	float mFireRate = 9.75f;
+	float lastShootTime = 0;
+
 	void Init() override
 	{
 		spdlog::info("Started MyGame");
@@ -57,11 +60,14 @@ public:
 		if (IsKeyDown(KEY_E))
 			CameraMoveUp(&mCamera, -mCameraSpeed * dt);
 
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && GetTime() - lastShootTime > 1.0/mFireRate)
 		{
+			lastShootTime = GetTime();
+
 			auto sphereEntity = GetWorld()->create();
 			auto& sphereTransform = GetWorld()->emplace<TransformComponent>(sphereEntity);
 			sphereTransform.position = mCamera.position;
+			sphereTransform.scale = { .2f , .2f , .2f };
 
 			sphereTransform.rotation = QuaternionIdentity();
 
@@ -69,7 +75,7 @@ public:
 			sphereRenderable.model = "sphere";
 			sphereRenderable.tint = RED;
 
-			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 1.0f, SphereShape{1.f});
+			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 10.0f, SphereShape{.2f});
 			sphereRigidbody.velocity = Vector3Normalize(mCamera.target - mCamera.position) * 50.0f;
 		}
 	}

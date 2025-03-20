@@ -141,6 +141,18 @@ int main()
 		renderer.Render(world, game->GetCamera());
 
 		DrawFPS(20, 20);
+
+		{
+			auto view = world.view<TransformComponent>();
+
+			for (auto&& [entity, transform] : view.each())
+			{
+				if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE)
+				{
+					world.destroy(entity);
+				}
+			}
+		}
 #else
         rlImGuiBegin();
         worldEditor.Update(deltaTime);

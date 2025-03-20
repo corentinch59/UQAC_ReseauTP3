@@ -43,14 +43,14 @@ void PhysicsSolver::SyncRigidbodyAndTransform(const entt::entity& entity, Rigidb
 {
 	if (!IsEqual(rbComp.velocity, mRigidbodies[entity]->btRigidBody::getLinearVelocity()))
 	{
-		spdlog::warn("Rigidbody velocity is unsynced!");
+		// spdlog::warn("Rigidbody velocity is unsynced!");
 		mRigidbodies[entity]->btRigidBody::setLinearVelocity(ToBtVector3(rbComp.velocity));
 	}
 
 	btTransform transform = mRigidbodies[entity]->btCollisionObject::getWorldTransform();
 	if (!IsEqual(tComp.position, transform.getOrigin()))
 	{
-		spdlog::warn("Rigidbody position is unsynced!");
+		// spdlog::warn("Rigidbody position is unsynced!");
 		transform.setOrigin({
 			tComp.position.x,
 			tComp.position.y,
@@ -61,7 +61,7 @@ void PhysicsSolver::SyncRigidbodyAndTransform(const entt::entity& entity, Rigidb
 	}
 	if (!IsEqual(tComp.rotation, transform.getRotation()))
 	{
-		spdlog::warn("Rigidbody rotation is unsynced!");
+		// spdlog::warn("Rigidbody rotation is unsynced!");
 		transform.setRotation({
 			tComp.rotation.x,
 			tComp.rotation.y,
@@ -83,7 +83,7 @@ void PhysicsSolver::Solve(float delta)
 		SyncRigidbodyAndTransform(entity, rigidbodyComponent, transformComponent);
 	}
 
-	mWorld->stepSimulation(delta, 10);
+	mWorld->stepSimulation(delta, 10, 1.0f/120.f);
 
 	for (auto&& [entity, rigidbodyComponent, transformComponent] : view.each())
 	{
@@ -101,9 +101,6 @@ void PhysicsSolver::Solve(float delta)
 
 std::unique_ptr<btCollisionShape> CreateShapeFromAny(entt::any shape)
 {
-	spdlog::debug("Shape index: {}, ({}, {})", (uint32_t)shape.type().index(), (uint32_t)entt::type_index<BoxShape>(),
-	              (uint32_t)entt::type_index<SphereShape>());
-
 	if (shape.type().index() == entt::type_index<BoxShape>())
 	{
 		auto boxShape = entt::any_cast<BoxShape>(shape);

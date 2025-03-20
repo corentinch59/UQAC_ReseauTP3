@@ -23,7 +23,7 @@ public:
 		return "assets/Scene1.dbs";
 	}
 
-	float mFireRate = 9.75f;
+	float mFireRate = 20.f;
 	float lastShootTime = 0;
 
 	void Init() override
@@ -45,20 +45,21 @@ public:
 	void GlobalUpdate(float dt) override
 	{
 		const Vector2 mouseDelta = GetMouseDelta();
+		const float movementMult = IsKeyDown(KEY_LEFT_SHIFT) ? 2.f : 1.f;
 		CameraYaw(&mCamera, -mouseDelta.x * mCameraMouseSens, false);
 		CameraPitch(&mCamera, -mouseDelta.y * mCameraMouseSens, true, false, false);
 		if (IsKeyDown(KEY_W))
-			CameraMoveForward(&mCamera, mCameraSpeed * dt, true);
+			CameraMoveForward(&mCamera, mCameraSpeed * dt * movementMult, true);
 		if (IsKeyDown(KEY_A))
-			CameraMoveRight(&mCamera, -mCameraSpeed * dt, true);
+			CameraMoveRight(&mCamera, -mCameraSpeed * dt * movementMult, true);
 		if (IsKeyDown(KEY_S))
-			CameraMoveForward(&mCamera, -mCameraSpeed * dt, true);
+			CameraMoveForward(&mCamera, -mCameraSpeed * dt * movementMult, true);
 		if (IsKeyDown(KEY_D))
-			CameraMoveRight(&mCamera, mCameraSpeed * dt, true);
+			CameraMoveRight(&mCamera, mCameraSpeed * dt * movementMult, true);
 		if (IsKeyDown(KEY_Q))
-			CameraMoveUp(&mCamera, mCameraSpeed * dt);
+			CameraMoveUp(&mCamera, mCameraSpeed * dt * movementMult);
 		if (IsKeyDown(KEY_E))
-			CameraMoveUp(&mCamera, -mCameraSpeed * dt);
+			CameraMoveUp(&mCamera, -mCameraSpeed * dt * movementMult);
 
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && GetTime() - lastShootTime > 1.0/mFireRate)
 		{
@@ -75,8 +76,17 @@ public:
 			sphereRenderable.model = "sphere";
 			sphereRenderable.tint = RED;
 
-			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 10.0f, SphereShape{.2f});
-			sphereRigidbody.velocity = Vector3Normalize(mCamera.target - mCamera.position) * 50.0f;
+			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 50.0f, SphereShape{.2f});
+			sphereRigidbody.velocity = Vector3Normalize(mCamera.target - mCamera.position) * 75.0f;
+		}
+
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			SetTimeScale(0.2f);
+		}
+		else if (IsKeyReleased(KEY_SPACE))
+		{
+			SetTimeScale(1.f);
 		}
 	}
 

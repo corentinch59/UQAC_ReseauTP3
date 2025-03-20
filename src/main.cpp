@@ -113,6 +113,7 @@ int main()
 	while (!WindowShouldClose())
 	{
 		float deltaTime = GetFrameTime();
+		float deltaTimeAfterScale = deltaTime * game->GetTimeScale();
 
 		if (IsKeyPressed(KEY_F10))
 		{
@@ -133,10 +134,9 @@ int main()
 		ClearBackground(BLACK);
 
 #ifndef WITH_SCE_EDITOR
-		game->GlobalUpdate(deltaTime);
+		game->GlobalUpdate(deltaTimeAfterScale);
 
-		solver.Solve(deltaTime);
-
+		solver.Solve(deltaTimeAfterScale);
 
 		renderer.Render(world, game->GetCamera());
 
@@ -155,7 +155,7 @@ int main()
 		}
 #else
         rlImGuiBegin();
-        worldEditor.Update(deltaTime);
+        worldEditor.Update(deltaTimeAfterScale);
         rlImGuiEnd();
 #endif
 

@@ -53,9 +53,14 @@ public:
 
 	virtual Camera GetCamera() { return {}; }
 
+	void SetTimeScale(float scale) { mTimeScale = scale;  }
+
+	float GetTimeScale() { return mTimeScale;  }
+
 protected:
 	entt::registry* mWorld;
 	std::function<void(const std::string&)> mSceneLoadFunc;
+	float mTimeScale = 1.0f;
 };
 
 BaseGame* CreateGameClass();

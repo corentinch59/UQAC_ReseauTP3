@@ -69,7 +69,7 @@ public:
 			sphereRenderable.model = "sphere";
 			sphereRenderable.tint = RED;
 
-			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, .5f, SphereShape{.5f});
+			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 1.0f, SphereShape{1.f});
 			sphereRigidbody.velocity = Vector3Normalize(mCamera.target - mCamera.position) * 50.0f;
 		}
 	}

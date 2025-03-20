@@ -133,17 +133,6 @@ int main()
 		ClearBackground(BLACK);
 
 #ifndef WITH_SCE_EDITOR
-		// destroy objects that are too far
-		{
-			auto view = world.view<TransformComponent>();
-
-			for (auto&& [entity, transform] : view.each())
-			{
-				if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE)
-					world.destroy(entity);
-			}
-		}
-
 		game->GlobalUpdate(deltaTime);
 
 		solver.Solve(deltaTime);

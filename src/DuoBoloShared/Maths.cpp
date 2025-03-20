@@ -5,79 +5,16 @@
 
 bool IsSphereInsideCameraFrustum(Camera3D camera, float radius, Vector3 position, float aspect)
 {
-    // Get the view and projection matrices
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-    Matrix matProj;
-
-    if (camera.projection == CAMERA_PERSPECTIVE)
-        matProj = MatrixPerspective(
-            camera.fovy * DEG2RAD, aspect, CAMERA_CULL_DISTANCE_NEAR, CAMERA_CULL_DISTANCE_FAR);
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-        matProj = MatrixOrtho(
-            -camera.fovy * aspect, camera.fovy * aspect, -camera.fovy, camera.fovy, CAMERA_CULL_DISTANCE_NEAR,
-            CAMERA_CULL_DISTANCE_FAR);
-    Matrix matViewProj = MatrixMultiply(matView, matProj);
-
-    // Extract the frustum planes from the view-projection matrix
-    float planes[6][4];
-    // Left plane
-    planes[0][0] = matViewProj.m3 + matViewProj.m0;
-    planes[0][1] = matViewProj.m7 + matViewProj.m4;
-    planes[0][2] = matViewProj.m11 + matViewProj.m8;
-    planes[0][3] = matViewProj.m15 + matViewProj.m12;
-
-    // Right plane
-    planes[1][0] = matViewProj.m3 - matViewProj.m0;
-    planes[1][1] = matViewProj.m7 - matViewProj.m4;
-    planes[1][2] = matViewProj.m11 - matViewProj.m8;
-    planes[1][3] = matViewProj.m15 - matViewProj.m12;
-
-    // Bottom plane
-    planes[2][0] = matViewProj.m3 + matViewProj.m1;
-    planes[2][1] = matViewProj.m7 + matViewProj.m5;
-    planes[2][2] = matViewProj.m11 + matViewProj.m9;
-    planes[2][3] = matViewProj.m15 + matViewProj.m13;
-
-    // Top plane
-    planes[3][0] = matViewProj.m3 - matViewProj.m1;
-    planes[3][1] = matViewProj.m7 - matViewProj.m5;
-    planes[3][2] = matViewProj.m11 - matViewProj.m9;
-    planes[3][3] = matViewProj.m15 - matViewProj.m13;
-
-    // Near plane
-    planes[4][0] = matViewProj.m3 + matViewProj.m2;
-    planes[4][1] = matViewProj.m7 + matViewProj.m6;
-    planes[4][2] = matViewProj.m11 + matViewProj.m10;
-    planes[4][3] = matViewProj.m15 + matViewProj.m14;
-
-    // Far plane
-    planes[5][0] = matViewProj.m3 - matViewProj.m2;
-    planes[5][1] = matViewProj.m7 - matViewProj.m6;
-    planes[5][2] = matViewProj.m11 - matViewProj.m10;
-    planes[5][3] = matViewProj.m15 - matViewProj.m14;
-
-    // Normalize the planes
-    for (int i = 0; i < 6; i++)
-    {
-        float length = sqrtf(planes[i][0] * planes[i][0] + planes[i][1] * planes[i][1] + planes[i][2] * planes[i][2]);
-        planes[i][0] /= length;
-        planes[i][1] /= length;
-        planes[i][2] /= length;
-        planes[i][3] /= length;
-    }
-
-    // Check if the sphere is inside the frustum
-    for (int i = 0; i < 6; i++)
-    {
-        float distance = planes[i][0] * position.x + planes[i][1] * position.y + planes[i][2] * position.z + planes[i][
-            3];
-        if (distance < -radius)
-        {
-            return false;
-        }
-    }
-
     return true;
+
+    Frustum camFrustum = CreateFrustumFromCamera(camera, aspect);
+
+    return (IsSphereOnOrForwardPlane(position, radius, camFrustum.leftFace) &&
+        IsSphereOnOrForwardPlane(position, radius, camFrustum.rightFace) &&
+        IsSphereOnOrForwardPlane(position, radius, camFrustum.farFace) &&
+        IsSphereOnOrForwardPlane(position, radius, camFrustum.nearFace) &&
+        IsSphereOnOrForwardPlane(position, radius, camFrustum.topFace) &&
+        IsSphereOnOrForwardPlane(position, radius, camFrustum.bottomFace));
 }
 
 Vector3 QuaternionUpVector(Quaternion q) {
@@ -100,14 +37,68 @@ Vector3 QuaternionForwardVector(Quaternion q) {
     return forward;
 }
 
-Vector3 QuaternionRightVector(Quaternion q) {
-    Vector3 right;
-    
-    right.x = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
-    right.y = 2.0f * (q.x * q.y + q.w * q.z);
-    right.z = 2.0f * (q.x * q.z - q.w * q.y);
+Frustum CreateFrustumFromCamera(const Camera& cam, float aspect)
+{
+    Frustum frustum;
 
-    right *= -1;
-    
-    return right;
+    // Extract camera properties
+    Vector3 position = cam.position;
+    Vector3 forward = Vector3Normalize(cam.target - cam.position);
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, cam.up));
+    Vector3 up = Vector3Normalize(Vector3CrossProduct(right, forward));
+
+    float nearDist = CAMERA_CULL_DISTANCE_NEAR;
+    float farDist = CAMERA_CULL_DISTANCE_FAR;
+    float fovY = cam.fovy * DEG2RAD;
+
+    if (cam.projection == CAMERA_PERSPECTIVE)
+    {
+        float halfVSide = tanf(fovY / 2.0f) * nearDist;
+        float halfHSide = halfVSide * aspect;
+
+        // Near and far plane centers
+        Vector3 nearCenter = position + forward * nearDist;
+        Vector3 farCenter = position + forward * farDist;
+
+        // Compute frustum planes
+        frustum.nearFace = Plane(nearCenter, forward);
+        frustum.farFace = Plane(farCenter, Vector3Negate(forward));
+
+        Vector3 topNormal = Vector3Normalize(Vector3CrossProduct(right, nearCenter + up * halfVSide - position));
+        frustum.topFace = Plane(position, topNormal);
+
+        Vector3 bottomNormal = Vector3Normalize(Vector3CrossProduct(nearCenter - up * halfVSide - position, right));
+        frustum.bottomFace = Plane(position, bottomNormal);
+
+        Vector3 rightNormal = Vector3Normalize(Vector3CrossProduct(nearCenter + right * halfHSide - position, up));
+        frustum.rightFace = Plane(position, rightNormal);
+
+        Vector3 leftNormal = Vector3Normalize(Vector3CrossProduct(up, nearCenter - right * halfHSide - position));
+        frustum.leftFace = Plane(position, leftNormal);
+    }
+    else // Orthographic projection
+    {
+        float orthoHeight = cam.fovy;
+        float orthoWidth = orthoHeight * aspect;
+
+        frustum.nearFace = Plane(position + forward * nearDist, forward);
+        frustum.farFace = Plane(position + forward * farDist, Vector3Negate(forward));
+        frustum.topFace = Plane(position + up * (orthoHeight / 2.0f), up);
+        frustum.bottomFace = Plane(position - up * (orthoHeight / 2.0f), Vector3Negate(up));
+        frustum.rightFace = Plane(position + right * (orthoWidth / 2.0f), right);
+        frustum.leftFace = Plane(position - right * (orthoWidth / 2.0f), Vector3Negate(right));
+    }
+
+    return frustum;
 }
+
+
+float GetSignedDistanceToPlane(const Plane& plane, const Vector3& point)
+{
+    return Vector3DotProduct(plane.normal, point) - plane.d;
+}
+
+bool IsSphereOnOrForwardPlane(Vector3 position, float radius, const Plane& plane)
+{
+    return GetSignedDistanceToPlane(plane, position) > -radius;
+};

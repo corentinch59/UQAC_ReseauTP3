@@ -324,6 +324,29 @@ void WorldEditor::InspectorWindow() {
                 else if (entry.addComponent)
                     canAddComponent = true;
             });
+
+        std::string deleteModalId = fmt::format("Delete {}", static_cast<std::uint32_t>(mSelected));
+        if (ImGui::Button("Delete entity"))
+            ImGui::OpenPopup(deleteModalId.c_str());
+
+        if (ImGui::BeginPopupModal(deleteModalId.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
+        {
+            ImGui::Text("Are you sure you want to delete this entity?\nThis operation cannot be undone!\n\n");
+            ImGui::Separator();
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                mEnttWorld.destroy(mSelected);
+                mSelected = entt::null;;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                ImGui::CloseCurrentPopup();
+
+            ImGui::EndPopup();
+        }
     }
 
     ImGui::End();

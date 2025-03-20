@@ -19,6 +19,8 @@ class WorldEditor {
     WorldEditor(const WorldEditor&) = delete;
     WorldEditor(WorldEditor&&) = delete;
 
+    ~WorldEditor() = default;
+
     WorldEditor& operator=(const WorldEditor&) = delete;
     WorldEditor& operator=(WorldEditor&&) = delete;
 

@@ -1,19 +1,13 @@
-//
-// Created by theo on 12/03/2025.
-//
-
 #pragma once
 
-#include <raylib.h>
-#include <raymath.h>
+#include <string>
 #include <entt/entity/handle.hpp>
+#include <vector>
 #include <nlohmann/json_fwd.hpp>
 
-struct TransformComponent
+struct NameComponent
 {
-    Vector3 position = {1, 1, 1};
-    Quaternion rotation = QuaternionIdentity();
-    Vector3 scale = { 1, 1, 1 }; // only affects rendering !!
+	explicit NameComponent(std::string Name);
 
     void BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray);
     static void BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray);
@@ -21,4 +15,6 @@ struct TransformComponent
     nlohmann::json JsonSerialize(const entt::handle entity) const;
     static void JsonUnserialize(entt::handle entity, const nlohmann::json& doc);
 
+    std::string name;
 };
+

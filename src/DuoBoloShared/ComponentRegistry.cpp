@@ -4,6 +4,8 @@
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/PhysicsComponent.h>
 #include <DuoBoloShared/CameraComponent.h>
+#include <DuoBoloShared/NameComponent.h>
+
 
 ComponentRegistry::ComponentRegistry()
 {
@@ -80,5 +82,23 @@ void ComponentRegistry::RegisterEngineComponent()
 		.binaryUnserialize = BuildBinaryUnserialize<CameraComponent>(),
 		.jsonSerialize = BuildJsonSerialize<CameraComponent>(),
 		.jsonUnserialize = BuildJsonUnserialize<CameraComponent>()
+		});
+
+	Register({
+		.id = "name",
+		.label = "Name",
+		.addComponent = [](entt::handle entity)
+			{
+				entity.emplace<NameComponent>("Unnamed");
+			},
+		.hasComponent = BuildHasComponent<NameComponent>(),
+		.removeComponent = BuildRemoveComponent<NameComponent>(),
+		.binarySerialize = BuildBinarySerialize<NameComponent>(),
+		.binaryUnserialize = BuildBinaryUnserialize<NameComponent>(),
+		.jsonSerialize = BuildJsonSerialize<NameComponent>(),
+		.jsonUnserialize = BuildJsonUnserialize<NameComponent>(),
+#ifdef WITH_SCE_EDITOR
+		.inspect = BuildInspect<NameComponent>(),
+#endif
 		});
 }

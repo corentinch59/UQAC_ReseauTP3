@@ -6,6 +6,7 @@
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
 #include <DuoBoloShared/PhysicsComponent.h>
+#include <DuoBoloShared/NameComponent.h>
 #include <DuoBoloNetwork/SceneLoading.h>
 
 #include <imgui_internal.h>
@@ -278,13 +279,22 @@ void WorldEditor::ViewportWindow() {
 void WorldEditor::HierarchyWindow() {
     ImGui::Begin(gHierarchyWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
 
+    
+
     for (auto entity : mEnttWorld.view<entt::entity>()) {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
         if (mSelected == entity) {
             flags |= ImGuiTreeNodeFlags_Selected;
         }
 
-        bool open = ImGui::TreeNodeEx(fmt::format("Entity {}", (uint32_t)entity).c_str(), flags);
+        std::string entityName = fmt::format("Entity #{}", static_cast<std::uint32_t>(entity));
+        if (NameComponent* nameComponent = mEnttWorld.try_get<NameComponent>(entity))
+        {
+            if (!nameComponent->name.empty())
+                entityName = fmt::format("{} - {}", entityName, nameComponent->name);
+        }
+
+        bool open = ImGui::TreeNodeEx(entityName.c_str(), flags);
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             spdlog::info("Selected entity {}", (uint32_t)entity);
             mSelected = entity;
@@ -488,6 +498,14 @@ void WorldEditor::PopulateInspector<RigidbodyComponent>(entt::handle entity)
     }
 
 }
+
+template<>
+void WorldEditor::PopulateInspector<NameComponent>(entt::handle entity)
+{
+    auto& n = entity.get<NameComponent>();
+    ImGui::InputText("Name", &n.name);
+}
+
 
 
 #endif

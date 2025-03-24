@@ -37,8 +37,8 @@ void LoadSceneFromPath(const std::string& path, entt::registry& world, const Com
         return;
     }
 
-    // On r�initialise le monde pour cr�er les entit�s du document
-    world = entt::registry{};
+    // On reinitialise le monde pour cr�er les entites du document
+    world.clear();
 
     std::vector<entt::entity> indexToEntity;
     for (const nlohmann::json& entityDoc : sceneDoc["Entities"])
@@ -72,7 +72,7 @@ void SaveSceneToPath(const std::string& path, entt::registry& world, const Compo
 
     std::unordered_map<entt::entity, unsigned int> entityToIndex;
 
-    // On sauvegarde tous les composants de toutes les entit�s
+    // On sauvegarde tous les composants de toutes les entites
     nlohmann::json entityArray;
     for (auto [entity] : world.storage<entt::entity>().each())
     {

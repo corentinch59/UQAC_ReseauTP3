@@ -41,7 +41,7 @@ PhysicsSolver::~PhysicsSolver() = default;
 void PhysicsSolver::SyncRigidbodyAndTransform(const entt::entity& entity, RigidbodyComponent& rbComp,
                                               TransformComponent& tComp)
 {
-	if (!IsEqual(rbComp.velocity, mRigidbodies[entity]->btRigidBody::getLinearVelocity()))
+	if (!IsEqual(rbComp.velocity, mRigidbodies[entity]->getLinearVelocity()))
 	{
 		// spdlog::warn("Rigidbody velocity is unsynced!");
 		mRigidbodies[entity]->btRigidBody::setLinearVelocity(ToBtVector3(rbComp.velocity));
@@ -57,7 +57,7 @@ void PhysicsSolver::SyncRigidbodyAndTransform(const entt::entity& entity, Rigidb
 			tComp.position.z
 		});
 
-		mRigidbodies[entity]->btCollisionObject::setWorldTransform(transform);
+		mRigidbodies[entity]->setWorldTransform(transform);
 	}
 	if (!IsEqual(tComp.rotation, transform.getRotation()))
 	{

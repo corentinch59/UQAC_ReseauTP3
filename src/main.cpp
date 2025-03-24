@@ -80,17 +80,6 @@ int main()
     rlImGuiSetup(true);
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
-	/*
-#ifndef WITH_SCE_EDITOR
-	// is updated using the values of the components
-	Camera camera{};
-	camera.position = {0.0f, 4.0f, 10.0f}; // Camera position
-	camera.target = {0.0f, 0.0f, 0.0f}; // Camera looking at point
-	camera.up = {0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
-	camera.fovy = 60.0f; // Camera field-of-view Y
-	camera.projection = CAMERA_PERSPECTIVE;
-#endif
-*/
 
 	Renderer renderer;
 	PhysicsSolver solver(world);

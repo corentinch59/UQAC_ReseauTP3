@@ -95,7 +95,7 @@ int main()
 	});
 
 #ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world, &renderer, &wSettings, componentRegistry, logSink);
+    WorldEditor worldEditor(world, renderer, wSettings, componentRegistry, logSink);
 
     renderer.SetRenderIntoTexture(true);
 #endif

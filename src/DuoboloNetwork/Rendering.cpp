@@ -23,45 +23,14 @@ void UnloadDepthRenderTexture(RenderTexture2D target);
 Renderer::Renderer()
 {
 	// Shadow
-	// mLightDir = Vector3Normalize({0.35f, -1.0f, -0.35f});
-	// mLightColor = WHITE;
-	// mLightColorNormalized = ColorNormalize(mLightColor);
-	// mAmbient[0] = mAmbient[1] = mAmbient[2] = mAmbient[3] = 0.1f;
 	mShadowMapResolution = SHADOWMAP_RESOLUTION;
 
-	mShadowShader = LoadShaderFromMemory(gShadowShaderVertex, gShadowShaderFragment);
-
-	mShadowShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(mShadowShader, "viewPos");
-
-	mLightDirLoc = GetShaderLocation(mShadowShader, "lightDir");
-	mLightColLoc = GetShaderLocation(mShadowShader, "lightColor");
-	mLightVPLoc = GetShaderLocation(mShadowShader, "lightVP");
-	mShadowMapLoc = GetShaderLocation(mShadowShader, "shadowMap");
-	mAmbientLoc = GetShaderLocation(mShadowShader, "ambient");
-	mShadowMapResolutionLoc = GetShaderLocation(mShadowShader, "shadowMapResolution");
+	SetupDefaultShader();
 
 	mShadowMap = LoadDepthRenderTexture(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
 
 	// Cubemap
-	mSkyboxModel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
-
-	mSkyboxModel.materials[0].shader = LoadShaderFromMemory(gSkyboxVertexShader, gSkyboxFragmentShader);
-
-	int environmentMap = MATERIAL_MAP_CUBEMAP;
-	int doGamma = 0;
-	int vflipped = 0;
-	SetShaderValue(mSkyboxModel.materials[0].shader,
-	               GetShaderLocation(mSkyboxModel.materials[0].shader, "environmentMap"),
-	               &environmentMap, SHADER_UNIFORM_INT);
-	SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "doGamma"),
-	               &doGamma, SHADER_UNIFORM_INT);
-	SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "vflipped"),
-	               &vflipped, SHADER_UNIFORM_INT);
-
-	Image img = LoadImage("assets/skybox.png");
-	mSkyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-	// CUBEMAP_LAYOUT_PANORAMA
-	UnloadImage(img);
+	SetupSkybox();
 
 	// RT
 	mRTWidth = DEFAULT_RENDERER_WIDTH;
@@ -325,6 +294,38 @@ void Renderer::DestroyRenderTexture()
 	UnloadRenderTexture(mRenderTexture);
 	mRenderTexture = {};
 	mRenderTextureInitialized = false;
+}
+
+void Renderer::SetupSkybox()
+{
+	mSkyboxModel = LoadModelFromMesh(GenMeshCube(1, 1, 1));
+
+	mSkyboxModel.materials[0].shader = LoadShaderFromMemory(gSkyboxVertexShader, gSkyboxFragmentShader);
+
+	int environmentMap = MATERIAL_MAP_CUBEMAP;
+	int doGamma = 0;
+	int vflipped = 0;
+	SetShaderValue(mSkyboxModel.materials[0].shader,GetShaderLocation(mSkyboxModel.materials[0].shader, "environmentMap"), &environmentMap, SHADER_UNIFORM_INT);
+	SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "doGamma"), &doGamma, SHADER_UNIFORM_INT);
+	SetShaderValue(mSkyboxModel.materials[0].shader, GetShaderLocation(mSkyboxModel.materials[0].shader, "vflipped"), &vflipped, SHADER_UNIFORM_INT);
+
+	Image img = LoadImage("assets/skybox.png");
+	mSkyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
+	UnloadImage(img);
+}
+
+void Renderer::SetupDefaultShader()
+{
+	mShadowShader = LoadShaderFromMemory(gShadowShaderVertex, gShadowShaderFragment);
+
+	mShadowShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(mShadowShader, "viewPos");
+
+	mLightDirLoc = GetShaderLocation(mShadowShader, "lightDir");
+	mLightColLoc = GetShaderLocation(mShadowShader, "lightColor");
+	mLightVPLoc = GetShaderLocation(mShadowShader, "lightVP");
+	mShadowMapLoc = GetShaderLocation(mShadowShader, "shadowMap");
+	mAmbientLoc = GetShaderLocation(mShadowShader, "ambient");
+	mShadowMapResolutionLoc = GetShaderLocation(mShadowShader, "shadowMapResolution");
 }
 
 void Renderer::UpdateLightCam(Vector3 lightDir)

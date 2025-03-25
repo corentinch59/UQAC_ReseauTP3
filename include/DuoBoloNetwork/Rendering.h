@@ -82,6 +82,9 @@ private:
     void BuildRenderTexture();
     void DestroyRenderTexture();
 
+    void SetupSkybox();
+
+    void SetupDefaultShader();
     void UpdateLightCam(Vector3 lightDir);
     void SetShaderUniforms(Vector3 lightDir, Vector4 lightColorNormalized, Vector4 ambientColorNormalized);
 };

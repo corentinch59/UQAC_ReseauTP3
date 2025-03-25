@@ -1,1 +1,0 @@
-xmake config -m release && xmake build && xmake run

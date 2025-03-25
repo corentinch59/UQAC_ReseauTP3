@@ -15,15 +15,15 @@
 #include <raymath.h>
 #include <rcamera.h>
 
-#include <fstream>
 #include <spdlog/spdlog.h>
 #include <fmt/format.h>
 
 #define ImGuiWindowFlags_NoInputIfCamera (mInCameraMode ? ImGuiWindowFlags_NoInputs : ImGuiWindowFlags_None)
 
-WorldEditor::WorldEditor(entt::registry &world, Renderer *renderer, const ComponentRegistry& componentRegistry,  std::shared_ptr<ImGuiSpdlogSinkMt> logSink) :
+WorldEditor::WorldEditor(entt::registry &world, Renderer& renderer, WorldSettings& wSettings, const ComponentRegistry& componentRegistry,  std::shared_ptr<ImGuiSpdlogSinkMt> logSink) :
 mEnttWorld(world),
-mRenderer(renderer),
+mRenderer(&renderer),
+mWSettings(&wSettings),
 mComponentRegistry(componentRegistry),
 mSink(logSink)
 {
@@ -65,7 +65,7 @@ void WorldEditor::Update(float dt) {
         CameraMovement(dt, &mCamera);
     }
 
-    mRenderer->Render(mEnttWorld, mCamera);
+    mRenderer->Render(mEnttWorld, mCamera, *mWSettings);
 
     if (mSelected != entt::null) {
         // render selected icon

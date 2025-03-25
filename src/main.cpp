@@ -84,6 +84,10 @@ int main()
 	Renderer renderer;
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
+	WorldSettings wSettings{};
+	wSettings.lightDirection = Vector3Normalize({0.35f, -1.0f, 0.f});
+	wSettings.lightColor = WHITE;
+	wSettings.ambientColor = GRAY;
 	game->RegisterComponents(&componentRegistry);
 	game->SetLoadSceneFunc([&](const std::string& path)
 	{
@@ -91,7 +95,7 @@ int main()
 	});
 
 #ifdef WITH_SCE_EDITOR
-    WorldEditor worldEditor(world, &renderer, componentRegistry, logSink);
+    WorldEditor worldEditor(world, &renderer, &wSettings, componentRegistry, logSink);
 
     renderer.SetRenderIntoTexture(true);
 #endif
@@ -127,7 +131,7 @@ int main()
 
 		solver.Solve(deltaTimeAfterScale);
 
-		renderer.Render(world, game->GetCamera());
+		renderer.Render(world, game->GetCamera(), wSettings);
 
 		DrawFPS(20, 20);
 

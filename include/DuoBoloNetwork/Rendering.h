@@ -14,6 +14,13 @@
 #define DEFAULT_RENDERER_WIDTH 1280
 #define DEFAULT_RENDERER_HEIGHT 720
 
+struct WorldSettings
+{
+	Vector3 lightDirection;
+    Color lightColor;
+    Color ambientColor;
+};
+
 class Renderer
 {
 public:
@@ -21,7 +28,7 @@ public:
 
     ~Renderer();
 
-    void Render(entt::registry& world, const Camera& camera);
+    void Render(entt::registry& world, const Camera& camera, const WorldSettings& wSettings);
 
     Shader GetShader() { return mShadowShader; }
 
@@ -51,10 +58,10 @@ private:
     Shader mShadowShader;
     RenderTexture2D mShadowMap;
     Camera3D mLightCam;
-    Vector3 mLightDir;
-    Color mLightColor;
-    Vector4 mLightColorNormalized;
-    float mAmbient[4];
+    // Vector3 mLightDir;
+    // Color mLightColor;
+    // Vector4 mLightColorNormalized;
+    // float mAmbient[4];
     int mShadowMapResolution;
     int mLightDirLoc;
     int mLightColLoc;
@@ -75,6 +82,6 @@ private:
     void BuildRenderTexture();
     void DestroyRenderTexture();
 
-    void UpdateLightCam();
-    void SetShaderUniforms();
+    void UpdateLightCam(Vector3 lightDir);
+    void SetShaderUniforms(Vector3 lightDir, Vector4 lightColorNormalized, Vector4 ambientColorNormalized);
 };

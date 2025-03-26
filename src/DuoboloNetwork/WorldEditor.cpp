@@ -197,11 +197,6 @@ void WorldEditor::FullscreenDockingSpace()
 	ImGui::End();
 }
 
-bool WorldEditor::EntityInspector(entt::entity entity)
-{
-	return false;
-}
-
 void WorldEditor::MainMenuBar()
 {
 	// menu bar

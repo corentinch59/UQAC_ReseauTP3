@@ -58,8 +58,6 @@ private:
 
 	bool mDockingSpaceCreated;
 
-	bool EntityInspector(entt::entity entity);
-
 	void MainMenuBar();
 
 	void ViewportWindow();

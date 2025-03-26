@@ -17,74 +17,85 @@
 struct WorldSettings
 {
 	Vector3 lightDirection;
-    Color lightColor;
-    Color ambientColor;
+	Color lightColor;
+	Color ambientColor;
 };
 
 class Renderer
 {
 public:
-    Renderer();
+	Renderer();
 
-    ~Renderer();
+	~Renderer();
 
-    void Render(entt::registry& world, const Camera& camera, const WorldSettings& wSettings);
+	void Render(entt::registry& world, const Camera& camera, const WorldSettings& wSettings);
 
-    Shader GetShader() { return mShadowShader; }
+	Shader GetShader() { return mShadowShader; }
 
-    void UpdateMeshMaterialsToUseCorrectShader(Model& model);
+	void UpdateMeshMaterialsToUseCorrectShader(Model& model);
 
-    void SetRenderIntoTexture(bool renderIntoTexture);
+	void SetRenderIntoTexture(bool renderIntoTexture);
 
-    void SetRenderSize(int width, int height);
+	void SetRenderSize(int width, int height);
 
-    RenderTexture2D GetRenderTexture() {
-        if (!mRenderTextureInitialized)
-        {
-            spdlog::error("Retrieving unitialized render texture!");
-        }
-        return mRenderTexture;
-    }
+	RenderTexture2D GetRenderTexture()
+	{
+		if (!mRenderTextureInitialized)
+		{
+			spdlog::error("Retrieving unitialized render texture!");
+		}
+		return mRenderTexture;
+	}
 
-    bool PreloadModel(const std::string& model);
+	bool PreloadModel(const std::string& model);
 
-    Model GetModel(const std::string& model);
+	Model GetModel(const std::string& model);
 
-    int GetWidth() const { if (mShouldRenderIntoTexture) return mRTWidth; else return GetRenderWidth(); }
+	int GetWidth() const
+	{
+		if (mShouldRenderIntoTexture) return mRTWidth;
+		else return GetRenderWidth();
+	}
 
-    int GetHeight() const { if (mShouldRenderIntoTexture) return mRTHeight; else return GetRenderHeight(); }
+	int GetHeight() const
+	{
+		if (mShouldRenderIntoTexture) return mRTHeight;
+		else return GetRenderHeight();
+	}
+
 
 private:
-    Shader mShadowShader;
-    RenderTexture2D mShadowMap;
-    Camera3D mLightCam;
-    // Vector3 mLightDir;
-    // Color mLightColor;
-    // Vector4 mLightColorNormalized;
-    // float mAmbient[4];
-    int mShadowMapResolution;
-    int mLightDirLoc;
-    int mLightColLoc;
-    int mLightVPLoc;
-    int mShadowMapLoc;
-    int mAmbientLoc;
-    int mShadowMapResolutionLoc;
-    Model mSkyboxModel;
-    RenderTexture2D mRenderTexture;
-    bool mRenderTextureInitialized;
-    bool mShouldRenderIntoTexture;
-    int mRTWidth, mRTHeight;
+	Shader mShadowShader;
+	RenderTexture2D mShadowMap;
+	Camera3D mLightCam;
+	// Vector3 mLightDir;
+	// Color mLightColor;
+	// Vector4 mLightColorNormalized;
+	// float mAmbient[4];
+	int mShadowMapResolution;
+	int mLightDirLoc;
+	int mLightColLoc;
+	int mLightVPLoc;
+	int mShadowMapLoc;
+	int mAmbientLoc;
+	int mShadowMapResolutionLoc;
+	Model mSkyboxModel;
+	RenderTexture2D mRenderTexture;
+	bool mRenderTextureInitialized;
+	bool mShouldRenderIntoTexture;
+	int mRTWidth, mRTHeight;
 
-    entt::dense_map<std::string, Model> mModels;
-    entt::dense_map<std::string, BoundingBox> mBoundingBoxes;
-    entt::dense_set<std::string> mUnknownModels;
+	entt::dense_map<std::string, Model> mModels;
+	entt::dense_map<std::string, BoundingBox> mBoundingBoxes;
+	entt::dense_set<std::string> mUnknownModels;
 
-    void BuildRenderTexture();
-    void DestroyRenderTexture();
 
-    void SetupSkybox();
+	void BuildRenderTexture();
+	void DestroyRenderTexture();
 
-    void SetupDefaultShader();
-    void UpdateLightCam(Vector3 lightDir);
-    void SetShaderUniforms(Vector3 lightDir, Vector4 lightColorNormalized, Vector4 ambientColorNormalized);
+	void SetupSkybox();
+
+	void SetupDefaultShader();
+	void UpdateLightCam(Vector3 lightDir);
+	void SetShaderUniforms(Vector3 lightDir, Vector4 lightColorNormalized, Vector4 ambientColorNormalized);
 };

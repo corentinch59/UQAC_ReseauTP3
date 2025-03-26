@@ -4,6 +4,10 @@
 
 #include <nlohmann/json.hpp>
 
+void TransformComponent::SetParent(entt::entity entity)
+{
+}
+
 void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {
 	// ID -|> Position -|> Rotation

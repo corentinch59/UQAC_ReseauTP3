@@ -1,5 +1,5 @@
 ﻿#include <DuoBoloNetwork/SceneLoading.h>
-
+#include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 
 #include <nlohmann/json.hpp>
@@ -9,6 +9,7 @@
 #include <entt/entt.hpp>
 
 #include <fstream>
+
 
 void LoadSceneFromPath(const std::string& path, entt::registry& world, const ComponentRegistry& componentRegistry)
 {
@@ -37,8 +38,8 @@ void LoadSceneFromPath(const std::string& path, entt::registry& world, const Com
         return;
     }
 
-    // On reinitialise le monde pour cr�er les entites du document
-    world.clear();
+    // On reinitialise le monde pour creer les entites du document
+    world.clear(); // try reset()
 
     std::vector<entt::entity> indexToEntity;
     for (const nlohmann::json& entityDoc : sceneDoc["Entities"])
@@ -58,6 +59,17 @@ void LoadSceneFromPath(const std::string& path, entt::registry& world, const Com
             });
     }
 
+    for (const nlohmann::json& hierarchyDoc : sceneDoc["Hierarchies"])
+    {
+        unsigned int parentId = hierarchyDoc["Parent"];
+        unsigned int childId = hierarchyDoc["Child"];
+        
+
+        //Transform& parentTransform = m_registry.get<Transform>(indexToEntity[parentId]);
+        //TransformComponent& childTransform = world.get<TransformComponent>(indexToEntity[childId]);
+        //childTransform.
+    }
+
     spdlog::info("successfully loaded {}", path);
 }
 
@@ -70,6 +82,13 @@ void SaveSceneToPath(const std::string& path, entt::registry& world, const Compo
         return;
     }
 
+    struct Hierarchy
+    {
+        entt::entity parent;
+        entt::entity child;
+    };
+
+    std::vector<Hierarchy> hierarchies;
     std::unordered_map<entt::entity, unsigned int> entityToIndex;
 
     // On sauvegarde tous les composants de toutes les entites
@@ -86,6 +105,13 @@ void SaveSceneToPath(const std::string& path, entt::registry& world, const Compo
                     entityDoc[entry.id] = entry.jsonSerialize(entityHandle);
             });
 
+        if (TransformComponent* transform = entityHandle.try_get<TransformComponent>())
+        {
+            if (world.valid(transform->parent))
+            {
+                hierarchies.push_back({ transform->parent, entity });
+            }
+        }
 
         entityToIndex[entity] = entityArray.size();
         entityArray.push_back(std::move(entityDoc));

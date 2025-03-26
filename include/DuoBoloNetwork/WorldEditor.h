@@ -44,11 +44,13 @@ private:
 	entt::entity mSelected = entt::null;
 	std::string mScenePath;
 	const ComponentRegistry& mComponentRegistry;
+	Texture mCubeImage;
 
 	static inline const char* gViewportWindowName = "Viewport";
 	static inline const char* gConsoleWindowName = "Console";
 	static inline const char* gHierarchyWindowName = "Hierarchy";
 	static inline const char* gInspectorWindowName = "Inspector";
+	static inline const char* gShapeBrowserWindowName = "Shape browser";
 
 	void CameraMovement(float dt, Camera* camera);
 
@@ -65,6 +67,8 @@ private:
 	void HierarchyWindow();
 
 	void InspectorWindow();
+
+	void ShapeBrowserWindow();
 
 	void LoadScene();
 

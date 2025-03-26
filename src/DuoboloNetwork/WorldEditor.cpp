@@ -37,6 +37,10 @@ mSink(logSink)
     mCamera.projection = CAMERA_PERSPECTIVE;
 
     mDockingSpaceCreated = false;
+
+    Image cubeImg = LoadImage("assets/cube_preview.jpg");
+    mCubeImage = LoadTextureFromImage(cubeImg);
+    UnloadImage(cubeImg);
 }
 
 void WorldEditor::Update(float dt) {
@@ -60,6 +64,8 @@ void WorldEditor::Update(float dt) {
     HierarchyWindow();
 
     InspectorWindow();
+
+    ShapeBrowserWindow();
 
     if (mInCameraMode) {
         CameraMovement(dt, &mCamera);
@@ -165,6 +171,7 @@ void WorldEditor::FullscreenDockingSpace() {
         ImGui::DockBuilderDockWindow(gViewportWindowName, topMiddleID);
         ImGui::DockBuilderDockWindow(gHierarchyWindowName, topLeftID);
         ImGui::DockBuilderDockWindow(gConsoleWindowName, bottomID);
+        ImGui::DockBuilderDockWindow(gShapeBrowserWindowName, bottomID);
 
         ImGui::DockBuilderFinish(dockspaceID);
     }
@@ -202,9 +209,7 @@ void WorldEditor::MainMenuBar() {
             ImGui::EndMenu();
         }
 
-        
-
-        ImGui::EndMenuBar();
+    	ImGui::EndMenuBar();
     }
 }
 
@@ -271,6 +276,24 @@ void WorldEditor::ViewportWindow() {
         mInCameraMode = false;
         ShowCursor();
         EnableCursor();
+    }
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_CUBE"))
+        {
+	        int dragId = 0;
+            std::memcpy(&dragId, payload->Data, payload->DataSize);
+	        if(dragId == 1)
+	        {
+                entt::handle entity(mEnttWorld, mEnttWorld.create());
+                entity.emplace<NameComponent>("Cube");
+                entity.emplace<TransformComponent>();
+                entity.emplace<RenderableComponent>();
+	        }
+        }
+
+        ImGui::EndDragDropTarget();
     }
 
     ImGui::End();
@@ -391,6 +414,24 @@ void WorldEditor::InspectorWindow() {
             ImGui::EndPopup();
         }
     }
+
+    ImGui::End();
+}
+
+void WorldEditor::ShapeBrowserWindow()
+{
+    ImGui::Begin(gShapeBrowserWindowName, nullptr, ImGuiWindowFlags_NoInputIfCamera);
+
+    ImGui::ImageButton("Cube", mCubeImage.id, ImVec2(100.f, 100.f));
+    if(ImGui::BeginDragDropSource())
+    {
+        const char* cubeId = new char(1);
+        ImGui::SetDragDropPayload("ENTITY_CUBE", cubeId, sizeof(char));
+        delete(cubeId);
+
+        ImGui::EndDragDropSource();
+    }
+    ImGui::TextWrapped("Cube");
 
     ImGui::End();
 }

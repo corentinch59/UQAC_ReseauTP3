@@ -28,6 +28,15 @@ elseif is_mode("deb-editor") then
     add_defines("WITH_SCE_EDITOR")
     set_symbols("debug")
     set_optimize("none")
+elseif is_mode("rel-server") then
+    add_defines("IS_SERVER")
+    set_symbols("hidden")
+    set_optimize("fastest")
+    set_strip("all")
+elseif is_mode("deb-server") then
+    add_defines("IS_SERVER")
+    set_symbols("debug")
+    set_optimize("none")
 end
 
 target("DuoBoloShared")

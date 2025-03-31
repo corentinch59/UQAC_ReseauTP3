@@ -11,15 +11,17 @@
 
 #include <entt/entt.hpp>
 
+#ifdef WITH_SCE_EDITOR && IS_SERVER
+#error "Cannot build editor as server"
+#endif
+
 
 #ifdef WITH_SCE_EDITOR
 #include <DuoBoloNetwork/WorldEditor.h>
 #include <rlImGui.h>
 #else
 #include <raymath.h>
-#include <DuoBoloShared/CameraComponent.h>
 #include <DuoBoloShared/TransformComponent.h>
-#include <DuoBoloNetwork/Helpers.h>
 #endif
 
 #define OBJECT_DESTROY_DISTANCE 1000
@@ -64,11 +66,13 @@ int main()
     spdlog::default_logger()->sinks().push_back(logSink);
 #endif
 
+#ifndef IS_SERVER
 	SetTraceLogCallback(CustomLogCallback);
 
 	InitWindow(1280, 720, "DuoBolo TP3");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
 	DisableCursor();
+#endif
 
 	entt::registry world{};
 
@@ -80,8 +84,10 @@ int main()
     rlImGuiSetup(true);
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
-
+	
+#ifndef IS_SERVER
 	Renderer renderer;
+#endif
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
 	WorldSettings wSettings{};
@@ -103,11 +109,30 @@ int main()
 	game->Init();
 	game->LoadScene(game->GetStartupSceneName());
 
+	auto lastFrame = std::chrono::high_resolution_clock::now();
+	
+#ifndef IS_SERVER
 	while (!WindowShouldClose())
+#else
+	while (true)
+#endif
 	{
-		float deltaTime = GetFrameTime();
+		auto now = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> delta = now - lastFrame;
+		float deltaTime = delta.count();
 		float deltaTimeAfterScale = deltaTime * game->GetTimeScale();
 
+#ifdef IS_SERVER
+		static float lastPrint = 0;
+		lastPrint += deltaTime;
+		if (lastPrint > 1)
+		{
+			lastPrint = 0;
+			spdlog::info("Server alive, dt: {}", deltaTime);
+		}
+#endif
+		
+#ifndef IS_SERVER
 		if (IsKeyPressed(KEY_F10))
 		{
 			if (IsCursorHidden())
@@ -125,15 +150,18 @@ int main()
 		// needed for imgui
 		BeginDrawing();
 		ClearBackground(BLACK);
+#endif
 
 #ifndef WITH_SCE_EDITOR
 		game->GlobalUpdate(deltaTimeAfterScale);
 
 		solver.Solve(deltaTimeAfterScale);
-
+		
+#ifndef IS_SERVER
 		renderer.Render(world, game->GetCamera(), wSettings);
 
 		DrawFPS(20, 20);
+#endif
 
 		{
 			auto view = world.view<TransformComponent>();
@@ -151,8 +179,12 @@ int main()
         worldEditor.Update(deltaTimeAfterScale);
         rlImGuiEnd();
 #endif
-
+		
+#ifndef IS_SERVER
 		EndDrawing();
+#endif
+
+		lastFrame = now;
 	}
 
 	world.clear();
@@ -162,7 +194,10 @@ int main()
 #ifdef WITH_SCE_EDITOR
     rlImGuiShutdown();
 #endif
+	
+#ifndef IS_SERVER
 	CloseWindow();
+#endif
 
 	return 0;
 }

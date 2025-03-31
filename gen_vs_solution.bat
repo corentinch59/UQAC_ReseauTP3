@@ -1,1 +1,1 @@
-xmake project -k vsxmake --modes="release,debug,rel-editor,deb-editor"
+xmake project -k vsxmake --modes="release,debug,rel-editor,deb-editor,rel-server,deb-server"

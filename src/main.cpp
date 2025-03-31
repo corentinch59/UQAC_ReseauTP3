@@ -11,8 +11,10 @@
 
 #include <entt/entt.hpp>
 
-#ifdef WITH_SCE_EDITOR && IS_SERVER
+#ifdef WITH_SCE_EDITOR
+#ifdef  IS_SERVER
 #error "Cannot build editor as server"
+#endif
 #endif
 
 

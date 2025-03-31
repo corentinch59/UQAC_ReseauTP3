@@ -15,11 +15,6 @@ struct TransformComponent
     Quaternion rotation = QuaternionIdentity();
     Vector3 scale = { 1, 1, 1 }; // only affects rendering !!
 
-    entt::entity parent;
-    std::vector<entt::entity> children;
-
-    void SetParent(entt::entity entity);
-
     void BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray);
     static void BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray);
 

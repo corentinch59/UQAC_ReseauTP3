@@ -4,6 +4,13 @@ This is the third exercice for the Networking class at UQAC Winter 2025 dispense
 Realised by [Théo Le Goc](https://github.com/tlegoc) and [Corentin Chrisment](https://github.com/corentinch59)   
 Lib used : [raylib](https://www.raylib.com/) (graphics), [Entt](https://github.com/skypjack/entt) (ECS), [Bullet3](https://github.com/bulletphysics/bullet3) (Physic), ImGui, [enet6](https://github.com/SirLynix/enet6) (Network), [spdlog](https://github.com/gabime/spdlog) (logging)
 
+# Build
+xmake command to generate solution :
+- For Visual studio solution
+```bash
+xmake project -k vsxmake --modes="rel-editor,deb-editor,debug,release"
+```
+
 # Editor
 ![Editor](https://github.com/user-attachments/assets/2dbf318f-dc65-4267-b1a0-63de5b2fc50f)
 

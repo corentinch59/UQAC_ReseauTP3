@@ -8,7 +8,7 @@ Lib used : [raylib](https://www.raylib.com/) (graphics), [Entt](https://github.c
 xmake command to generate solution :
 - For Visual studio solution
 ```bash
-xmake project -k vsxmake --modes="rel-editor,deb-editor,debug,release"
+xmake project -k vsxmake --modes="rel-editor,deb-editor,debug,release,rel-server,deb-server"
 ```
 
 # Editor

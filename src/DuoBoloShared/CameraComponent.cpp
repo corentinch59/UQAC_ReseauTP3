@@ -1,5 +1,5 @@
+#include <DuoBoloNetwork/BinarySerialize.h>
 #include <DuoBoloShared/CameraComponent.h>
-#include <DuoBoloShared/BinarySerializer.h>
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
@@ -7,10 +7,10 @@
 
 void CameraComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {
-	BinarySerializer::BinarySerializeType(byteArray, "camera");
-	BinarySerializer::BinarySerializeType<float>(byteArray, fovy);
-	BinarySerializer::BinarySerializeType<int>(byteArray, projection);
-	BinarySerializer::BinarySerializeType<bool>(byteArray, isMainCamera);
+	BinarySerializeType(byteArray, "camera");
+	BinarySerializeType<float>(byteArray, fovy);
+	BinarySerializeType<int>(byteArray, projection);
+	BinarySerializeType<bool>(byteArray, isMainCamera);
 }
 
 void CameraComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)

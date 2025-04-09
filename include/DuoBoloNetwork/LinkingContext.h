@@ -10,7 +10,7 @@ class LinkingContext
 	public:
 		struct Entry
 		{
-			Opcodes id;
+			Opcode id;
 			std::function<void(std::vector<uint8_t>)> linkFunc;
 		};
 

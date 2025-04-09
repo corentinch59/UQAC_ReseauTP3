@@ -1,5 +1,5 @@
+#include <DuoBoloNetwork/BinarySerialize.h>
 #include <DuoBoloShared/PhysicsComponent.h>
-#include <DuoBoloShared/BinarySerializer.h>
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>

@@ -11,8 +11,15 @@
 
 #include <entt/entt.hpp>
 
+#include "DuoBoloNetwork/OnlineClientManager.h"
+#include "DuoBoloNetwork/OnlineServerManager.h"
+
+#ifdef IS_SERVER
+#include <DuoBoloNetwork/OnlineServerManager.h>
+#endif
+
 #ifdef WITH_SCE_EDITOR
-#ifdef  IS_SERVER
+#ifdef IS_SERVER
 #error "Cannot build editor as server"
 #endif
 #endif
@@ -27,6 +34,7 @@
 #endif
 
 #define OBJECT_DESTROY_DISTANCE 1000
+constexpr float networkRate = 1.f / 64.f;
 
 void CustomLogCallback(int logLevel, const char* text, va_list args)
 {
@@ -86,9 +94,20 @@ int main()
     rlImGuiSetup(true);
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
-	
+
+#ifdef IS_SERVER
+	OnlineServerManager server(13333, 4);
+	double accumulator = 0.0;
+#endif
+
 #ifndef IS_SERVER
 	Renderer renderer;
+	OnlineClientManager client;
+	if(client.SendConnectionRequest(13333, "localhost"))
+	{
+		spdlog::info("connection successfully established");
+	}
+
 #endif
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
@@ -102,6 +121,7 @@ int main()
 		LoadSceneFromPath(path, world, componentRegistry);
 	});
 
+
 #ifdef WITH_SCE_EDITOR
     WorldEditor worldEditor(world, renderer, wSettings, componentRegistry, logSink);
 
@@ -109,7 +129,9 @@ int main()
 #endif
 
 	game->Init();
+#ifdef IS_SERVER
 	game->LoadScene(game->GetStartupSceneName());
+#endif
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();
 	
@@ -125,16 +147,21 @@ int main()
 		float deltaTimeAfterScale = deltaTime * game->GetTimeScale();
 
 #ifdef IS_SERVER
-		static float lastPrint = 0;
-		lastPrint += deltaTime;
-		if (lastPrint > 1)
+		//Server ticking
+		accumulator += deltaTime;
+
+		while (accumulator >= networkRate)
 		{
-			lastPrint = 0;
-			spdlog::info("Server alive, dt: {}", deltaTime);
+			// Do networking stuff
+			accumulator -= networkRate;
 		}
+		server.PollEvents();
+		
 #endif
 		
 #ifndef IS_SERVER
+		client.PollEvents();
+
 		if (IsKeyPressed(KEY_F10))
 		{
 			if (IsCursorHidden())

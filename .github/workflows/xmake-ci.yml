@@ -12,11 +12,11 @@ on:
 
 jobs:
   build:
-    name: "[${{ matrix.mode }}] Build on ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
+    name: "[${{ matrix.mode }}] Build on ${{ matrix.os }}-latest"
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows, macos, ubuntu]
         mode: [release, rel-editor, rel-server]
 
     steps:
@@ -31,9 +31,18 @@ jobs:
 
       - name: Build with XMake
         run: xmake
+
+      - name: Debug display files
+        if: ${{matrix.os}} != windows
+        run: ls build/${{matrix.os}}/x64/${{matrix.mode}}
+
+      - name: Debug display files
+        if: ${{matrix.os}} == windows
+        run: dir build/${{matrix.os}}/x64/${{matrix.mode}}
+
       - name: Create ZIP excluding .lib files
         run: |
-            cd build/PLATFORM/ARCH/TARGET
+            cd build/${{matrix.os}}/x64/${{matrix.mode}}
             zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib'
 
       - name: Upload ZIP to GitHub Release

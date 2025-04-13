@@ -37,7 +37,7 @@ jobs:
 
       - name: ADZDOIAJZD
         if: ${{matrix.os}}!=windows
-        run: ls --recursive build/ 
+        run: ls -R build/ 
 
 #      - name: Create ZIP MacOS
 #        if: ${{matrix.os}}==macos

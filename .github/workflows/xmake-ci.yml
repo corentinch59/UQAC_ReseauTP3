@@ -23,6 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install opengl for ubuntu build
+        uses: openrndr/setup-opengl@v1.1
+
       - name: Install XMake
         uses: xmake-io/github-action-setup-xmake@v1
         with:
@@ -39,35 +42,35 @@ jobs:
         if: ${{matrix.os}}!=windows
         run: ls -R build/ 
 
-#      - name: Create ZIP MacOS
-#        if: ${{matrix.os}}==macos
-#        uses: thedoctor0/zip-release@0.7.5
-#        with:
-#          type: 'zip'
-#          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-#          directory: build/macosx/x64/${{matrix.mode}}
-#          exclusions: '*.lib *.so'
-#
-#      - name: Create ZIP Linux
-#        if: ${{matrix.os}}==ubuntu
-#        uses: thedoctor0/zip-release@0.7.5
-#        with:
-#          type: 'zip'
-#          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-#          directory: build/linux/x64/${{matrix.mode}}
-#          exclusions: '*.lib *.so'
-#
-#      - name: Create ZIP Windows
-#        if: ${{matrix.os}}==windows
-#        uses: thedoctor0/zip-release@0.7.5
-#        with:
-#          type: 'zip'
-#          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-#          directory: build/windows/x64/${{matrix.mode}}
-#          exclusions: '*.lib *.so'
-#
-#      - name: Upload Release
-#        uses: ncipollo/release-action@v1.12.0
-#        with:
-#          artifacts: ${{matrix.mode}}-${{matrix.os}}.zip
-#          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create ZIP MacOS
+        if: ${{matrix.os}}==macos
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+          directory: build/macosx/arm64/${{matrix.mode}}
+          exclusions: '*.lib *.so *.a *.dll'
+
+      - name: Create ZIP Linux
+        if: ${{matrix.os}}==ubuntu
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+          directory: build/linux/x64/${{matrix.mode}}
+          exclusions: '*.lib *.so *.a *.dll'
+
+      - name: Create ZIP Windows
+        if: ${{matrix.os}}==windows
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+          directory: build/windows/x64/${{matrix.mode}}
+          exclusions: '*.lib *.so *.a *.dll'
+
+      - name: Upload Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: ${{matrix.mode}}-${{matrix.os}}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}

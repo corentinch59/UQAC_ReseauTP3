@@ -1,12 +1,14 @@
 name: XMake CI
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+   release:
+      types: [published]
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
 
 jobs:
   build:
@@ -14,8 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
-        mode: [debug, release, rel-editor, deb-editor]
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        mode: [release, rel-editor, rel-server]
 
     steps:
       - name: Checkout repository
@@ -29,3 +31,14 @@ jobs:
 
       - name: Build with XMake
         run: xmake
+      - name: Create ZIP excluding .lib files
+        run: |
+            cd build/PLATFORM/ARCH/TARGET
+            zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib'
+
+      - name: Upload ZIP to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{matrix.mode}}-${{matrix.os}}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

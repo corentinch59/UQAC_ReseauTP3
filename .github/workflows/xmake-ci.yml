@@ -1,8 +1,8 @@
 name: XMake CI
 
 on:
-   release:
-      types: [published]
+    release:
+        types: [published]
 #  push:
 #    branches:
 #      - main
@@ -11,67 +11,67 @@ on:
 #      - main
 
 jobs:
-  build:
-    name: "[${{ matrix.mode }}] Build on ${{ matrix.os }}-latest"
-    runs-on: ${{ matrix.os }}-latest
-    strategy:
-      matrix:
-        os: [windows, macos, ubuntu]
-        mode: [release, rel-editor, rel-server]
+    build:
+        name: "[${{ matrix.mode }}] Build on ${{ matrix.os }}-latest"
+        runs-on: ${{ matrix.os }}-latest
+        strategy:
+            matrix:
+                os: [windows, macos, ubuntu]
+                mode: [release, rel-editor, rel-server]
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Setup OpenGL for ubuntu
-        if: ${{matrix.os}}==ubuntu
-        run: sudo apt-get install freeglut3-dev
+            - name: Setup OpenGL for ubuntu
+              if: matrix.os == ubuntu
+              run: sudo apt-get install mesa-utils
 
-      - name: Install XMake
-        uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          package-cache: true
-          package-cache-key: ${{matrix.os}}
+            - name: Install XMake
+              uses: xmake-io/github-action-setup-xmake@v1
+              with:
+                  package-cache: true
+                  package-cache-key: ${{matrix.os}}
 
-      - name: Configure XMake
-        run: xmake f -y -m ${{ matrix.mode }}
+            - name: Configure XMake
+              run: xmake f -y -m ${{ matrix.mode }}
 
-      - name: Build with XMake
-        run: xmake
+            - name: Build with XMake
+              run: xmake
 
-      - name: ADZDOIAJZD
-        if: ${{matrix.os}}!=windows
-        run: ls -R build/ 
+            - name: ADZDOIAJZD
+              if: matrix.os != windows
+              run: ls -R build/
 
-      - name: Create ZIP MacOS
-        if: ${{matrix.os}}==macos
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-          directory: build/macosx/arm64/${{matrix.mode}}
-          exclusions: '*.lib *.so *.a *.dll'
+            - name: Create ZIP MacOS
+              if: matrix.os == macos
+              uses: thedoctor0/zip-release@0.7.5
+              with:
+                  type: 'zip'
+                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  directory: build/macosx/arm64/${{matrix.mode}}
+                  exclusions: '*.lib *.so *.a *.dll'
 
-      - name: Create ZIP Linux
-        if: ${{matrix.os}}==ubuntu
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-          directory: build/linux/x64/${{matrix.mode}}
-          exclusions: '*.lib *.so *.a *.dll'
+            - name: Create ZIP Linux
+              if: matrix.os == ubuntu
+              uses: thedoctor0/zip-release@0.7.5
+              with:
+                  type: 'zip'
+                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  directory: build/linux/x64/${{matrix.mode}}
+                  exclusions: '*.lib *.so *.a *.dll'
 
-      - name: Create ZIP Windows
-        if: ${{matrix.os}}==windows
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-          directory: build/windows/x64/${{matrix.mode}}
-          exclusions: '*.lib *.so *.a *.dll'
+            - name: Create ZIP Windows
+              if: matrix.os == windows
+              uses: thedoctor0/zip-release@0.7.5
+              with:
+                  type: 'zip'
+                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  directory: build/windows/x64/${{matrix.mode}}
+                  exclusions: '*.lib *.so *.a *.dll'
 
-      - name: Upload Release
-        uses: ncipollo/release-action@v1.12.0
-        with:
-          artifacts: ${{matrix.mode}}-${{matrix.os}}.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Upload Release
+              uses: ncipollo/release-action@v1.12.0
+              with:
+                  artifacts: ${{matrix.mode}}-${{matrix.os}}.zip
+                  token: ${{ secrets.GITHUB_TOKEN }}

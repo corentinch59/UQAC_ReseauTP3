@@ -25,6 +25,8 @@ jobs:
 
       - name: Install XMake
         uses: xmake-io/github-action-setup-xmake@v1
+        package-cache: true
+        package-cache-key: ${{matrix.os}}
 
       - name: Configure XMake
         run: xmake f -y -m ${{ matrix.mode }}
@@ -32,18 +34,23 @@ jobs:
       - name: Build with XMake
         run: xmake
 
-      - name: Debug display files
-        if: ${{matrix.os}} != windows
-        run: ls build/${{matrix.os}}/x64/${{matrix.mode}}
-
-      - name: Debug display files
-        if: ${{matrix.os}} == windows
-        run: dir build/${{matrix.os}}/x64/${{matrix.mode}}
-
-      - name: Create ZIP excluding .lib files
+      - name: Create ZIP MacOS
+        if: ${{matrix.os}}==macos
         run: |
-            cd build/${{matrix.os}}/x64/${{matrix.mode}}
-            zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib'
+            cd build/macosx/x64/${{matrix.mode}}
+            zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib,*.so'
+
+      - name: Create ZIP Ubuntu
+        if: ${{matrix.os}}==ubuntu
+        run: |
+            cd build/linux/x64/${{matrix.mode}}
+            zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib,*.so'
+
+      - name: Create ZIP Windows
+        if: ${{matrix.os}}==windows
+        run: |
+            cd build/windows/x64/${{matrix.mode}}
+            zip -r ../../../../../${{matrix.mode}}-${{matrix.os}}.zip . -x '*.lib,*.so'
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v1

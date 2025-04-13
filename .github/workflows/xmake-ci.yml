@@ -49,7 +49,7 @@ jobs:
               with:
                   type: 'zip'
                   filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  directory: build/macosx/arm64/${{matrix.mode}}
+                  path: build/macosx/arm64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Create ZIP Linux
@@ -58,7 +58,7 @@ jobs:
               with:
                   type: 'zip'
                   filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  directory: build/linux/x64/${{matrix.mode}}
+                  path: build/linux/x64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Create ZIP Windows
@@ -67,7 +67,7 @@ jobs:
               with:
                   type: 'zip'
                   filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  directory: build/windows/x64/${{matrix.mode}}
+                  path: build/windows/x64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Upload Release

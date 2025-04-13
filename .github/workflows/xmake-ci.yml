@@ -54,7 +54,7 @@ jobs:
           exclusions: '*.lib *.so'
 
       - name: Create ZIP Windows
-        if: ${{matrix.os}}==macos
+        if: ${{matrix.os}}==windows
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'

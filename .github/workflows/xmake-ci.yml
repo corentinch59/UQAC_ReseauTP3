@@ -23,8 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install opengl for ubuntu build
-        uses: openrndr/setup-opengl@v1.1
+      - name: Setup OpenGL for ubuntu
+        if: ${{matrix.os}}==ubuntu
+        run: sudo apt-get install freeglut3-dev
 
       - name: Install XMake
         uses: xmake-io/github-action-setup-xmake@v1

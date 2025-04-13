@@ -25,7 +25,7 @@ jobs:
 
             - name: Setup OpenGL for ubuntu
               if: matrix.os == 'ubuntu'
-              run: sudo apt-get install mesa-utils
+              run: sudo apt-get -y update && sudo apt-get install --fix-missing -y libgl1-mesa-dev mesa-utils
 
             - name: Install XMake
               uses: xmake-io/github-action-setup-xmake@v1

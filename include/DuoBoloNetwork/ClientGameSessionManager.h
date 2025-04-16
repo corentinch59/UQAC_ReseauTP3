@@ -2,8 +2,8 @@
 
 #include <DuoBoloNetwork/INetworkEventListener.h>
 #include <DuoBoloShared/ComponentRegistry.h>
-#include <DuoboloNetWork/LinkingContext.h>
-#include <DuoBoloNetWork/PacketBuilder.h>
+#include <DuoBoloNetwork/LinkingContext.h>
+#include <DuoBoloNetwork/PacketBuilder.h>
 
 
 class ClientGameSessionManager : public INetworkEventListener

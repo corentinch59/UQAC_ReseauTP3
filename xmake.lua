@@ -17,7 +17,9 @@ set_encodings("utf-8")
 add_includedirs("include")
 add_installfiles("(assets/**)", {prefixdir = "bin"})
 
-add_cxflags("/wd4251")
+if is_plat("windows") then
+    add_cxflags("/wd4251")
+end
 
 if is_mode("rel-editor") then
     add_defines("WITH_SCE_EDITOR")

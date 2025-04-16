@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DuoboloNetwork/INetworkEventListener.h>
+#include <DuoBoloNetwork/INetworkEventListener.h>
 
 #include <enet6/enet.h>
 

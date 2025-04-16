@@ -1,8 +1,8 @@
 #pragma once
 
-#include <DuoboloNetwork/INetworkEventListener.h>
+#include <DuoBoloNetwork/INetworkEventListener.h>
 #include <DuoBoloShared/ComponentRegistry.h>
-#include <DuoboloNetwork/PacketBuilder.h>
+#include <DuoBoloNetwork/PacketBuilder.h>
 
 class ServerGameSessionManager : public INetworkEventListener
 {

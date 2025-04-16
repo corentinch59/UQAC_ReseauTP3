@@ -1,4 +1,4 @@
-name: XMake CI
+name: XMake CI Linux
 
 on:
     release:
@@ -16,7 +16,7 @@ jobs:
         runs-on: ${{ matrix.os }}-latest
         strategy:
             matrix:
-                os: [windows, macos, ubuntu]
+                os: [ubuntu]
                 mode: [release, rel-editor, rel-server]
 
         steps:
@@ -39,19 +39,6 @@ jobs:
             - name: Build with XMake
               run: xmake
 
-            - name: ADZDOIAJZD
-              if: matrix.os != 'windows'
-              run: ls -R build/
-
-            - name: Create ZIP MacOS
-              if: matrix.os == 'macos'
-              uses: thedoctor0/zip-release@0.7.5
-              with:
-                  type: 'zip'
-                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/macosx/arm64/${{matrix.mode}}
-                  exclusions: '*.lib *.so *.a *.dll'
-
             - name: Create ZIP Linux
               if: matrix.os == 'ubuntu'
               uses: thedoctor0/zip-release@0.7.5
@@ -59,15 +46,6 @@ jobs:
                   type: 'zip'
                   filename: '${{matrix.mode}}-${{matrix.os}}.zip'
                   path: build/linux/x64/${{matrix.mode}}
-                  exclusions: '*.lib *.so *.a *.dll'
-
-            - name: Create ZIP Windows
-              if: matrix.os == 'windows'
-              uses: thedoctor0/zip-release@0.7.5
-              with:
-                  type: 'zip'
-                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/windows/x64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Upload Release

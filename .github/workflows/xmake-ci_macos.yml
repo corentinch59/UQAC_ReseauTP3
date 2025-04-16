@@ -1,0 +1,50 @@
+name: XMake CI
+
+on:
+    release:
+        types: [published]
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
+
+jobs:
+    build:
+        name: "[${{ matrix.mode }}] Build on ${{ matrix.os }}-latest"
+        runs-on: ${{ matrix.os }}-latest
+        strategy:
+            matrix:
+                os: [macos]
+                mode: [release, rel-editor, rel-server]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install XMake
+              uses: xmake-io/github-action-setup-xmake@v1
+              with:
+                  package-cache: true
+                  package-cache-key: ${{matrix.os}}
+
+            - name: Configure XMake
+              run: xmake f -y -m ${{ matrix.mode }}
+
+            - name: Build with XMake
+              run: xmake
+
+            - name: Create ZIP MacOS
+              if: matrix.os == 'macos'
+              uses: thedoctor0/zip-release@0.7.5
+              with:
+                  type: 'zip'
+                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  path: build/macosx/arm64/${{matrix.mode}}
+                  exclusions: '*.lib *.so *.a *.dll'
+
+            - name: Upload Release
+              run: gh release upload ${{github.event.release.tag_name}} ${{matrix.mode}}-${{matrix.os}}.zip
+              env:
+                  GITHUB_TOKEN: ${{ github.TOKEN }}

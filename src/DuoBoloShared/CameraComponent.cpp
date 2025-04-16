@@ -13,7 +13,7 @@ void CameraComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>&
 	BinarySerializeType<bool>(byteArray, isMainCamera);
 }
 
-void CameraComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
+void CameraComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 {
 
 }

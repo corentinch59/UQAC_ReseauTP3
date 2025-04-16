@@ -18,11 +18,9 @@ void RenderableComponent::BinarySerialize(entt::handle handle, std::vector<uint8
 	BinarySerializeType<uint8_t>(byteArray, tint.b);
 }
 
-void RenderableComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
+void RenderableComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 {
 	auto& node = handle.emplace<RenderableComponent>();
-
-	std::size_t offset = 0;
 
 	node.model = BinaryDeserialize(byteArray, offset);
 

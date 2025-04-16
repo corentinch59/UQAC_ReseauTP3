@@ -21,19 +21,18 @@ void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_
 	BinarySerializeType<uint8_t>(byteArray, rotation.w * 100.f);
 }
 
-void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
+void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 {
 	auto& node = handle.emplace<TransformComponent>();
-	std::size_t offset = 0;
 	// Position
 	node.position.x = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
 	node.position.y = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
 	node.position.z = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
 	//Rotation
-	node.rotation.x = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
-	node.rotation.y = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
-	node.rotation.z = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
-	node.rotation.w = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
+	node.rotation.x = static_cast<float>(BinaryDeserialize<int8_t>(byteArray, offset)) / 100.f;
+	node.rotation.y = static_cast<float>(BinaryDeserialize<int8_t>(byteArray, offset)) / 100.f;
+	node.rotation.z = static_cast<float>(BinaryDeserialize<int8_t>(byteArray, offset)) / 100.f;
+	node.rotation.w = static_cast<float>(BinaryDeserialize<int8_t>(byteArray, offset)) / 100.f;
 }
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const

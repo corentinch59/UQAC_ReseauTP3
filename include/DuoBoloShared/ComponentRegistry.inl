@@ -55,12 +55,12 @@ std::function<void(entt::handle, std::vector<uint8_t>&)> ComponentRegistry::Buil
 }
 
 template <typename T>
-std::function<void(entt::handle, const std::vector<uint8_t>&)> ComponentRegistry::BuildBinaryUnserialize()
+std::function<void(entt::handle, const std::vector<uint8_t>&, std::size_t&)> ComponentRegistry::BuildBinaryUnserialize()
 {
-	return [](entt::handle entity, const std::vector<uint8_t>& byteArray)
+	return [](entt::handle entity, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 		{
 			if constexpr (!std::is_empty_v<T>)
-				return T::BinaryUnserialize(entity, byteArray);
+				return T::BinaryUnserialize(entity, byteArray, offset);
 			else
 				entity.emplace<T>();
 		};

@@ -25,9 +25,11 @@ void ComponentRegistry::Register(Entry&& data)
 	mComponentTypes.push_back(std::move(data));
 }
 
-ComponentRegistry::Entry& ComponentRegistry::FindEntry(ComponentType type)
+bool ComponentRegistry::FindEntry(const ComponentType type, std::vector<Entry>::iterator& it)
 {
-	return *std::find_if(mComponentTypes.begin(), mComponentTypes.end(), [&](const Entry& x) -> bool { return type == x.type; });
+	it = std::ranges::find_if(mComponentTypes, [&](const Entry& x) -> bool { return type == x.type; });
+
+	return it != mComponentTypes.end();
 }
 
 void ComponentRegistry::RegisterEngineComponent()

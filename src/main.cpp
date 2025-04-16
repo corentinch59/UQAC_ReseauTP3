@@ -123,10 +123,11 @@ int main()
 	ClientGameSessionManager session(world, componentRegistry);
 	OnlineClientManager client;
 	client.SetListener(&session);
-	if (client.SendConnectionRequest(13333, s))
+	if (!client.SendConnectionRequest(13333, s))
 	{
-		spdlog::info("connection successfully established");
+		return 1;
 	}
+
 #endif
 
 #ifdef IS_SERVER

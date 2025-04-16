@@ -40,9 +40,21 @@ bool OnlineClientManager::SendConnectionRequest(unsigned short port, const std::
 	}
 
 	mClient = enet_host_connect(mHost, &address, 2, 0);
-	if (!mClient)
+	if (mClient == nullptr)
 	{
 		spdlog::error("Failed to connect to server : {}", ipAddress);
+		return false;
+	}
+
+	ENetEvent event;
+	if (enet_host_service(mHost, &event, 1000.f) > 0 &&
+		event.type == ENET_EVENT_TYPE_CONNECT)
+	{
+		spdlog::info("Client successfully connected to {}", ipAddress);
+	}
+	else
+	{
+		spdlog::error("connection failed");
 		return false;
 	}
 

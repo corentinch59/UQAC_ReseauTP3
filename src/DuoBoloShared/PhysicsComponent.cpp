@@ -8,7 +8,7 @@ void RigidbodyComponent::BinarySerialize(entt::handle handle, std::vector<uint8_
 {
 }
 
-void RigidbodyComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
+void RigidbodyComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 {
 }
 

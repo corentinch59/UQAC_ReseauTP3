@@ -11,7 +11,7 @@ void NameComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& b
 {
 }
 
-void NameComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
+void NameComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
 {
 }
 

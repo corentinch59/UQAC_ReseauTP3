@@ -13,6 +13,7 @@ mComponents(components)
 
 void ClientGameSessionManager::OnConnected(ENetPeer* peer)
 {
+
 }
 
 void ClientGameSessionManager::OnDisconnected(ENetPeer* peer)
@@ -41,7 +42,11 @@ void ClientGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vecto
 					for(int j = 0; j < nbComp; ++j)
 					{
 						ComponentType comp = static_cast<ComponentType>(BinaryDeserialize<uint8_t>(data, offset));
-
+						std::vector<ComponentRegistry::Entry>::iterator it;
+						if(mComponents.FindEntry(comp, it))
+						{
+							it->binaryUnserialize(entityHandle, data, offset);
+						}
 					}
 				}
 				break;

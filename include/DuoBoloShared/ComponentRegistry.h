@@ -31,7 +31,7 @@ class ComponentRegistry
 			std::function<bool(entt::handle)> hasComponent;
 			std::function<void(entt::handle)> removeComponent;
 			std::function<void(entt::handle, std::vector<uint8_t>&)> binarySerialize;
-			std::function<void(entt::handle, const std::vector<uint8_t>&)> binaryUnserialize;
+			std::function<void(entt::handle, const std::vector<uint8_t>&, std::size_t&)> binaryUnserialize;
 			std::function<nlohmann::json(entt::handle)> jsonSerialize;
 			std::function<void(entt::handle, const nlohmann::json&)> jsonUnserialize;
 #ifdef WITH_SCE_EDITOR
@@ -51,7 +51,8 @@ class ComponentRegistry
 		ComponentRegistry& operator=(const ComponentRegistry&) = delete;
 		ComponentRegistry& operator=(ComponentRegistry&&) = delete;
 
-		Entry& FindEntry(ComponentType type);
+		// Returns True if iterator is valid
+		bool FindEntry(ComponentType type, std::vector<Entry>::iterator& it);
 
 		template<typename T> static std::function<void(entt::handle)> BuildAddComponent();
 		template<typename T> static std::function<bool(entt::handle)> BuildHasComponent();
@@ -60,7 +61,7 @@ class ComponentRegistry
 		template<typename T> static std::function<void(WorldEditor&, entt::handle)> BuildInspect();
 #endif
 		template<typename T> static std::function<void(entt::handle, std::vector<uint8_t>&)>  BuildBinarySerialize();
-		template<typename T> static std::function<void(entt::handle, const std::vector<uint8_t>&)> BuildBinaryUnserialize();
+		template<typename T> static std::function<void(entt::handle, const std::vector<uint8_t>&, std::size_t&)> BuildBinaryUnserialize();
 		template<typename T> static std::function<nlohmann::json(entt::handle)> BuildJsonSerialize();
 		template<typename T> static std::function<void(entt::handle, const nlohmann::json&)> BuildJsonUnserialize();
 

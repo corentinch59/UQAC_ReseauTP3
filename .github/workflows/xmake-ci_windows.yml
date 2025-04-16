@@ -1,4 +1,4 @@
-name: XMake CI
+name: XMake CI Windows
 
 on:
     release:
@@ -35,13 +35,12 @@ jobs:
             - name: Build with XMake
               run: xmake
 
-            - name: Create ZIP Linux
-              if: matrix.os == 'ubuntu'
+            - name: Create ZIP Windows
               uses: thedoctor0/zip-release@0.7.5
               with:
                   type: 'zip'
                   filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/linux/x64/${{matrix.mode}}
+                  path: build/windows/x64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Upload Release

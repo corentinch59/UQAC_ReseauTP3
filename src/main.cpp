@@ -34,6 +34,8 @@
 #include <DuoBoloShared/TransformComponent.h>
 #endif
 
+#include <iostream>
+
 #define OBJECT_DESTROY_DISTANCE 1000
 constexpr float networkRate = 1.f / 64.f;
 
@@ -70,6 +72,13 @@ void CustomLogCallback(int logLevel, const char* text, va_list args)
 int main()
 {
 	spdlog::set_level(spdlog::level::debug);
+
+#ifndef IS_SERVER
+	std::cout << "Server IP : " << '\n';
+
+	std::string s;
+	std::getline(std::cin, s);
+#endif
 
 #ifdef WITH_SCE_EDITOR
     // So we can see in the editor the previous logs
@@ -114,7 +123,7 @@ int main()
 	ClientGameSessionManager session(world, componentRegistry);
 	OnlineClientManager client;
 	client.SetListener(&session);
-	if (client.SendConnectionRequest(13333, "localhost"))
+	if (client.SendConnectionRequest(13333, s))
 	{
 		spdlog::info("connection successfully established");
 	}

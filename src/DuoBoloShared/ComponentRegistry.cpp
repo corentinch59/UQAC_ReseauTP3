@@ -25,11 +25,17 @@ void ComponentRegistry::Register(Entry&& data)
 	mComponentTypes.push_back(std::move(data));
 }
 
+ComponentRegistry::Entry& ComponentRegistry::FindEntry(ComponentType type)
+{
+	return *std::find_if(mComponentTypes.begin(), mComponentTypes.end(), [&](const Entry& x) -> bool { return type == x.type; });
+}
+
 void ComponentRegistry::RegisterEngineComponent()
 {
 	Register({
 		.id = "transform",
 		.label = "Transform",
+		.type = ComponentType::Transform,
 		.addComponent = BuildAddComponent<TransformComponent>(),
 		.hasComponent = BuildHasComponent<TransformComponent>(),
 		.removeComponent = BuildRemoveComponent<TransformComponent>(),
@@ -45,6 +51,7 @@ void ComponentRegistry::RegisterEngineComponent()
 	Register({
 		.id = "renderable",
 		.label = "Renderable",
+		.type = ComponentType::Renderable,
 		.addComponent = BuildAddComponent<RenderableComponent>(),
 		.hasComponent = BuildHasComponent<RenderableComponent>(),
 		.removeComponent = BuildRemoveComponent<RenderableComponent>(),
@@ -60,6 +67,7 @@ void ComponentRegistry::RegisterEngineComponent()
 	Register({
 		.id = "rigidBody",
 		.label = "RigidBody",
+		.type = ComponentType::RigidBody,
 		.addComponent = BuildAddComponent<RigidbodyComponent>(),
 		.hasComponent = BuildHasComponent<RigidbodyComponent>(),
 		.removeComponent = BuildRemoveComponent<RigidbodyComponent>(),
@@ -75,6 +83,7 @@ void ComponentRegistry::RegisterEngineComponent()
 	Register({
 		.id = "camera",
 		.label = "Camera",
+		.type = ComponentType::Camera,
 		.addComponent = BuildAddComponent<CameraComponent>(),
 		.hasComponent = BuildHasComponent<CameraComponent>(),
 		.removeComponent = BuildRemoveComponent<CameraComponent>(),
@@ -87,6 +96,7 @@ void ComponentRegistry::RegisterEngineComponent()
 	Register({
 		.id = "name",
 		.label = "Name",
+		.type = ComponentType::Name,
 		.addComponent = [](entt::handle entity)
 			{
 				entity.emplace<NameComponent>("Unnamed");

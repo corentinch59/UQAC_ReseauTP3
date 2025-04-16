@@ -1,9 +1,9 @@
 #include <DuoBoloNetwork/ClientGameSessionManager.h>
 #include <DuoBoloNetwork/BinarySerialize.h>
+#include <DuoBoloNetwork/Opcodes.h>
 
 #include <spdlog/spdlog.h>
 
-#include "DuoBoloNetwork/Opcodes.h"
 
 ClientGameSessionManager::ClientGameSessionManager(entt::registry& registry, ComponentRegistry& components) :
 mWorld(registry),

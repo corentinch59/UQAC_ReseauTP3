@@ -26,6 +26,7 @@ class ComponentRegistry
 		{
 			std::string id;
 			std::string label;
+			ComponentType type;
 			std::function<void(entt::handle)> addComponent;
 			std::function<bool(entt::handle)> hasComponent;
 			std::function<void(entt::handle)> removeComponent;
@@ -49,6 +50,8 @@ class ComponentRegistry
 
 		ComponentRegistry& operator=(const ComponentRegistry&) = delete;
 		ComponentRegistry& operator=(ComponentRegistry&&) = delete;
+
+		Entry& FindEntry(ComponentType type);
 
 		template<typename T> static std::function<void(entt::handle)> BuildAddComponent();
 		template<typename T> static std::function<bool(entt::handle)> BuildHasComponent();

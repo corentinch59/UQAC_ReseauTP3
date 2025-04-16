@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 #include <enet6/enet.h>
 
 template<typename T> void BinarySerializeType(std::vector<uint8_t>& byteArray, T data);

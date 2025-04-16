@@ -1,15 +1,31 @@
 #include <DuoBoloNetwork/LinkingContext.h>
+#include <DuoBoloNetwork/BinarySerialize.h>
+#include <DuoBoloNetwork/Opcodes.h>
 
-LinkingContext::LinkingContext()
+void LinkingContext::ProcessPacket(const std::vector<uint8_t>& byteArray)
 {
-	RegisterLinks(); 
-}
+	std::size_t offset = 0;
+	Opcode code = static_cast<Opcode>(BinaryDeserialize<uint8_t>(byteArray, offset));
 
-void LinkingContext::Register(Entry&& data)
-{
-	mEntries.push_back(std::move(data));
-}
+	switch(code)
+	{
+	case Opcode::WorldInit:
+		{
 
-void LinkingContext::RegisterLinks()
-{
+			const int entities = BinaryDeserialize<std::uint16_t>(byteArray, offset);
+			for(std::size_t i = 0; i < entities; ++i )
+			{
+				
+			}
+			break;
+		}
+	case Opcode::GameData:
+		{
+			break;
+		}
+	case Opcode::Entity:
+		{
+			break;
+		}
+	}
 }

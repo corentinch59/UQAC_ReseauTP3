@@ -1,4 +1,5 @@
 #include <DuoBoloNetwork/BinarySerialize.h>
+#include <DuoBoloNetwork/Opcodes.h>
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/JsonSerializer.h>
 
@@ -8,21 +9,31 @@ void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_
 {
 	// ID -|> Position -|> Rotation
 	// ID
-	BinarySerializeType(byteArray, "transform");
+	BinarySerializeType<uint8_t>(byteArray, static_cast<uint8_t>(ComponentTypeID::Transform));
 	// Position
-	BinarySerializeType<float>(byteArray, position.x);
-	BinarySerializeType<float>(byteArray, position.y);
-	BinarySerializeType<float>(byteArray, position.z);
+	BinarySerializeType<int32_t>(byteArray, position.x);
+	BinarySerializeType<int32_t>(byteArray, position.y);
+	BinarySerializeType<int32_t>(byteArray, position.z);
 	// Rotation
-	BinarySerializeType<float>(byteArray, rotation.x);
-	BinarySerializeType<float>(byteArray, rotation.y);
-	BinarySerializeType<float>(byteArray, rotation.z);
-	BinarySerializeType<float>(byteArray, rotation.w);
+	BinarySerializeType<uint8_t>(byteArray, rotation.x * 100.f);
+	BinarySerializeType<uint8_t>(byteArray, rotation.y * 100.f);
+	BinarySerializeType<uint8_t>(byteArray, rotation.z * 100.f);
+	BinarySerializeType<uint8_t>(byteArray, rotation.w * 100.f);
 }
 
 void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray)
 {
-
+	auto& node = handle.emplace<TransformComponent>();
+	std::size_t offset = 0;
+	// Position
+	node.position.x = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
+	node.position.y = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
+	node.position.z = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset));
+	//Rotation
+	node.rotation.x = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
+	node.rotation.y = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
+	node.rotation.z = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
+	node.rotation.w = static_cast<float>(BinaryDeserialize<int32_t>(byteArray, offset)) / 100.f;
 }
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const

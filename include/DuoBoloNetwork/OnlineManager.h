@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DuoboloNetwork/INetworkEventListener.h>
+
 #include <enet6/enet.h>
 
 class OnlineManager
@@ -14,7 +16,11 @@ class OnlineManager
 		OnlineManager& operator=(const OnlineManager&) = delete;
 		OnlineManager& operator=(OnlineManager&&) = delete;
 
+		void SetListener(INetworkEventListener* listener) { mListener = listener; }
+		void PollEvents();
+
 	protected:
 		ENetHost* mHost;
+		INetworkEventListener* mListener;
 };
 

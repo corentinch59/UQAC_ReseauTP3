@@ -3,7 +3,7 @@
 #include <string>
 #include <DuoBoloNetwork/OnlineManager.h>
 
-class OnlineClientManager final : OnlineManager
+class OnlineClientManager final : public OnlineManager
 {
 	public:
 		explicit OnlineClientManager();
@@ -18,8 +18,7 @@ class OnlineClientManager final : OnlineManager
 		bool SendConnectionRequest(unsigned short port, const std::string& ipAddress);
 
 		void Disconnect();
-		void PollEvents();
-	
+
 	private:
 		ENetPeer* mClient;
 };

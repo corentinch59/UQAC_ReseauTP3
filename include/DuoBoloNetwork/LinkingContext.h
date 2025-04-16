@@ -1,20 +1,13 @@
 #pragma once
 
-#include <DuoBoloNetwork/Opcodes.h>
+#include <DuoBoloShared/ComponentRegistry.h>
 
 #include <vector>
-#include <functional>
 
 class LinkingContext
 {
 	public:
-		struct Entry
-		{
-			Opcode id;
-			std::function<void(std::vector<uint8_t>)> linkFunc;
-		};
-
-		LinkingContext();
+		LinkingContext() = default;
 		~LinkingContext() = default;
 
 		LinkingContext(const LinkingContext&) = delete;
@@ -23,10 +16,8 @@ class LinkingContext
 		LinkingContext& operator=(const LinkingContext&) = delete;
 		LinkingContext& operator=(LinkingContext&&) = delete;
 
-		void Register(Entry&& data);
+		void ProcessPacket(const std::vector<uint8_t>& byteArray);
 
 	private:
-		void RegisterLinks();
-		std::vector<Entry> mEntries;
 };
 

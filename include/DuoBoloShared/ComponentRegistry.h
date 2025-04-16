@@ -10,6 +10,15 @@
 
 class WorldEditor;
 
+enum class ComponentType : uint8_t
+{
+	Transform,
+	Renderable,
+	RigidBody,
+	Camera,
+	Name
+};
+
 class ComponentRegistry
 {
 	public:

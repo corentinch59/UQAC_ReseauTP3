@@ -11,11 +11,12 @@
 
 #include <entt/entt.hpp>
 
-#include "DuoBoloNetwork/OnlineClientManager.h"
-#include "DuoBoloNetwork/OnlineServerManager.h"
-
 #ifdef IS_SERVER
 #include <DuoBoloNetwork/OnlineServerManager.h>
+#include <DuoBoloNetwork/ServerGameSessionManager.h>
+#else
+#include <DuoBoloNetwork/OnlineClientManager.h>
+#include <DuoBoloNetwork/ClientGameSessionManager.h>
 #endif
 
 #ifdef WITH_SCE_EDITOR
@@ -95,20 +96,7 @@ int main()
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
 
-#ifdef IS_SERVER
-	OnlineServerManager server(13333, 4);
-	double accumulator = 0.0;
-#endif
 
-#ifndef IS_SERVER
-	Renderer renderer;
-	OnlineClientManager client;
-	if(client.SendConnectionRequest(13333, "localhost"))
-	{
-		spdlog::info("connection successfully established");
-	}
-
-#endif
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
 	WorldSettings wSettings{};
@@ -121,6 +109,23 @@ int main()
 		LoadSceneFromPath(path, world, componentRegistry);
 	});
 
+#ifndef IS_SERVER
+	Renderer renderer;
+	ClientGameSessionManager session(world, componentRegistry);
+	OnlineClientManager client;
+	client.SetListener(&session);
+	if (client.SendConnectionRequest(13333, "localhost"))
+	{
+		spdlog::info("connection successfully established");
+	}
+#endif
+
+#ifdef IS_SERVER
+	ServerGameSessionManager session(world, componentRegistry);
+	OnlineServerManager server(13333, 4);
+	server.SetListener(&session);
+	double accumulator = 0.0;
+#endif
 
 #ifdef WITH_SCE_EDITOR
     WorldEditor worldEditor(world, renderer, wSettings, componentRegistry, logSink);

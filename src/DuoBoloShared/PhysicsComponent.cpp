@@ -1,11 +1,14 @@
 #include <DuoBoloNetwork/BinarySerialize.h>
+#include <DuoBoloNetwork/Opcodes.h>
 #include <DuoBoloShared/PhysicsComponent.h>
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
 
+
 void RigidbodyComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {
+	BinarySerializeType<uint8_t>(byteArray, static_cast<uint8_t>(ComponentTypeID::RigidBody));
 }
 
 void RigidbodyComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)

@@ -8,16 +8,17 @@ ENetPacket* PacketBuilder::build_world_init_packet(entt::registry& world, Compon
 {
 	WorldInitPacket packet;
 	packet.nbEntities = world.view<entt::entity>().size();
+	spdlog::info("Sending {} entities", packet.nbEntities);
 	// Serialiser toutes les entites
 	for(auto [entity] : world.storage<entt::entity>().each())
 	{
 		entt::handle entityHandle(world, entity);
 		int nbComponents = 0;
-		std::size_t offset = 0;
+		std::size_t offset = packet.worldArray.size();
+		BinarySerializeType<uint8_t>(packet.worldArray, 0);
 		components.ForEachComponent([&](const ComponentRegistry::Entry& entry)
 			{
-				offset = packet.worldArray.size();
-				BinarySerializeType<uint8_t>(packet.worldArray, 0);
+				
 				if (entry.hasComponent(entityHandle))
 				{
 					entry.binarySerialize(entityHandle, packet.worldArray);

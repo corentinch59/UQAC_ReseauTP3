@@ -4,6 +4,7 @@
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 
 void RenderableComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
@@ -27,6 +28,7 @@ void RenderableComponent::BinaryUnserialize(entt::handle handle, const std::vect
 	node.tint.r = BinaryDeserialize<uint8_t>(byteArray, offset);
 	node.tint.g = BinaryDeserialize<uint8_t>(byteArray, offset);
 	node.tint.b = BinaryDeserialize<uint8_t>(byteArray, offset);
+	node.tint.a = 255;
 }
 
 nlohmann::json RenderableComponent::JsonSerialize(const entt::handle entity) const

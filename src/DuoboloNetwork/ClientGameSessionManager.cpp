@@ -39,6 +39,7 @@ void ClientGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vecto
 				{
 					entt::handle entityHandle(mWorld, mWorld.create());
 					int nbComp = BinaryDeserialize<uint8_t>(data, offset);
+					spdlog::info("{} components to deserialize", nbComp);
 					for(int j = 0; j < nbComp; ++j)
 					{
 						ComponentType comp = static_cast<ComponentType>(BinaryDeserialize<uint8_t>(data, offset));

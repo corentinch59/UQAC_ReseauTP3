@@ -13,4 +13,7 @@ enum class ComponentTypeID : uint8_t
 {
 	Transform,
 	Renderable,
+	Camera,
+	RigidBody,
+	Name,
 };

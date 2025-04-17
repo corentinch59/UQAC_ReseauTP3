@@ -4,7 +4,6 @@
 #include <DuoBoloShared/JsonSerializer.h>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 
 void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {

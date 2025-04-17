@@ -74,10 +74,12 @@ int main()
 	spdlog::set_level(spdlog::level::debug);
 
 #ifndef IS_SERVER
-	std::cout << "Server IP : " << '\n';
+	std::cout << "Server IP (empty will be localhost) : " << '\n';
 
 	std::string s;
 	std::getline(std::cin, s);
+	if (s.empty())
+		s = "localhost";
 #endif
 
 #ifdef WITH_SCE_EDITOR

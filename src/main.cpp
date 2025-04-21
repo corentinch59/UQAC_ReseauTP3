@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	
 #ifndef IS_SERVER
 	std::string ip;
-	program.add_argument("-i", "--ip").help("IP of the remote server to connect to").store_into(ip).required();
+	program.add_argument("-i", "--ip").help("IP of the remote server to connect to").store_into(ip).default_value(std::string("localhost"));
 #endif
 
 	try

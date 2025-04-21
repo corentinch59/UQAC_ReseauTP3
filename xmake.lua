@@ -5,7 +5,7 @@ if is_plat("windows") then
     add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
 end
 
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt")
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse")
 add_requires("raylib")
 
 set_project("DuoBoloNetwork")
@@ -66,6 +66,7 @@ target("DuoBoloEngine")
     add_files("src/main.cpp")
     add_headerfiles("include/DuoBoloNetwork/**.hpp","include/DuoBoloNetwork/**.inl", "include/DuoBoloNetwork/**.h")
     add_packages("imgui", "bullet3", "raylib", "enet6", "spdlog", "entt", "nlohmann_json", "fmt")
+    add_packages("argparse", {public = true})
     includes("external/rlimgui", "external/rcamera")
     add_deps("rlimgui", "rcamera")
     add_deps("DuoBoloShared")

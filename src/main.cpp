@@ -11,6 +11,9 @@
 
 #include <entt/entt.hpp>
 
+#include <string>
+#include <argparse/argparse.hpp>
+
 #ifdef IS_SERVER
 #include <DuoBoloNetwork/OnlineServerManager.h>
 #include <DuoBoloNetwork/ServerGameSessionManager.h>
@@ -69,17 +72,29 @@ void CustomLogCallback(int logLevel, const char* text, va_list args)
 	}
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	spdlog::set_level(spdlog::level::debug);
 
+	argparse::ArgumentParser program("duobologame");
+	
 #ifndef IS_SERVER
-	std::cout << "Server IP (empty will be localhost) : " << '\n';
+	std::string ip;
+	program.add_argument("-i", "--ip").help("IP of the remote server to connect to").store_into(ip).required();
+#endif
 
-	std::string s;
-	std::getline(std::cin, s);
-	if (s.empty())
-		s = "localhost";
+	try
+	{
+		program.parse_args(argc, argv);
+	}
+	catch (const std::exception& err)
+	{
+		spdlog::error(err.what());
+		return 1;
+	}
+
+#ifndef IS_SERVER
+	spdlog::info("Connecting to {}", ip);
 #endif
 
 #ifdef WITH_SCE_EDITOR
@@ -125,7 +140,7 @@ int main()
 	ClientGameSessionManager session(world, componentRegistry);
 	OnlineClientManager client;
 	client.SetListener(&session);
-	if (!client.SendConnectionRequest(13333, s))
+	if (!client.SendConnectionRequest(13333, ip))
 	{
 		return 1;
 	}
@@ -151,7 +166,7 @@ int main()
 #endif
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();
-	
+
 #ifndef IS_SERVER
 	while (!WindowShouldClose())
 #else
@@ -175,7 +190,7 @@ int main()
 		server.PollEvents();
 		
 #endif
-		
+
 #ifndef IS_SERVER
 		client.PollEvents();
 
@@ -202,7 +217,7 @@ int main()
 		game->GlobalUpdate(deltaTimeAfterScale);
 
 		solver.Solve(deltaTimeAfterScale);
-		
+
 #ifndef IS_SERVER
 		renderer.Render(world, game->GetCamera(), wSettings);
 
@@ -225,7 +240,7 @@ int main()
         worldEditor.Update(deltaTimeAfterScale);
         rlImGuiEnd();
 #endif
-		
+
 #ifndef IS_SERVER
 		EndDrawing();
 #endif
@@ -240,7 +255,7 @@ int main()
 #ifdef WITH_SCE_EDITOR
     rlImGuiShutdown();
 #endif
-	
+
 #ifndef IS_SERVER
 	CloseWindow();
 #endif

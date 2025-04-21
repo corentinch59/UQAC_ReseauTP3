@@ -15,7 +15,7 @@ bool OnlineClientManager::SendConnectionRequest(unsigned short port, const std::
 	ENetAddress address;
 	address.port = port;
 
-	if(enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, ipAddress.data()) != 0)
+	if(enet_address_set_host(&address, ENET_ADDRESS_TYPE_IPV4, ipAddress.data()) != 0)
 	{
 		spdlog::error("failed to resolve address");
 		return false;
@@ -25,7 +25,7 @@ bool OnlineClientManager::SendConnectionRequest(unsigned short port, const std::
 		enet_host_destroy(mHost);
 
 	mHost = enet_host_create(
-		ENET_ADDRESS_TYPE_ANY,
+		ENET_ADDRESS_TYPE_IPV4,
 		nullptr,
 		1,
 		2,
@@ -54,7 +54,7 @@ bool OnlineClientManager::SendConnectionRequest(unsigned short port, const std::
 	}
 	else
 	{
-		spdlog::error("connection failed");
+		spdlog::error("connection failed {}", (int) event.type);
 		return false;
 	}
 

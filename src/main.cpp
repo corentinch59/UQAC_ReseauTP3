@@ -80,7 +80,9 @@ int main(int argc, char* argv[])
 	
 #ifndef IS_SERVER
 	std::string ip;
+	std::string username;
 	program.add_argument("-i", "--ip").help("IP of the remote server to connect to").store_into(ip).default_value(std::string("localhost"));
+	program.add_argument("-u", "--user").help("Username of the player to join as").store_into(username).default_value(std::string("p"));
 #endif
 
 	try

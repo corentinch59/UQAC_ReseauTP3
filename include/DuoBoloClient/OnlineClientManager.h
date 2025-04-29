@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <DuoBoloNetwork/OnlineManager.h>
+#include <DuoBoloShared/OnlineManager.h>
+#include <enet6/enet.h>
 
 class OnlineClientManager final : public OnlineManager
 {

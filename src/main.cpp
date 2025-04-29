@@ -3,11 +3,12 @@
 #include <DuoBoloNetwork/SceneLoading.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 #include <DuoBoloShared/Maths.h>
-#include <DuoBoloGame/BaseGame.h>
+#include <DuoBoloNetwork/InputManager.h>
 
 #include <spdlog/spdlog.h>
 
 #include <raylib.h>
+#include <rcamera.h>
 
 #include <entt/entt.hpp>
 
@@ -37,10 +38,8 @@
 #include <DuoBoloShared/TransformComponent.h>
 #endif
 
-#include <iostream>
-
 #define OBJECT_DESTROY_DISTANCE 1000
-constexpr float networkRate = 1.f / 64.f;
+constexpr float networkRate = 1.f / 30.f;
 
 void CustomLogCallback(int logLevel, const char* text, va_list args)
 {
@@ -115,8 +114,6 @@ int main(int argc, char* argv[])
 
 	entt::registry world{};
 
-	BaseGame* game = CreateGameClass();
-	game->SetWorld(&world);
 	// spdlog::critical("registry address inside exe: {}", (void*) &world);
 
 #ifdef WITH_SCE_EDITOR
@@ -124,21 +121,19 @@ int main(int argc, char* argv[])
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
 
-
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
 	WorldSettings wSettings{};
 	wSettings.lightDirection = Vector3Normalize({0.35f, -1.0f, 0.f});
 	wSettings.lightColor = WHITE;
 	wSettings.ambientColor = GRAY;
-	game->RegisterComponents(&componentRegistry);
-	game->SetLoadSceneFunc([&](const std::string& path)
-	{
-		LoadSceneFromPath(path, world, componentRegistry);
-	});
+
+	InputManager inputManager;
 
 #ifndef IS_SERVER
 	Renderer renderer;
+
+#ifndef WITH_SCE_EDITOR
 	ClientGameSessionManager session(world, componentRegistry);
 	OnlineClientManager client;
 	client.SetListener(&session);
@@ -147,6 +142,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+#endif
 #endif
 
 #ifdef IS_SERVER
@@ -162,9 +158,10 @@ int main(int argc, char* argv[])
     renderer.SetRenderIntoTexture(true);
 #endif
 
-	game->Init();
+	//Init la camera game->Init();
+
 #ifdef IS_SERVER
-	game->LoadScene(game->GetStartupSceneName());
+	LoadSceneFromPath("assets/Scene1.dbs", world, componentRegistry);
 #endif
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();
@@ -172,13 +169,13 @@ int main(int argc, char* argv[])
 #ifndef IS_SERVER
 	while (!WindowShouldClose())
 #else
+	// La game loop
 	while (true)
 #endif
 	{
 		auto now = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> delta = now - lastFrame;
 		float deltaTime = delta.count();
-		float deltaTimeAfterScale = deltaTime * game->GetTimeScale();
 
 #ifdef IS_SERVER
 		//Server ticking
@@ -187,28 +184,22 @@ int main(int argc, char* argv[])
 		while (accumulator >= networkRate)
 		{
 			// Do networking stuff
+			session.Tick(server.GetHost(),*game, networkRate);
 			accumulator -= networkRate;
 		}
 		server.PollEvents();
 		
 #endif
 
-#ifndef IS_SERVER
-		client.PollEvents();
 
-		if (IsKeyPressed(KEY_F10))
-		{
-			if (IsCursorHidden())
-			{
-				ShowCursor();
-				EnableCursor();
-			}
-			else
-			{
-				HideCursor();
-				DisableCursor();
-			}
-		}
+#ifndef IS_SERVER
+		inputManager.PollInputs(deltaTime);
+
+#ifndef WITH_SCE_EDITOR
+		game->GlobalUpdate(deltaTime);
+
+		client.PollEvents();
+#endif
 
 		// needed for imgui
 		BeginDrawing();
@@ -216,9 +207,9 @@ int main(int argc, char* argv[])
 #endif
 
 #ifndef WITH_SCE_EDITOR
-		game->GlobalUpdate(deltaTimeAfterScale);
-
-		solver.Solve(deltaTimeAfterScale);
+#ifdef IS_SERVER
+		solver.Solve(deltaTime);
+#endif
 
 #ifndef IS_SERVER
 		renderer.Render(world, game->GetCamera(), wSettings);
@@ -239,7 +230,7 @@ int main(int argc, char* argv[])
 		}
 #else
         rlImGuiBegin();
-        worldEditor.Update(deltaTimeAfterScale);
+        worldEditor.Update(deltaTime);
         rlImGuiEnd();
 #endif
 

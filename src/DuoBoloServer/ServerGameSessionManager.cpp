@@ -14,7 +14,9 @@ ServerGameSessionManager::~ServerGameSessionManager()
 void ServerGameSessionManager::OnConnected(ENetPeer* peer)
 {
 	spdlog::info("Client connected, sending world info");
-	enet_peer_send(peer, 0, mBuilder.build_world_init_packet(mWorld, mComponents));
+	ENetPacket* worldPacket = mBuilder.build_world_init_packet(mWorld, mComponents);
+	enet_peer_send(peer, 0, worldPacket);
+	enet_packet_dispose(worldPacket);
 }
 
 void ServerGameSessionManager::OnDisconnected(ENetPeer* peer)
@@ -29,4 +31,14 @@ void ServerGameSessionManager::OnTimedOut(ENetPeer* peer)
 
 void ServerGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data)
 {
+}
+
+void ServerGameSessionManager::Tick(ENetHost* host, BaseGame& game, float dt)
+{
+	if (host->connectedPeers > 0)
+	{
+		ENetPacket* packet = mBuilder.build_world_init_packet(mWorld, mComponents);
+		enet_host_broadcast(host, 0, packet);
+		enet_packet_dispose(packet);
+	}
 }

@@ -5,6 +5,8 @@
 #include <raylib.h>
 
 #include <functional>
+#include <DuoBoloNetwork/ClientGameSessionManager.h>
+#include <DuoBoloNetwork/Input.h>
 
 class BaseGame
 {
@@ -34,6 +36,8 @@ public:
 	{
 	}
 
+	virtual void SetupInput(ClientGameSessionManager& client) {}
+
 	virtual entt::registry* GetWorld() const { return mWorld; }
 
 	virtual void OnSceneLoaded()
@@ -50,6 +54,8 @@ public:
 	{
 		mSceneLoadFunc = func;
 	}
+
+	virtual PlayerInput GetPlayerInput() { return {}; }
 
 	virtual Camera GetCamera() { return {}; }
 

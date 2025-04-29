@@ -1,4 +1,5 @@
-#include <DuoBoloNetwork/OnlineClientManager.h>
+#include <DuoBoloClient/OnlineClientManager.h>
+#include <enet6/enet.h>
 #include <spdlog/spdlog.h>
 
 OnlineClientManager::OnlineClientManager() :

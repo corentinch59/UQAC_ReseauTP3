@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DuoBoloNetwork/INetworkEventListener.h>
+#include <DuoBoloShared/INetworkEventListener.h>
 
 #include <enet6/enet.h>
 
@@ -18,6 +18,7 @@ class OnlineManager
 
 		void SetListener(INetworkEventListener* listener) { mListener = listener; }
 		void PollEvents();
+		ENetHost* GetHost() const { return mHost; };
 
 	protected:
 		ENetHost* mHost;

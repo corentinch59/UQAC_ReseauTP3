@@ -1,5 +1,8 @@
 #include <DuoBoloGame/BaseGame.h>
 
+#include <DuoBoloNetwork/InputManager.h>
+#include <DuoBoloNetwork/Input.h>
+
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/RenderableComponent.h>
 #include <DuoBoloShared/PhysicsComponent.h>
@@ -38,6 +41,147 @@ public:
 		mCamera.projection = CAMERA_PERSPECTIVE;
 	}
 
+	void SetupInput(ClientGameSessionManager& client) override
+	{
+		InputManager::Instance().BindKeyboardAction("forward",
+			[&](InputAction a)
+			{
+				CameraMoveForward(&mCamera, mCameraSpeed * a.deltaTime * mMovementMult, true);
+				if(a.state == PressState::Press)
+				{
+					playerInput.forward = true;
+				}
+
+				if(a.state == PressState::Release)
+				{
+					playerInput.forward = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("left",
+			[&](InputAction a)
+			{
+				CameraMoveRight(&mCamera, -mCameraSpeed * a.deltaTime * mMovementMult, true);
+				if(a.state == PressState::Press)
+				{
+					playerInput.left = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.left = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("backward",
+			[&](InputAction a)
+			{
+				CameraMoveForward(&mCamera, -mCameraSpeed * a.deltaTime * mMovementMult, true);
+				if(a.state == PressState::Press)
+				{
+					playerInput.backward = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.backward = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("right",
+			[&](InputAction a)
+			{
+				CameraMoveRight(&mCamera, mCameraSpeed * a.deltaTime * mMovementMult, true);
+				if(a.state == PressState::Press)
+				{
+					playerInput.right = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.right = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("up",
+			[&](InputAction a)
+			{
+				CameraMoveUp(&mCamera, mCameraSpeed * a.deltaTime * mMovementMult);
+				if(a.state == PressState::Press)
+				{
+					playerInput.up = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.up = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("down",
+			[&](InputAction a)
+			{
+				CameraMoveUp(&mCamera, -mCameraSpeed * a.deltaTime * mMovementMult);
+				if(a.state == PressState::Press)
+				{
+					playerInput.down = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.down = false;
+				}
+
+				client.SendInputPacket(playerInput);
+			});
+		InputManager::Instance().BindKeyboardAction("showCursor",
+			[](InputAction a)
+			{
+				if (a.state != PressState::Press)
+					return;
+
+				if (IsCursorHidden())
+				{
+					ShowCursor();
+					EnableCursor();
+				}
+				else
+				{
+					HideCursor();
+					DisableCursor();
+				}
+			});
+		InputManager::Instance().BindMouseAction("Shoot",
+			[&](InputAction a)
+			{
+				if(a.state == PressState::Press)
+				{
+					playerInput.shoot = true;
+				}
+
+				if(a.state == PressState::Down)
+				{
+					playerInput.shoot = false;
+				}
+
+				client.SendShootPacket(mCamera.position, mCamera.target - mCamera.position);
+			});
+
+		InputManager::Instance().BindKey(KEY_W, "forward");
+		InputManager::Instance().BindKey(KEY_A, "left");
+		InputManager::Instance().BindKey(KEY_S, "backward");
+		InputManager::Instance().BindKey(KEY_D, "right");
+		InputManager::Instance().BindKey(KEY_Q, "up");
+		InputManager::Instance().BindKey(KEY_E, "down");
+		InputManager::Instance().BindMouse(MOUSE_BUTTON_LEFT, "shoot");
+		InputManager::Instance().BindKey(KEY_F10, "showCursor");
+	}
+
 	void OnSceneLoaded() override
 	{
 	}
@@ -48,46 +192,6 @@ public:
 		const float movementMult = IsKeyDown(KEY_LEFT_SHIFT) ? 2.f : 1.f;
 		CameraYaw(&mCamera, -mouseDelta.x * mCameraMouseSens, false);
 		CameraPitch(&mCamera, -mouseDelta.y * mCameraMouseSens, true, false, false);
-		if (IsKeyDown(KEY_W))
-			CameraMoveForward(&mCamera, mCameraSpeed * dt * movementMult, true);
-		if (IsKeyDown(KEY_A))
-			CameraMoveRight(&mCamera, -mCameraSpeed * dt * movementMult, true);
-		if (IsKeyDown(KEY_S))
-			CameraMoveForward(&mCamera, -mCameraSpeed * dt * movementMult, true);
-		if (IsKeyDown(KEY_D))
-			CameraMoveRight(&mCamera, mCameraSpeed * dt * movementMult, true);
-		if (IsKeyDown(KEY_Q))
-			CameraMoveUp(&mCamera, mCameraSpeed * dt * movementMult);
-		if (IsKeyDown(KEY_E))
-			CameraMoveUp(&mCamera, -mCameraSpeed * dt * movementMult);
-
-		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && GetTime() - lastShootTime > 1.0/mFireRate)
-		{
-			lastShootTime = GetTime();
-
-			auto sphereEntity = GetWorld()->create();
-			auto& sphereTransform = GetWorld()->emplace<TransformComponent>(sphereEntity);
-			sphereTransform.position = mCamera.position;
-			sphereTransform.scale = { .2f , .2f , .2f };
-
-			sphereTransform.rotation = QuaternionIdentity();
-
-			auto& sphereRenderable = GetWorld()->emplace<RenderableComponent>(sphereEntity);
-			sphereRenderable.model = "sphere";
-			sphereRenderable.tint = RED;
-
-			auto& sphereRigidbody = GetWorld()->emplace<RigidbodyComponent>(sphereEntity, 50.0f, SphereShape{.2f});
-			sphereRigidbody.velocity = Vector3Normalize(mCamera.target - mCamera.position) * 75.0f;
-		}
-
-		if (IsKeyPressed(KEY_SPACE))
-		{
-			SetTimeScale(0.2f);
-		}
-		else if (IsKeyReleased(KEY_SPACE))
-		{
-			SetTimeScale(1.f);
-		}
 	}
 
 	void Shutdown() override
@@ -104,6 +208,8 @@ private:
 	Camera mCamera{};
 	float mCameraMouseSens = 0.003f;
 	float mCameraSpeed = 5.4f;
+	float mMovementMult = 1.f;
+	PlayerInput playerInput;
 };
 
 DECLARE_BASE_GAME_CLASS(MyGame)

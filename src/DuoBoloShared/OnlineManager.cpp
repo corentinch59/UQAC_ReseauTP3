@@ -1,6 +1,5 @@
-#include <DuoBoloNetwork/OnlineManager.h>
+#include <DuoBoloShared/OnlineManager.h>
 
-#include <enet6/enet.h>
 #include <spdlog/spdlog.h>
 
 OnlineManager::OnlineManager() :

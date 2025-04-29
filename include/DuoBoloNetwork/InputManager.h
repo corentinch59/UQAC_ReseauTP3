@@ -12,6 +12,12 @@ enum class PressState
 	Down // Repeat
 };
 
+struct InputAction
+{
+	PressState state;
+	float deltaTime;
+};
+
 class InputManager
 {
 	public:
@@ -24,12 +30,12 @@ class InputManager
 		InputManager& operator=(const InputManager&) = delete;
 		InputManager& operator=(InputManager&&) = delete;
 
-		void PollInputs();
+		void PollInputs(float dt);
 
 		void BindKey(KeyboardKey key, std::string action);
 		void BindMouse(MouseButton mouse, std::string action);
-		void BindMouseAction(std::string action, std::function<void(PressState)> callback);
-		void BindKeyboardAction(std::string action, std::function<void(PressState)> callback);
+		void BindMouseAction(std::string action, std::function<void(InputAction)> callback);
+		void BindKeyboardAction(std::string action, std::function<void(InputAction)> callback);
 
 		static InputManager& Instance();
 
@@ -37,12 +43,10 @@ class InputManager
 		static InputManager* s_instance;
 
 		std::unordered_map<KeyboardKey, std::string> m_keyInputMap;
-		std::unordered_map<std::string, std::function<void(PressState)>> m_keyActionMap;
-
 		std::unordered_map<MouseButton, std::string> m_mouseInputMap;
-		std::unordered_map<std::string, std::function<void(PressState)>> m_mouseActionMap;
 
-		void InternalPerformKey(const std::string& action, PressState state);
-		void InternalPerformMouse(const std::string& action, PressState state);
+		std::unordered_map<std::string, std::function<void(InputAction)>> m_keyActionMap;
+
+		void InternalPerformAction(const std::string& action, InputAction inputAction);
 };
 

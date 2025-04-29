@@ -19,23 +19,26 @@ InputManager::~InputManager()
 	s_instance = nullptr;
 }
 
-void InputManager::PollInputs()
+void InputManager::PollInputs(float dt)
 {
 	for(auto& input : m_keyInputMap)
 	{
 		if(IsKeyPressed(input.first))
 		{
-			InternalPerformKey(input.second, PressState::Press);
+			InputAction ia{ PressState::Press, dt };
+			InternalPerformAction(input.second, ia);
 		}
 
 		if(IsKeyReleased(input.first))
 		{
-			InternalPerformKey(input.second, PressState::Release);
+			InputAction ia{ PressState::Release, dt };
+			InternalPerformAction(input.second, ia);
 		}
 
 		if(IsKeyDown(input.first))
 		{
-			InternalPerformKey(input.second, PressState::Down);
+			InputAction ia{ PressState::Down, dt };
+			InternalPerformAction(input.second, ia);
 		}
 	}
 
@@ -43,17 +46,20 @@ void InputManager::PollInputs()
 	{
 		if(IsMouseButtonPressed(mouse.first))
 		{
-			InternalPerformMouse(mouse.second, PressState::Press);
+			InputAction ia{ PressState::Press, dt };
+			InternalPerformAction(mouse.second, ia);
 		}
 
 		if(IsMouseButtonReleased(mouse.first))
 		{
-			InternalPerformMouse(mouse.second, PressState::Release);
+			InputAction ia{ PressState::Release, dt };
+			InternalPerformAction(mouse.second, ia);
 		}
 
 		if(IsMouseButtonDown(mouse.first))
 		{
-			InternalPerformMouse(mouse.second, PressState::Down);
+			InputAction ia{ PressState::Down, dt };
+			InternalPerformAction(mouse.second, ia);
 		}
 	}
 }
@@ -78,12 +84,7 @@ void InputManager::BindMouse(MouseButton mouse, std::string action)
 	m_mouseInputMap[mouse] = std::move(action);
 }
 
-void InputManager::BindMouseAction(std::string action, std::function<void(PressState)> callback)
-{
-	m_mouseActionMap[action] = std::move(callback);
-}
-
-void InputManager::BindKeyboardAction(std::string action, std::function<void(PressState)> callback)
+void InputManager::BindKeyboardAction(std::string action, std::function<void(InputAction)> callback)
 {
 	m_keyActionMap[action] = std::move(callback);
 }
@@ -93,20 +94,11 @@ InputManager& InputManager::Instance()
 	return *s_instance;
 }
 
-void InputManager::InternalPerformKey(const std::string& action, PressState state)
+void InputManager::InternalPerformAction(const std::string& action, InputAction inputAction)
 {
 	auto it = m_keyActionMap.find(action);
 	if (it == m_keyActionMap.end())
 		return;
 
-	m_keyActionMap[action](state);
-}
-
-void InputManager::InternalPerformMouse(const std::string& action, PressState state)
-{
-	auto it = m_mouseActionMap.find(action);
-	if (it == m_mouseActionMap.end())
-		return;
-
-	m_mouseActionMap[action](state);
+	m_keyActionMap[action](inputAction);
 }

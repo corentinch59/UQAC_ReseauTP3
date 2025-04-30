@@ -1,85 +1,52 @@
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.vsxmake.autoupdate")
 
-
--- Shitty fix for shitty bug when using spdlog and raylib on windows
-if is_plat("windows") then
-    add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
-end
-
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse")
-add_requires("raylib")
-
 set_project("DuoBoloNetwork")
-
 set_languages("cxx20")
 set_exceptions("cxx")
 set_encodings("utf-8")
--- set_rundir(".")
 add_includedirs("include")
 add_installfiles("(assets/**)", {prefixdir = "bin"})
 
+-- Dépendances communes
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse", "raylib")
+
+-- Patch Windows
 if is_plat("windows") then
+    add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER", {public = true})
     add_cxflags("/wd4251")
 end
 
-if is_mode("rel-editor") then
+-- Configurations custom
+option("with_editor", { description = "Build with editor support", default = false, showmenu = true })
+option("is_server", { description = "Build as server", default = false, showmenu = true })
+
+-- Défines globaux liés aux options
+if has_config("with_editor") then
     add_defines("WITH_SCE_EDITOR")
-    set_symbols("hidden")
-    set_optimize("fastest")
-    set_strip("all")
-elseif is_mode("deb-editor") then
-    add_defines("WITH_SCE_EDITOR")
-    set_symbols("debug")
-    set_optimize("none")
-elseif is_mode("rel-server") then
+end
+if has_config("is_server") then
     add_defines("IS_SERVER")
-    set_symbols("hidden")
-    set_optimize("fastest")
-    set_strip("all")
-elseif is_mode("deb-server") then
-    add_defines("IS_SERVER")
-    set_symbols("debug")
-    set_optimize("none")
 end
 
-target("Main", function ()
-	set_kind("static")
-	add_headerfiles("include/(Main/**.hpp)", "include/(Main/**.inl)")
-	add_files("src/Main/**.cpp")
-	add_packages("spdlog", { public = true })
-end)
+-- Modes d'optimisation
+if is_mode("debug") then
+    set_symbols("debug")
+    set_optimize("none")
+else
+    set_symbols("hidden")
+    set_optimize("fastest")
+    set_strip("all")
+end
 
-target("Editor", function ()
-    set_kind("binary")
-    add_defines("WITH_SCE_EDITOR")
-    add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
-    add_headerfiles("include/DuoBoloClient/**.hpp","include/DuoBoloClient/**.inl", "include/DuoBoloClient/**.h")
-    add_files("src/DuoBoloClient/**.cpp", "src/DuoBoloShared/**.cpp")
-    add_deps("rlimgui", "rcamera")
-    add_deps("Main")
-end)
+-- Target principale partagée
+target("Main")
+    set_kind("static")
+    add_headerfiles("include/(Main/**.hpp)", "include/(Main/**.inl)")
+    add_files("src/Main/**.cpp")
+    add_packages("spdlog", { public = true })
 
-target("DuoBoloClient", function ()
-    set_kind("binary")
-    add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
-    add_headerfiles("include/DuoBoloClient/**.hpp","include/DuoBoloClient/**.inl", "include/DuoBoloClient/**.h")
-    add_files("src/DuoBoloClient/**.cpp", "src/DuoBoloShared/**.cpp")
-    add_packages("raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse", { public = true })
-    add_deps("Main", "DuoBoloEngine")
-    add_deps("rlimgui", "rcamera")
-end)
-
-target("DuoBoloServer", function ()
-    set_kind("binary")
-    add_defines("IS_SERVER")
-    add_headerfiles("include/DuoBoloShared/**.hpp","include/DuoBoloShared/**.inl", "include/DuoBoloShared/**.h")
-    add_headerfiles("include/DuoBoloServer/**.hpp","include/DuoBoloServer/**.inl", "include/DuoBoloServer/**.h")
-    add_files("src/DuoBoloServer/**.cpp", "src/DuoBoloShared/**.cpp")
-    add_packages("entt", "enet6", "nlohmann_json", "raylib", "argparse")
-    add_deps("Main", "DuoBoloEngine")
-end)
-
+-- Engine (partagé)
 target("DuoBoloEngine")
     set_kind("static")
     add_files("src/DuoBoloNetwork/**.cpp")
@@ -88,5 +55,21 @@ target("DuoBoloEngine")
     includes("external/rlimgui", "external/rcamera")
     add_deps("rlimgui", "rcamera")
     after_build(function (target)
-            os.cp("assets", target:targetdir())
+        os.cp("assets", target:targetdir())
     end)
+
+-- Fonction utilitaire pour targets clients/serveurs
+function duo_target(name, folders, deps, extra_packages)
+    target(name)
+        set_kind("binary")
+        for _, folder in ipairs(folders) do
+            add_headerfiles("include/"..folder.."/**.hpp", "include/"..folder.."/**.inl", "include/"..folder.."/**.h")
+            add_files("src/"..folder.."/**.cpp")
+        end
+        add_packages(table.unpack(extra_packages or {}))
+        add_deps(table.unpack(deps))
+end
+
+duo_target("Editor", {"DuoBoloShared", "DuoBoloClient"}, {"rlimgui", "rcamera", "Main"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
+duo_target("DuoBoloClient", {"DuoBoloShared", "DuoBoloClient"}, {"Main", "DuoBoloEngine", "rlimgui", "rcamera"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
+duo_target("DuoBoloServer", {"DuoBoloShared", "DuoBoloServer"}, {"Main", "DuoBoloEngine"}, {"entt", "enet6", "nlohmann_json", "raylib", "argparse"})

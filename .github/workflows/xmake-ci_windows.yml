@@ -17,7 +17,7 @@ jobs:
         strategy:
             matrix:
                 os: [windows]
-                mode: [release, rel-editor, rel-server]
+                mode: [release]
 
         steps:
             - name: Checkout repository
@@ -33,15 +33,15 @@ jobs:
               run: xmake f -y -m ${{ matrix.mode }}
 
             - name: Build with XMake
-              run: xmake
+              run: xmake build -a
 
             - name: Create ZIP Windows
               uses: thedoctor0/zip-release@0.7.5
               with:
                   type: 'zip'
-                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/windows/x64/${{matrix.mode}}
-                  exclusions: '*.lib *.so *.a *.dll'
+                  filename: '../../../../${{matrix.mode}}-${{matrix.os}}.zip'
+                  directory: build/windows/x64/${{matrix.mode}}
+                  exclusions: '*.lib *.so *.a'
 
             - name: Upload Release
               run: gh release upload ${{github.event.release.tag_name}} ${{matrix.mode}}-${{matrix.os}}.zip

@@ -17,7 +17,7 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu]
-                mode: [release, rel-editor, rel-server]
+                mode: [release]
 
         steps:
             - name: Checkout repository
@@ -37,16 +37,16 @@ jobs:
               run: xmake f -y -m ${{ matrix.mode }}
 
             - name: Build with XMake
-              run: xmake
+              run: xmake build -a
 
             - name: Create ZIP Linux
               if: matrix.os == 'ubuntu'
               uses: thedoctor0/zip-release@0.7.5
               with:
                   type: 'zip'
-                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  filename: '../../../../${{matrix.mode}}-${{matrix.os}}.zip'
                   path: build/linux/x86_64/${{matrix.mode}}
-                  exclusions: '*.lib *.so *.a *.dll'
+                  exclusions: '*.lib *.a *.dll'
 
             - name: Upload Release
               run: gh release upload ${{github.event.release.tag_name}} ${{matrix.mode}}-${{matrix.os}}.zip

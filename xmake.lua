@@ -29,16 +29,6 @@ if has_config("is_server") then
     add_defines("IS_SERVER")
 end
 
--- Modes d'optimisation
-if is_mode("debug") then
-    set_symbols("debug")
-    set_optimize("none")
-else
-    set_symbols("hidden")
-    set_optimize("fastest")
-    set_strip("all")
-end
-
 -- Target principale partagée
 target("Main")
     set_kind("static")

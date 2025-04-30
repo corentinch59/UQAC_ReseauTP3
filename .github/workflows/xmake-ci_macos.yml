@@ -17,7 +17,7 @@ jobs:
         strategy:
             matrix:
                 os: [macos]
-                mode: [release, rel-editor, rel-server]
+                mode: [release]
 
         steps:
             - name: Checkout repository
@@ -33,14 +33,14 @@ jobs:
               run: xmake f -y -m ${{ matrix.mode }}
 
             - name: Build with XMake
-              run: xmake
+              run: xmake build -a
 
             - name: Create ZIP MacOS
               if: matrix.os == 'macos'
               uses: thedoctor0/zip-release@0.7.5
               with:
                   type: 'zip'
-                  filename: '${{matrix.mode}}-${{matrix.os}}.zip'
+                  filename: '../../../../${{matrix.mode}}-${{matrix.os}}.zip'
                   path: build/macosx/arm64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 

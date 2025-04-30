@@ -39,7 +39,7 @@ void ServerGameSessionManager::Tick(ENetHost* host, ServerGame& game, float dt)
 {
 	if (host->connectedPeers > 0)
 	{
-		ENetPacket* packet = mBuilder.build_world_init_packet(mWorld, mComponents);
+		ENetPacket* packet = mBuilder.build_game_data(mWorld, mComponents);
 		enet_host_broadcast(host, 0, packet);
 		enet_packet_dispose(packet);
 	}

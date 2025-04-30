@@ -15,14 +15,14 @@ void TransformComponent::BinarySerialize(entt::handle handle, std::vector<uint8_
 	BinarySerializeType<float>(byteArray, position.y);
 	BinarySerializeType<float>(byteArray, position.z);
 	// Rotation
-	BinarySerializeType<uint8_t>(byteArray, rotation.x * 100.f);
-	BinarySerializeType<uint8_t>(byteArray, rotation.y * 100.f);
-	BinarySerializeType<uint8_t>(byteArray, rotation.z * 100.f);
-	BinarySerializeType<uint8_t>(byteArray, rotation.w * 100.f);
+	BinarySerializeType<int8_t>(byteArray, rotation.x * 100.f);
+	BinarySerializeType<int8_t>(byteArray, rotation.y * 100.f);
+	BinarySerializeType<int8_t>(byteArray, rotation.z * 100.f);
+	BinarySerializeType<int8_t>(byteArray, rotation.w * 100.f);
 	// Scale
-	BinarySerializeType<uint8_t>(byteArray, scale.x);
-	BinarySerializeType<uint8_t>(byteArray, scale.y);
-	BinarySerializeType<uint8_t>(byteArray, scale.z);
+	BinarySerializeType<float>(byteArray, scale.x);
+	BinarySerializeType<float>(byteArray, scale.y);
+	BinarySerializeType<float>(byteArray, scale.z);
 }
 
 void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset)
@@ -33,14 +33,14 @@ void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vecto
 	node.position.y = BinaryDeserialize<float>(byteArray, offset);
 	node.position.z = BinaryDeserialize<float>(byteArray, offset);
 	// Rotation
-	node.rotation.x = BinaryDeserialize<uint8_t>(byteArray, offset) / 100.f;
-	node.rotation.y = BinaryDeserialize<uint8_t>(byteArray, offset) / 100.f;
-	node.rotation.z = BinaryDeserialize<uint8_t>(byteArray, offset) / 100.f;
-	node.rotation.w = BinaryDeserialize<uint8_t>(byteArray, offset) / 100.f;
+	node.rotation.x = BinaryDeserialize<int8_t>(byteArray, offset) / 100.f;
+	node.rotation.y = BinaryDeserialize<int8_t>(byteArray, offset) / 100.f;
+	node.rotation.z = BinaryDeserialize<int8_t>(byteArray, offset) / 100.f;
+	node.rotation.w = BinaryDeserialize<int8_t>(byteArray, offset) / 100.f;
 	// Scale
-	node.scale.x = BinaryDeserialize<uint8_t>(byteArray, offset);
-	node.scale.y = BinaryDeserialize<uint8_t>(byteArray, offset);
-	node.scale.z = BinaryDeserialize<uint8_t>(byteArray, offset);
+	node.scale.x = BinaryDeserialize<float>(byteArray, offset);
+	node.scale.y = BinaryDeserialize<float>(byteArray, offset);
+	node.scale.z = BinaryDeserialize<float>(byteArray, offset);
 }
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const

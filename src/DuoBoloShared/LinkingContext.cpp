@@ -72,7 +72,6 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& b
 		}
 		case Opcode::Shoot:
 		{
-			spdlog::info("Received shoot packet");
 			ClientShootPacket packet = ClientShootPacket::Deserialize(byteArray, offset);
 
 			auto sphereEntity = mWorld.create();

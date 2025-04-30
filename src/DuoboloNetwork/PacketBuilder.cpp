@@ -18,7 +18,6 @@ ENetPacket* PacketBuilder::build_world_init_packet(entt::registry& world, Compon
 		BinarySerializeType<uint8_t>(packet.worldArray, 0);
 		components.ForEachComponent([&](const ComponentRegistry::Entry& entry)
 			{
-				
 				if (entry.hasComponent(entityHandle))
 				{
 					entry.binarySerialize(entityHandle, packet.worldArray);
@@ -49,7 +48,6 @@ ENetPacket* PacketBuilder::build_game_data(entt::registry& world, ComponentRegis
 		BinarySerializeType<uint8_t>(packet.worldArray, 0);
 		components.ForEachComponent([&](const ComponentRegistry::Entry& entry)
 			{
-
 				if (entry.hasComponent(entityHandle))
 				{
 					entry.binarySerialize(entityHandle, packet.worldArray);
@@ -59,7 +57,7 @@ ENetPacket* PacketBuilder::build_game_data(entt::registry& world, ComponentRegis
 		packet.worldArray[offset] = nbComponents;
 	}
 
-	return build_packet<WorldInitPacket>(packet, ENET_PACKET_FLAG_RELIABLE);
+	return build_packet<WorldInitPacket>(packet, 0);
 }
 
 ENetPacket* PacketBuilder::build_client_input(const PlayerInput& inputs)

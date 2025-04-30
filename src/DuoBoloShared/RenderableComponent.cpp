@@ -9,7 +9,6 @@
 
 void RenderableComponent::BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray)
 {
-
 	BinarySerializeType<uint8_t>(byteArray, static_cast<uint8_t>(ComponentTypeID::Renderable));
 
 	BinarySerializeType(byteArray, model);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 #include <DuoBoloShared/OnlineManager.h>
 #include <enet6/enet.h>
 

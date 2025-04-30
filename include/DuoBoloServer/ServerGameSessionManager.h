@@ -1,12 +1,14 @@
 #pragma once
 
+#include <cstdint>
+
 #include <DuoBoloShared/INetworkEventListener.h>
 #include <DuoBoloShared/ComponentRegistry.h>
+#include <DuoBoloShared/LinkingContext.h>
+
 #include <DuoBoloNetwork/PacketBuilder.h>
 
 #include <DuoBoloServer/ServerGame.h>
-
-#include "DuoBoloShared/LinkingContext.h"
 
 class ServerGameSessionManager : public INetworkEventListener
 {

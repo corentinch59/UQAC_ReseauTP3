@@ -2,6 +2,7 @@
 
 #include <enet6/enet.h>
 #include <vector>
+#include <cstdint>
 
 class INetworkEventListener
 {

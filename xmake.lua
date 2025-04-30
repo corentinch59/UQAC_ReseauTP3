@@ -60,6 +60,6 @@ function duo_target(name, folders, deps, extra_packages)
         add_deps(table.unpack(deps))
 end
 
-duo_target("Editor", {"DuoBoloShared", "DuoBoloClient"}, {"rlimgui", "rcamera", "Main"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
+-- duo_target("Editor", {"DuoBoloShared", "DuoBoloClient"}, {"rlimgui", "rcamera", "Main"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
 duo_target("DuoBoloClient", {"DuoBoloShared", "DuoBoloClient"}, {"Main", "DuoBoloEngine", "rlimgui", "rcamera"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
 duo_target("DuoBoloServer", {"DuoBoloShared", "DuoBoloServer"}, {"Main", "DuoBoloEngine"}, {"entt", "enet6", "nlohmann_json", "raylib", "argparse"})

@@ -1,4 +1,4 @@
-#include <DuoBoloNetwork/OnlineServerManager.h>
+#include <DuoBoloServer/OnlineServerManager.h>
 #include <DuoBoloNetwork/PacketBuilder.h>
 #include <spdlog/spdlog.h>
 

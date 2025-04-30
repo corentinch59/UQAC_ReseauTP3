@@ -34,8 +34,7 @@ class InputManager
 
 		void BindKey(KeyboardKey key, std::string action);
 		void BindMouse(MouseButton mouse, std::string action);
-		void BindMouseAction(std::string action, std::function<void(InputAction)> callback);
-		void BindKeyboardAction(std::string action, std::function<void(InputAction)> callback);
+		void BindAction(std::string action, std::function<void(InputAction)> callback);
 
 		static InputManager& Instance();
 

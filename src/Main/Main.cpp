@@ -4,7 +4,6 @@
 
 int DUOEntry(int argc, char* argv[], int(*mainFunc)(int argc, char* argv[]))
 {
-	spdlog::info("Launching main from DuoEntry");
 	try
 	{
 		return mainFunc(argc, argv);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DuoBoloNetwork/OnlineManager.h>
+#include <DuoBoloShared/OnlineManager.h>
 
 class OnlineServerManager final : public OnlineManager
 {

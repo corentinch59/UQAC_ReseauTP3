@@ -1,8 +1,9 @@
-#include <DuoBoloNetwork/ServerGameSessionManager.h>
+#include <DuoBoloServer/ServerGameSessionManager.h>
 #include <spdlog/spdlog.h>
 
 ServerGameSessionManager::ServerGameSessionManager(entt::registry& world, ComponentRegistry& components) :
 mWorld(world),
+mLinkingContext(world, components),
 mComponents(components)
 {
 }
@@ -31,9 +32,10 @@ void ServerGameSessionManager::OnTimedOut(ENetPeer* peer)
 
 void ServerGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data)
 {
+	mLinkingContext.ProcessPacket(peer, data);
 }
 
-void ServerGameSessionManager::Tick(ENetHost* host, BaseGame& game, float dt)
+void ServerGameSessionManager::Tick(ENetHost* host, ServerGame& game, float dt)
 {
 	if (host->connectedPeers > 0)
 	{

@@ -1,8 +1,12 @@
 #pragma once
 
-#include <DuoBoloNetwork/INetworkEventListener.h>
+#include <DuoBoloShared/INetworkEventListener.h>
 #include <DuoBoloShared/ComponentRegistry.h>
 #include <DuoBoloNetwork/PacketBuilder.h>
+
+#include <DuoBoloServer/ServerGame.h>
+
+#include "DuoBoloShared/LinkingContext.h"
 
 class ServerGameSessionManager : public INetworkEventListener
 {
@@ -16,12 +20,13 @@ class ServerGameSessionManager : public INetworkEventListener
 		void OnTimedOut(ENetPeer* peer) override;
 		void OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data) override;
 
-		void Tick(ENetHost* host, BaseGame& game, float dt) override;
+		void Tick(ENetHost* host, ServerGame& game, float dt);
 
 	private:
 		entt::registry& mWorld;
 		ComponentRegistry& mComponents;
 
+		LinkingContext mLinkingContext;
 		PacketBuilder mBuilder;
 };
 

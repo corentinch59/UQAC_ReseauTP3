@@ -18,6 +18,7 @@ class OnlineManager
 
 		void SetListener(INetworkEventListener* listener) { mListener = listener; }
 		void PollEvents();
+
 		ENetHost* GetHost() const { return mHost; };
 
 	protected:

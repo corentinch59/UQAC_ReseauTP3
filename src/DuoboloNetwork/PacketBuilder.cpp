@@ -9,7 +9,6 @@ ENetPacket* PacketBuilder::build_world_init_packet(entt::registry& world, Compon
 {
 	WorldInitPacket packet;
 	packet.nbEntities = world.view<entt::entity>().size();
-	spdlog::info("Sending {} entities", packet.nbEntities);
 	// Serialiser toutes les entites
 	for(auto [entity] : world.storage<entt::entity>().each())
 	{
@@ -41,7 +40,6 @@ ENetPacket* PacketBuilder::build_game_data(entt::registry& world, ComponentRegis
 {
 	WorldInitPacket packet;
 	packet.nbEntities = world.view<entt::entity>().size();
-	spdlog::info("Sending {} entities", packet.nbEntities);
 	// Serialiser toutes les entites
 	for (auto [entity] : world.storage<entt::entity>().each())
 	{

@@ -84,7 +84,7 @@ void InputManager::BindMouse(MouseButton mouse, std::string action)
 	m_mouseInputMap[mouse] = std::move(action);
 }
 
-void InputManager::BindKeyboardAction(std::string action, std::function<void(InputAction)> callback)
+void InputManager::BindAction(std::string action, std::function<void(InputAction)> callback)
 {
 	m_keyActionMap[action] = std::move(callback);
 }

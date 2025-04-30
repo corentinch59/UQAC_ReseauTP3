@@ -17,6 +17,7 @@ class OnlineClientManager final : public OnlineManager
 		OnlineClientManager& operator=(OnlineClientManager&&) = delete;
 
 		bool SendConnectionRequest(unsigned short port, const std::string& ipAddress);
+		void SendPacket(ENetPacket* packet, std::uint8_t channel = 0);
 
 		void Disconnect();
 

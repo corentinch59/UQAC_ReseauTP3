@@ -9,7 +9,7 @@ add_includedirs("include")
 add_installfiles("(assets/**)", {prefixdir = "bin"})
 
 -- Dépendances communes
-add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse", "raylib")
+add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse", "raylib", "libcurl")
 
 -- Patch Windows
 if is_plat("windows") then
@@ -62,4 +62,4 @@ end
 
 -- duo_target("Editor", {"DuoBoloShared", "DuoBoloClient"}, {"rlimgui", "rcamera", "Main"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
 duo_target("DuoBoloClient", {"DuoBoloShared", "DuoBoloClient"}, {"Main", "DuoBoloEngine", "rlimgui", "rcamera"}, {"raylib", "enet6", "spdlog", "entt", "nlohmann_json", "argparse"})
-duo_target("DuoBoloServer", {"DuoBoloShared", "DuoBoloServer"}, {"Main", "DuoBoloEngine"}, {"entt", "enet6", "nlohmann_json", "raylib", "argparse"})
+duo_target("DuoBoloServer", {"DuoBoloShared", "DuoBoloServer"}, {"Main", "DuoBoloEngine"}, {"entt", "enet6", "nlohmann_json", "raylib", "argparse", "libcurl"})

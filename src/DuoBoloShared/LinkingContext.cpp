@@ -17,7 +17,7 @@ mComponents(components)
 {
 }
 
-void LinkingContext::ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& byteArray)
+void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& byteArray)
 {
 	std::size_t offset = 0;
 	Opcode opcode = static_cast<Opcode>(BinaryDeserialize<uint8_t>(byteArray, offset));
@@ -27,11 +27,11 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& b
 		{
 			mWorld.clear();
 			int nb = BinaryDeserialize<uint16_t>(byteArray, offset);
-			for (int i = 0; i < nb; ++i)
+			for (std::size_t i = 0; i < nb; ++i)
 			{
 				entt::handle entityHandle(mWorld, mWorld.create());
 				int nbComp = BinaryDeserialize<uint8_t>(byteArray, offset);
-				for (int j = 0; j < nbComp; ++j)
+				for (std::size_t j = 0; j < nbComp; ++j)
 				{
 					ComponentType comp = static_cast<ComponentType>(BinaryDeserialize<uint8_t>(byteArray, offset));
 					std::vector<ComponentRegistry::Entry>::iterator it;
@@ -87,7 +87,17 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& b
 		}
 		case Opcode::Entity:
 		{
-
+			entt::handle entityHandle(mWorld, mWorld.create());
+			int nbComp = BinaryDeserialize<uint8_t>(byteArray, offset);
+			for (std::size_t i = 0; i < nbComp; ++i)
+			{
+				ComponentType comp = static_cast<ComponentType>(BinaryDeserialize<uint8_t>(byteArray, offset));
+				std::vector<ComponentRegistry::Entry>::iterator it;
+				if (mComponents.FindEntry(comp, it))
+				{
+					it->binaryUnserialize(entityHandle, byteArray, offset);
+				}
+			}
 
 			break;
 		}
@@ -113,6 +123,11 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& b
 			network.id = static_cast<std::uint32_t>(sphereEntity);
 
 			//Send the newly created entity
+			entt::handle entityhandle(mWorld, sphereEntity);
+			ENetPacket* ep = mBuilder.build_entity_packet(entityhandle, mComponents);
+
+			enet_host_broadcast(host, 0, ep);
+			enet_packet_dispose(ep);
 			
 			break;
 		}

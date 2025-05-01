@@ -20,7 +20,7 @@ class ServerGameSessionManager : public INetworkEventListener
 		void OnConnected(ENetPeer* peer) override;
 		void OnDisconnected(ENetPeer* peer) override;
 		void OnTimedOut(ENetPeer* peer) override;
-		void OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data) override;
+		void OnPacketReceived(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& data) override;
 
 		void Tick(ENetHost* host, ServerGame& game, float dt);
 

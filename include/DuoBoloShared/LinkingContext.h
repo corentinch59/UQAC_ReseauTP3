@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DuoBoloShared/ComponentRegistry.h>
+#include <DuoBoloNetwork/PacketBuilder.h>
 
 #include <vector>
 #include <enet6/enet.h>
@@ -17,10 +18,11 @@ class LinkingContext
 		LinkingContext& operator=(const LinkingContext&) = delete;
 		LinkingContext& operator=(LinkingContext&&) = delete;
 
-		void ProcessPacket(ENetPeer* peer, const std::vector<uint8_t>& byteArray);
+		void ProcessPacket(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& byteArray);
 
 	private:
 		entt::registry& mWorld;
 		ComponentRegistry& mComponents;
+		PacketBuilder mBuilder;
 };
 

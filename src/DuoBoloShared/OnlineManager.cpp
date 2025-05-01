@@ -46,7 +46,7 @@ void OnlineManager::PollEvents()
 				{
 					std::vector<uint8_t> byteArray(event.packet->dataLength);
 					std::memcpy(byteArray.data(), event.packet->data, event.packet->dataLength);
-					mListener->OnPacketReceived(event.peer, byteArray);
+					mListener->OnPacketReceived(event.peer, mHost, byteArray);
 
 					enet_packet_dispose(event.packet);
 					break;

@@ -24,9 +24,9 @@ void ClientGameSessionManager::OnTimedOut(ENetPeer* peer)
 {
 }
 
-void ClientGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data)
+void ClientGameSessionManager::OnPacketReceived(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& data)
 {
-	mLinkingContext.ProcessPacket(peer, data);
+	mLinkingContext.ProcessPacket(peer, nullptr, data);
 }
 
 void ClientGameSessionManager::Tick(ENetHost* host, float dt)

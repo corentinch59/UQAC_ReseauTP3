@@ -21,7 +21,11 @@ void GameDataPacket::Serialize(std::vector<std::uint8_t>& byteArray) const
 
 void EntityPacket::Serialize(std::vector<std::uint8_t>& byteArray) const
 {
+	BinarySerializeType<uint8_t>(byteArray, nbComp);
 
+	std::size_t oldSize = byteArray.size();
+	byteArray.resize(sizeof(Opcode) + oldSize + componentData.size());
+	std::memcpy(&byteArray[sizeof(uint8_t) + sizeof(Opcode)], componentData.data(), componentData.size());
 }
 
 EntityPacket EntityPacket::Deserialize(const std::vector<std::uint8_t>& byteArray, std::size_t& offset)

@@ -30,9 +30,9 @@ void ServerGameSessionManager::OnTimedOut(ENetPeer* peer)
 	spdlog::info("Client {} timed out", peer->incomingPeerID);
 }
 
-void ServerGameSessionManager::OnPacketReceived(ENetPeer* peer, const std::vector<uint8_t>& data)
+void ServerGameSessionManager::OnPacketReceived(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& data)
 {
-	mLinkingContext.ProcessPacket(peer, data);
+	mLinkingContext.ProcessPacket(peer, host, data);
 }
 
 void ServerGameSessionManager::Tick(ENetHost* host, ServerGame& game, float dt)

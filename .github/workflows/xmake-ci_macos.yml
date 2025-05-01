@@ -41,7 +41,7 @@ jobs:
               with:
                   type: 'zip'
                   filename: '../../../../${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/macosx/arm64/${{matrix.mode}}
+                  directory: build/macosx/arm64/${{matrix.mode}}
                   exclusions: '*.lib *.so *.a *.dll'
 
             - name: Upload Release

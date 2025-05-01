@@ -45,7 +45,7 @@ jobs:
               with:
                   type: 'zip'
                   filename: '../../../../${{matrix.mode}}-${{matrix.os}}.zip'
-                  path: build/linux/x86_64/${{matrix.mode}}
+                  directory: build/linux/x86_64/${{matrix.mode}}
                   exclusions: '*.lib *.a *.dll'
 
             - name: Upload Release

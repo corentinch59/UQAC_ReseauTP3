@@ -60,3 +60,28 @@ void TransformComponent::JsonUnserialize(entt::handle entity, const nlohmann::js
 	node.rotation = doc.value("Rotation", Quaternion{0,0,0,1});
 	node.scale = doc.value("Scale", Vector3{ 1.f,1.f,1.f });
 }
+
+bool TransformComponent::IsComponentModified(std::vector<uint8_t>& byteArray)
+{
+	std::vector<uint8_t> temp;
+	BinarySerialize(entt::handle{}, temp);
+
+	if (temp.size() != previous.size())
+	{
+		byteArray.insert(byteArray.end(), temp.begin(), temp.end());
+		previous = std::move(temp);
+		return true;
+	}
+
+	for (std::size_t i = 0; i < temp.size(); ++i)
+	{
+		if (temp[i] != previous[i])
+		{
+			byteArray.insert(byteArray.end(), temp.begin(), temp.end());
+			previous = std::move(temp);
+			return true;
+		}
+	}
+
+	return false;
+}

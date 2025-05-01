@@ -18,4 +18,5 @@ enum class ComponentTypeID : uint8_t
 	Camera,
 	RigidBody,
 	Name,
+	Network,
 };

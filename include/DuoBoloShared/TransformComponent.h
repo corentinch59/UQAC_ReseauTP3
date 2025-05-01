@@ -8,12 +8,16 @@
 #include <raymath.h>
 #include <entt/entity/handle.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <cstdint>
 
 struct TransformComponent
 {
     Vector3 position = {1, 1, 1};
     Quaternion rotation = QuaternionIdentity();
     Vector3 scale = { 1, 1, 1 }; // only affects rendering !!
+    std::vector<uint8_t> previous;
+
+    bool IsComponentModified(std::vector<uint8_t>& byteArray);
 
     void BinarySerialize(entt::handle handle, std::vector<uint8_t>& byteArray);
     static void BinaryUnserialize(entt::handle handle, const std::vector<uint8_t>& byteArray, std::size_t& offset);

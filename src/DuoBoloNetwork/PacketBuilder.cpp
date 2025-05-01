@@ -3,7 +3,11 @@
 #include <DuoBoloNetwork/Protocol.h>
 #include <DuoBoloNetwork/BinarySerialize.h>
 
+#include <DuoBoloShared/TransformComponent.h>
+
 #include <spdlog/spdlog.h>
+
+#include "DuoBoloShared/NetworkComponent.h"
 
 ENetPacket* PacketBuilder::build_world_init_packet(entt::registry& world, ComponentRegistry& components)
 {
@@ -37,27 +41,21 @@ ENetPacket* PacketBuilder::build_player_packet()
 
 ENetPacket* PacketBuilder::build_game_data(entt::registry& world, ComponentRegistry& components)
 {
-	WorldInitPacket packet;
-	packet.nbEntities = world.view<entt::entity>().size();
-	// Serialiser toutes les entites
-	for (auto [entity] : world.storage<entt::entity>().each())
+	GameDataPacket packet;
+
+	int count = 0;
+	for (auto [entity, transform, network] : world.view<TransformComponent, NetworkComponent>().each())
 	{
 		entt::handle entityHandle(world, entity);
-		int nbComponents = 0;
-		std::size_t offset = packet.worldArray.size();
-		BinarySerializeType<uint8_t>(packet.worldArray, 0);
-		components.ForEachComponent([&](const ComponentRegistry::Entry& entry)
-			{
-				if (entry.hasComponent(entityHandle))
-				{
-					entry.binarySerialize(entityHandle, packet.worldArray);
-					++nbComponents;
-				}
-			});
-		packet.worldArray[offset] = nbComponents;
+		if (transform.IsComponentModified(packet.worldArray))
+		{
+			network.BinarySerialize(entityHandle, packet.worldArray);
+			count++;
+		}
 	}
+	packet.nbEntities = count;
 
-	return build_packet<WorldInitPacket>(packet, 0);
+	return build_packet<GameDataPacket>(packet, 0);
 }
 
 ENetPacket* PacketBuilder::build_client_input(const PlayerInput& inputs)

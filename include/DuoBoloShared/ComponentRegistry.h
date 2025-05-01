@@ -16,7 +16,8 @@ enum class ComponentType : uint8_t
 	Renderable,
 	RigidBody,
 	Camera,
-	Name
+	Name,
+	Network,
 };
 
 class ComponentRegistry

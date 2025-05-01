@@ -19,7 +19,6 @@
 #include <DuoBoloClient/OnlineClientManager.h>
 #include <DuoBoloClient/ClientGame.h>
 
-
 #define OBJECT_DESTROY_DISTANCE 1000
 
 void SetupInputActions(ClientGame& game, ClientGameSessionManager& session);

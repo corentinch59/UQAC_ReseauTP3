@@ -5,6 +5,7 @@
 #include <DuoBoloShared/PhysicsComponent.h>
 #include <DuoBoloShared/CameraComponent.h>
 #include <DuoBoloShared/NameComponent.h>
+#include <DuoBoloShared/NetworkComponent.h>
 
 
 ComponentRegistry::ComponentRegistry()
@@ -111,6 +112,22 @@ void ComponentRegistry::RegisterEngineComponent()
 		.jsonUnserialize = BuildJsonUnserialize<NameComponent>(),
 #ifdef WITH_SCE_EDITOR
 		.inspect = BuildInspect<NameComponent>(),
+#endif
+		});
+
+		Register({
+		.id = "network",
+		.label = "Network",
+		.type = ComponentType::Network,
+		.addComponent = BuildAddComponent<NetworkComponent>(),
+		.hasComponent = BuildHasComponent<NetworkComponent>(),
+		.removeComponent = BuildRemoveComponent<NetworkComponent>(),
+		.binarySerialize = BuildBinarySerialize<NetworkComponent>(),
+		.binaryUnserialize = BuildBinaryUnserialize<NetworkComponent>(),
+		.jsonSerialize = BuildJsonSerialize<NetworkComponent>(),
+		.jsonUnserialize = BuildJsonUnserialize<NetworkComponent>(),
+#ifdef WITH_SCE_EDITOR
+		.inspect = BuildInspect<NetworkComponent>(),
 #endif
 		});
 }

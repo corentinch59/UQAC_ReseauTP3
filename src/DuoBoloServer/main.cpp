@@ -14,6 +14,7 @@
 #include <DuoBoloServer/OnlineServerManager.h>
 #include <DuoBoloServer/ServerGameSessionManager.h>
 
+#include "DuoBoloShared/NetworkComponent.h"
 
 #define OBJECT_DESTROY_DISTANCE 1000
 constexpr float networkRate = 1.f / 30.f;
@@ -32,6 +33,13 @@ int ServerMain(int argc, char* argv[])
 	double accumulator = 0.0;
 
 	LoadSceneFromPath("assets/Scene1.dbs", world, componentRegistry);
+
+	//Add NetworkComponent to all entities
+	for(auto&& [entity] : world.view<entt::entity>().each())
+	{
+		auto& node = world.emplace<NetworkComponent>(entity);
+		node.id = static_cast<std::uint32_t>(entity);
+	}
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();
 

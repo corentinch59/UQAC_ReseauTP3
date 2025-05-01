@@ -12,6 +12,11 @@ void WorldInitPacket::Serialize(std::vector<uint8_t>& byteArray) const
 
 void GameDataPacket::Serialize(std::vector<std::uint8_t>& byteArray) const
 {
+	BinarySerializeType<uint16_t>(byteArray, nbEntities);
+
+	std::size_t oldSize = byteArray.size();
+	byteArray.resize(sizeof(Opcode) + oldSize + worldArray.size());
+	std::memcpy(&byteArray[sizeof(uint16_t) + sizeof(Opcode)], worldArray.data(), worldArray.size());
 }
 
 void EntityPacket::Serialize(std::vector<std::uint8_t>& byteArray) const

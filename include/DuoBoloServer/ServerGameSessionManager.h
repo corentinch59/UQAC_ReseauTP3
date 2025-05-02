@@ -24,6 +24,8 @@ class ServerGameSessionManager : public INetworkEventListener
 
 		void Tick(ENetHost* host, ServerGame& game, float dt);
 
+		std::string GetUsernameForConnection(uint32_t connectionId);
+
 	private:
 		entt::registry& mWorld;
 		ComponentRegistry& mComponents;

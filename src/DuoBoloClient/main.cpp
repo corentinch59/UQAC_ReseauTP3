@@ -44,6 +44,8 @@ int ClientMain(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
+	spdlog::info("Connecting to {} as {}", ip, username);
+
 	InitWindow(1280, 720, "DuoBoloGame");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
 	DisableCursor();

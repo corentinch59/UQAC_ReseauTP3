@@ -20,6 +20,6 @@ OnlineServerManager::OnlineServerManager(unsigned short port, int numberOfPlayer
 
 OnlineServerManager::~OnlineServerManager()
 {
-	enet_host_destroy(mHost);
+
 }
 

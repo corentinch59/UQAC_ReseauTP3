@@ -14,9 +14,13 @@
 
 #include <spdlog/spdlog.h>
 
+#include "DuoBoloShared/UserCreationInfoComponent.h"
+
 #define GRAVITY (-9.8f)
 
 #define DEFAULT_DESTROY_DISTANCE_FROM_CENTER 100.0f
+
+PhysicsSolver* PhysicsSolver::gPhysicsSolver = nullptr;
 
 PhysicsSolver::PhysicsSolver(entt::registry& world) : mEnttWorld(world),
                                                       mDefaultCollisionConfiguration(
@@ -30,13 +34,26 @@ PhysicsSolver::PhysicsSolver(entt::registry& world) : mEnttWorld(world),
 	                                                      mCollisionDispatcher.get(), mOverlappingPairCache.get(),
 	                                                      mSolver.get(), mDefaultCollisionConfiguration.get()))
 {
+	if (gPhysicsSolver)
+	{
+		spdlog::error("A physics solver already exists!");
+		throw std::exception("A physics solver already exists!");
+	}
+
+	gPhysicsSolver = this;
+
+	mCollisionDispatcher->setNearCallback(NearCallback);
+
 	mWorld->setGravity(btVector3(0, GRAVITY, 0));
 
 	mEnttWorld.on_construct<RigidbodyComponent>().connect<&PhysicsSolver::HandleRigidbodyCreate>(this);
 	mEnttWorld.on_destroy<RigidbodyComponent>().connect<&PhysicsSolver::HandleRigidbodyDestroy>(this);
 }
 
-PhysicsSolver::~PhysicsSolver() = default;
+PhysicsSolver::~PhysicsSolver()
+{
+	if (gPhysicsSolver == this) gPhysicsSolver = nullptr;
+};
 
 void PhysicsSolver::SyncRigidbodyAndTransform(const entt::entity& entity, RigidbodyComponent& rbComp,
                                               TransformComponent& tComp)
@@ -83,7 +100,7 @@ void PhysicsSolver::Solve(float delta)
 		SyncRigidbodyAndTransform(entity, rigidbodyComponent, transformComponent);
 	}
 
-	mWorld->stepSimulation(delta, 10, 1.0f/120.f);
+	mWorld->stepSimulation(delta, 10, 1.0f / 120.f);
 
 	for (auto&& [entity, rigidbodyComponent, transformComponent] : view.each())
 	{
@@ -124,8 +141,9 @@ void PhysicsSolver::HandleRigidbodyCreate(entt::registry& registry, entt::entity
 	mCollisionShapes[entity] = CreateShapeFromAny(comp.shape);
 
 	btVector3 bInertia(0.0f, 0.0f, 0.0f);
-	if (comp.mass != 0.0f && mCollisionShapes[entity]) mCollisionShapes[entity]->calculateLocalInertia(
-		comp.mass, bInertia);
+	if (comp.mass != 0.0f && mCollisionShapes[entity])
+		mCollisionShapes[entity]->calculateLocalInertia(
+			comp.mass, bInertia);
 
 	mMotionStates[entity] = std::make_unique<btDefaultMotionState>();
 	mRigidbodies[entity] = std::make_unique<btRigidBody>(
@@ -134,6 +152,7 @@ void PhysicsSolver::HandleRigidbodyCreate(entt::registry& registry, entt::entity
 		mCollisionShapes[entity].get(),
 		bInertia
 	);
+	mRigidbodies[entity]->setUserIndex(static_cast<int>(entity));
 	mWorld->addRigidBody(mRigidbodies[entity].get());
 }
 
@@ -145,5 +164,45 @@ void PhysicsSolver::HandleRigidbodyDestroy(entt::registry& registry, entt::entit
 		mRigidbodies.erase(entity);
 		mMotionStates.erase(entity);
 		mCollisionShapes.erase(entity);
+	}
+}
+
+void PhysicsSolver::NearCallback(btBroadphasePair& collisionPair,
+                                 btCollisionDispatcher& dispatcher,
+                                 const btDispatcherInfo& dispatchInfo)
+{
+	// Default processing (generates contact points)
+	btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
+	btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
+
+	// You can filter collisions here if needed
+	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+
+	// Example: Only trigger on rigid bodies
+	btRigidBody* body0 = btRigidBody::upcast(colObj0);
+	btRigidBody* body1 = btRigidBody::upcast(colObj1);
+	if (body0 && body1)
+	{
+		if (gPhysicsSolver) gPhysicsSolver->OnCollision(body0, body1);
+	}
+}
+
+void PhysicsSolver::OnCollision(btRigidBody* body0, btRigidBody* body1)
+{
+	entt::entity entity0 = static_cast<entt::entity>(body0->getUserIndex());
+	entt::entity entity1 = static_cast<entt::entity>(body1->getUserIndex());
+
+	if (mEnttWorld.any_of<UserCreationInfoComponent>(entity0))
+	{
+		auto& userComp = mEnttWorld.get<UserCreationInfoComponent>(entity0);
+		auto& rbComp = mEnttWorld.get<RigidbodyComponent>(entity1);
+		rbComp.lastTouchedByUser = userComp.connectionId;
+	}
+
+	if (mEnttWorld.any_of<UserCreationInfoComponent>(entity1))
+	{
+		auto& userComp = mEnttWorld.get<UserCreationInfoComponent>(entity1);
+		auto& rbComp = mEnttWorld.get<RigidbodyComponent>(entity0);
+		rbComp.lastTouchedByUser = userComp.connectionId;
 	}
 }

@@ -10,11 +10,22 @@
 #include <spdlog/spdlog.h>
 
 #include "DuoBoloShared/NetworkComponent.h"
+#include "DuoBoloShared/UserCreationInfoComponent.h"
 
 LinkingContext::LinkingContext(entt::registry& world, ComponentRegistry& components) :
 mWorld(world),
 mComponents(components)
 {
+}
+
+std::string LinkingContext::GetUsernameForConnection(uint32_t connectionId)
+{
+	if (mConnectionToUsers.contains(connectionId))
+	{
+		return mConnectionToUsers[connectionId];
+	}
+
+	return "";
 }
 
 void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& byteArray)
@@ -122,6 +133,9 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 			sphereRenderable.model = "sphere";
 			sphereRenderable.tint = RED;
 
+			auto& userCreationInfoComp = mWorld.emplace<UserCreationInfoComponent>(sphereEntity);
+			userCreationInfoComp.connectionId = static_cast<int32_t>(peer->connectID);
+
 			auto& sphereRigidbody = mWorld.emplace<RigidbodyComponent>(sphereEntity, 50.0f, SphereShape{ .2f });
 			sphereRigidbody.velocity = Vector3Normalize(packet.forward) * 75.0f;
 
@@ -141,7 +155,7 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 		case Opcode::Auth:
 		{
 			ClientAuthPacket packet = ClientAuthPacket::Deserialize(byteArray, offset);
-
+			mConnectionToUsers[peer->connectID] = packet.username;
 		}
 	}
 }

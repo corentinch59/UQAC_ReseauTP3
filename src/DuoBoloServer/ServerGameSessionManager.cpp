@@ -44,3 +44,8 @@ void ServerGameSessionManager::Tick(ENetHost* host, ServerGame& game, float dt)
 		enet_packet_dispose(packet);
 	}
 }
+
+std::string ServerGameSessionManager::GetUsernameForConnection(uint32_t connectionId)
+{
+	return mLinkingContext.GetUsernameForConnection(connectionId);
+}

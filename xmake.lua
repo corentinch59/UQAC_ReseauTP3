@@ -8,6 +8,8 @@ set_encodings("utf-8")
 add_includedirs("include")
 add_installfiles("(assets/**)", {prefixdir = "bin"})
 
+add_defines("ENTT_DISABLE_ASSERT")
+
 -- Dépendances communes
 add_requires("enet6", "entt", "spdlog", "bullet3", "imgui v1.91.8-docking", "nlohmann_json", "fmt", "argparse", "raylib", "libcurl")
 

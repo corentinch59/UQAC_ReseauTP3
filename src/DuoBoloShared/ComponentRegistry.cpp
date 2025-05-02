@@ -115,17 +115,17 @@ void ComponentRegistry::RegisterEngineComponent()
 #endif
 		});
 
-		Register({
-		.id = "network",
-		.label = "Network",
-		.type = ComponentType::Network,
-		.addComponent = BuildAddComponent<NetworkComponent>(),
-		.hasComponent = BuildHasComponent<NetworkComponent>(),
-		.removeComponent = BuildRemoveComponent<NetworkComponent>(),
-		.binarySerialize = BuildBinarySerialize<NetworkComponent>(),
-		.binaryUnserialize = BuildBinaryUnserialize<NetworkComponent>(),
-		.jsonSerialize = BuildJsonSerialize<NetworkComponent>(),
-		.jsonUnserialize = BuildJsonUnserialize<NetworkComponent>(),
+	Register({
+	.id = "network",
+	.label = "Network",
+	.type = ComponentType::Network,
+	.addComponent = BuildAddComponent<NetworkComponent>(),
+	.hasComponent = BuildHasComponent<NetworkComponent>(),
+	.removeComponent = BuildRemoveComponent<NetworkComponent>(),
+	.binarySerialize = BuildBinarySerialize<NetworkComponent>(),
+	.binaryUnserialize = BuildBinaryUnserialize<NetworkComponent>(),
+	.jsonSerialize = BuildJsonSerialize<NetworkComponent>(),
+	.jsonUnserialize = BuildJsonUnserialize<NetworkComponent>(),
 #ifdef WITH_SCE_EDITOR
 		.inspect = BuildInspect<NetworkComponent>(),
 #endif

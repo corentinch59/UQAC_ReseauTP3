@@ -18,6 +18,9 @@
 
 #include <curl/curl.h>
 
+#include "DuoBoloShared/PhysicsComponent.h"
+#include "DuoBoloShared/UserCreationInfoComponent.h"
+
 #define OBJECT_DESTROY_DISTANCE 1000
 constexpr float networkRate = 1.f / 30.f;
 
@@ -44,7 +47,9 @@ int ServerMain(int argc, char* argv[])
 	}
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();
-	auto stopTime = std::chrono::high_resolution_clock::now() + std::chrono::minutes(19);
+	auto stopTime = std::chrono::high_resolution_clock::now() + std::chrono::minutes(2);
+
+	std::map<uint32_t, uint32_t> cubesDropped;
 
 	while (stopTime > std::chrono::high_resolution_clock::now())
 	{
@@ -66,15 +71,29 @@ int ServerMain(int argc, char* argv[])
 		solver.Solve(deltaTime);
 
 		{
-			auto view = world.view<TransformComponent>();
-
-			for (auto&& [entity, transform] : view.each())
+			world.view<TransformComponent>().each([&](const auto entity, auto&& transform)
 			{
 				if (Vector3LengthSqr(transform.position) > OBJECT_DESTROY_DISTANCE * OBJECT_DESTROY_DISTANCE)
 				{
+					if (world.any_of<RigidbodyComponent>(entity) && !world.any_of<UserCreationInfoComponent>(entity))
+					{
+						RigidbodyComponent& comp = world.get<RigidbodyComponent>(entity);
+						if (comp.lastTouchedByUser != -1)
+						{
+							if (cubesDropped.contains(comp.lastTouchedByUser))
+							{
+								cubesDropped[comp.lastTouchedByUser]++;
+							}
+							else
+							{
+								cubesDropped[comp.lastTouchedByUser] = 1;
+							}
+						}
+					}
+
 					world.destroy(entity);
 				}
-			}
+			});
 		}
 
 		lastFrame = now;
@@ -83,47 +102,91 @@ int ServerMain(int argc, char* argv[])
 	world.clear();
 
 	// get os env variable MATCH_ID
-	std::string matchId = std::getenv("MATCH_ID");
-
-	CURL* curl;
-	CURLcode res;
-
-	/* In Windows, this inits the Winsock stuff */
-	curl_global_init(CURL_GLOBAL_ALL);
-
-	/* get a curl handle */
-	curl = curl_easy_init();
-	if (curl)
+	try
 	{
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-		curl_easy_setopt(curl, CURLOPT_URL, "https://8v66afx0ff.execute-api.us-east-1.amazonaws.com/prod");
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-		curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fmt::format("matchId={}", matchId).c_str());
+		std::map<std::string, uint32_t> cubesDroppedByUsername;
 
-		struct curl_slist* headers = NULL;
-		headers = curl_slist_append(headers, "Content-Type: text/json");
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		for (auto& [cId, cubes] : cubesDropped)
+		{
+			std::string user = session.GetUsernameForConnection(cId);
+			if (cubesDroppedByUsername.contains(user))
+			{
+				cubesDroppedByUsername[user] += cubes;
+			}
+			else
+			{
+				cubesDroppedByUsername[user] = cubes;
+			}
+		}
 
-		nlohmann::json j = {
-			{"matchId", matchId},
-			{"players", nlohmann::json::array()}
-		};
+		for (auto& [user, cubes] : cubesDroppedByUsername)
+		{
+			spdlog::info("{} dropped {} cubes", user, cubes);
+		}
 
-		std::string data = j.dump();
+		const char* env = std::getenv("MATCH_ID");
+		std::string matchId;
+		if (env != nullptr) { // OK : on copie la chaîne si elle existe
+			matchId = env;
+		}
+		else {
+			spdlog::error("No match ID in env");
+		}
 
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+		CURL* curl;
+		CURLcode res;
 
-		/* Perform the request, res gets the return code */
-		res = curl_easy_perform(curl);
-		/* Check for errors */
-		if (res != CURLE_OK)
-			spdlog::error("Couldn't post match result...");
+		/* In Windows, this inits the Winsock stuff */
+		curl_global_init(CURL_GLOBAL_ALL);
 
-		/* always cleanup */
-		curl_easy_cleanup(curl);
+		/* get a curl handle */
+		curl = curl_easy_init();
+		if (curl)
+		{
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+			curl_easy_setopt(curl, CURLOPT_URL, fmt::format("https://8v66afx0ff.execute-api.us-east-1.amazonaws.com/prod/server/postmatchresult?matchId={}", matchId).c_str());
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fmt::format("matchId={}", matchId).c_str());
+
+			struct curl_slist* headers = NULL;
+			headers = curl_slist_append(headers, "Content-Type: text/json");
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+			nlohmann::json j = {
+				{"matchId", matchId},
+				{"players", nlohmann::json::array()}
+			};
+
+			for (auto& [user, cubes] : cubesDroppedByUsername)
+			{
+				nlohmann::json player = {
+					{"playerId", user},
+					{"cubesDropped", static_cast<int>(cubes)}
+				};
+
+				j["players"].push_back(player);
+			}
+
+			std::string data = j.dump();
+
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+
+			/* Perform the request, res gets the return code */
+			res = curl_easy_perform(curl);
+			/* Check for errors */
+			if (res != CURLE_OK)
+				spdlog::error("Couldn't post match result...");
+
+			/* always cleanup */
+			curl_easy_cleanup(curl);
+		}
+		curl_global_cleanup();
 	}
-	curl_global_cleanup();
+	catch (std::exception e)
+	{
+		spdlog::error("Error sending match info: {}", e.what());
+	}
 
 	return EXIT_SUCCESS;
 }

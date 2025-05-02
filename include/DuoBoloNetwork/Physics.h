@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+#include <BulletCollision/BroadphaseCollision/btDispatcher.h>
 #include <entt/entt.hpp>
 
 struct TransformComponent;
@@ -30,6 +32,8 @@ public:
 private:
     entt::registry& mEnttWorld;
 
+    static PhysicsSolver* gPhysicsSolver;
+
     std::unique_ptr<btDefaultCollisionConfiguration> mDefaultCollisionConfiguration;
     std::unique_ptr<btCollisionDispatcher> mCollisionDispatcher;
     std::unique_ptr<btBroadphaseInterface> mOverlappingPairCache;
@@ -41,4 +45,7 @@ private:
     entt::dense_map<entt::entity, std::unique_ptr<btMotionState>> mMotionStates;
     void HandleRigidbodyCreate(entt::registry& registry, entt::entity entity);
     void HandleRigidbodyDestroy(entt::registry& registry, entt::entity entity);
+    static void NearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo);
+
+    void OnCollision(btRigidBody* body0, btRigidBody* body1);
 };

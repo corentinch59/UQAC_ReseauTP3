@@ -6,7 +6,7 @@
 #include <enet6/enet.h>
 
 template<typename T> void BinarySerializeType(std::vector<uint8_t>& byteArray, T data);
-void BinarySerializeType(std::vector<uint8_t>& byteArray, std::string& data);
+void BinarySerializeType(std::vector<uint8_t>& byteArray,const  std::string& data);
 
 template<typename T> T BinaryDeserialize(const std::vector<uint8_t>& byteArray, std::size_t& offset);
 std::string BinaryDeserialize(const std::vector<uint8_t>& byteArray, std::size_t& offset);

@@ -1,5 +1,7 @@
 #include <DuoBoloNetwork/BinarySerialize.h>
 #include <DuoBoloNetwork/Opcodes.h>
+#include <DuoBoloNetwork/TimerManager.h>
+
 #include <DuoBoloShared/TransformComponent.h>
 #include <DuoBoloShared/JsonSerializer.h>
 
@@ -41,6 +43,12 @@ void TransformComponent::BinaryUnserialize(entt::handle handle, const std::vecto
 	node.scale.x = BinaryDeserialize<float>(byteArray, offset);
 	node.scale.y = BinaryDeserialize<float>(byteArray, offset);
 	node.scale.z = BinaryDeserialize<float>(byteArray, offset);
+
+	node.previousPosition = node.position;
+	node.previousRotation = node.rotation;
+
+	node.targetPosition = node.position;
+	node.targetRotation = node.rotation;
 }
 
 nlohmann::json TransformComponent::JsonSerialize(const entt::handle entity) const

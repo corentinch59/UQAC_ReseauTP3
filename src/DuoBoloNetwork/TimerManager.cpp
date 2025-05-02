@@ -52,6 +52,15 @@ std::weak_ptr<Timer> TimerManager::CreateTimer(float timeToWait, const std::func
 	return ret;
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="timeToWait">: the timer it takes for the timer to finish</param>
+/// <param name="inContinuousAction">: continuously called, the first float is deltatime, second is progress</param>
+/// <param name="inCompletedAction">: called when timer finishes</param>
+/// <param name="inDelay">: delay before the timer starts</param>
+/// <param name="isLooping">: will make the timer loop</param>
+/// <returns></returns>
 std::weak_ptr<Timer> TimerManager::CreateContinuousTimer(float timeToWait, const std::function<void(float, float)>& inContinuousAction, const std::function<void()>& inCompletedAction, float inDelay, bool isLooping)
 {
 	std::shared_ptr<Timer> ret = std::make_shared<Timer>(timeToWait, inCompletedAction, inContinuousAction, inDelay, isLooping);

@@ -79,7 +79,13 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 					auto entity = it->second;
 					auto& transform = view.get<TransformComponent>(entity);
 
-					transform = temp;
+					transform.previousPosition = transform.position;
+					transform.previousRotation = transform.rotation;
+
+					transform.targetPosition = temp.position;
+					transform.targetRotation = temp.rotation;
+
+					transform.interpElapsed = 0.0f;
 				}
 			}
 

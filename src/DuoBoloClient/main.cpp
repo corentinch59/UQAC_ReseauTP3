@@ -11,6 +11,7 @@
 #include <DuoBoloNetwork/Input.h>
 #include <DuoBoloNetwork/Physics.h>
 #include <DuoBoloNetwork/Rendering.h>
+#include <DuoBoloNetwork/TimerManager.h>
 
 #include <DuoBoloShared/ComponentRegistry.h>
 #include <DuoBoloShared/TransformComponent.h>
@@ -18,6 +19,7 @@
 #include <DuoBoloClient/ClientGameSessionManager.h>
 #include <DuoBoloClient/OnlineClientManager.h>
 #include <DuoBoloClient/ClientGame.h>
+#include <DuoBoloServer/ServerGameSessionManager.h>
 
 #define OBJECT_DESTROY_DISTANCE 1000
 
@@ -57,6 +59,7 @@ int ClientMain(int argc, char* argv[])
 
 	ClientGame game;
 	InputManager inputManager;
+	TimerManager timerManager;
 
 	game.SetupInput();
 
@@ -68,6 +71,13 @@ int ClientMain(int argc, char* argv[])
 	if (!client.SendConnectionRequest(13333, ip))
 	{
 		return EXIT_FAILURE;
+	}
+
+	{
+		PacketBuilder builder;
+		ENetPacket* packet = builder.build_client_auth(username);
+		client.SendPacket(packet);
+		enet_packet_dispose(packet);
 	}
 
 	SetupInputActions(game,session);
@@ -85,6 +95,23 @@ int ClientMain(int argc, char* argv[])
 		game.UpdateCameraRotation();
 
 		client.PollEvents();
+
+		timerManager.UpdateTimers(deltaTime);
+
+		auto view = world.view<TransformComponent>();
+		for (auto&& [entity, transform] : view.each()) {
+			if (transform.interpElapsed < transform.interpolationTime) {
+				transform.interpElapsed += deltaTime;
+				float t = Clamp(transform.interpElapsed / transform.interpolationTime, 0.0f, 1.0f);
+
+				transform.position = Vector3Lerp(transform.previousPosition, transform.targetPosition, t);
+				transform.rotation = QuaternionSlerp(transform.previousRotation, transform.targetRotation, t);
+			}
+			else {
+				transform.position = transform.targetPosition;
+				transform.rotation = transform.targetRotation;
+			}
+		}
 
 		// needed for imgui
 		BeginDrawing();

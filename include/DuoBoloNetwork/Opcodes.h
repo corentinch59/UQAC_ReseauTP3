@@ -9,6 +9,7 @@ enum class Opcode : uint8_t
 	Entity,
 	Input,
 	Shoot,
+	Auth,
 };
 
 enum class ComponentTypeID : uint8_t

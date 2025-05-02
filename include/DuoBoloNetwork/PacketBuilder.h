@@ -18,6 +18,7 @@ class PacketBuilder
 		ENetPacket* build_game_data(entt::registry& world, ComponentRegistry& components);
 		ENetPacket* build_client_input(const PlayerInput& inputs);
 		ENetPacket* build_client_shoot(Vector3 position, Vector3 forward);
+		ENetPacket* build_client_auth(std::string username);
 };
 
 

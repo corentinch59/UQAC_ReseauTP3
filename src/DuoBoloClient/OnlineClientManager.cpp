@@ -66,7 +66,7 @@ void OnlineClientManager::SendPacket(ENetPacket* packet, std::uint8_t channel)
 {
 	if (mClient && packet)
 	{
-		spdlog::info("Sending packet of {} bytes", packet->dataLength);
+		//spdlog::info("Sending packet of {} bytes", packet->dataLength);
 		enet_peer_send(mClient, channel, packet);
 	}
 }

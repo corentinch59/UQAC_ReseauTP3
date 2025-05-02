@@ -23,6 +23,7 @@ class ServerGameSessionManager : public INetworkEventListener
 		void OnPacketReceived(ENetPeer* peer, ENetHost* host, const std::vector<uint8_t>& data) override;
 
 		void Tick(ENetHost* host, ServerGame& game, float dt);
+		LinkingContext& GetContext() { return mLinkingContext; }
 
 		std::string GetUsernameForConnection(uint32_t connectionId);
 

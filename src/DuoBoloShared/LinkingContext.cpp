@@ -11,6 +11,7 @@
 
 #include "DuoBoloShared/NetworkComponent.h"
 #include "DuoBoloShared/UserCreationInfoComponent.h"
+#include <DuoBoloServer/ServerGame.h>
 
 LinkingContext::LinkingContext(entt::registry& world, ComponentRegistry& components) :
 mWorld(world),
@@ -121,6 +122,8 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 		case Opcode::Shoot:
 		{
 			ClientShootPacket packet = ClientShootPacket::Deserialize(byteArray, offset);
+			if (!mShootCallback(peer->connectID))
+				break;
 
 			auto sphereEntity = mWorld.create();
 			auto& sphereTransform = mWorld.emplace<TransformComponent>(sphereEntity);

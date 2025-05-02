@@ -20,6 +20,7 @@
 
 #include "DuoBoloShared/PhysicsComponent.h"
 #include "DuoBoloShared/UserCreationInfoComponent.h"
+#include <DuoBoloNetwork/TimerManager.h>
 
 #define OBJECT_DESTROY_DISTANCE 1000
 constexpr float networkRate = 1.f / 30.f;
@@ -30,12 +31,15 @@ int ServerMain(int argc, char* argv[])
 
 	PhysicsSolver solver(world);
 	ComponentRegistry componentRegistry;
+	TimerManager timerManager;
 
 	ServerGame game;
 	ServerGameSessionManager session(world, componentRegistry);
 	OnlineServerManager server(13333, 4);
 	server.SetListener(&session);
 	double accumulator = 0.0;
+
+	session.GetContext().SetShootCallback([&](std::uint32_t id) { return game.CanPlayerShoot(id); });
 
 	LoadSceneFromPath("assets/Scene1.dbs", world, componentRegistry);
 
@@ -66,6 +70,9 @@ int ServerMain(int argc, char* argv[])
 			session.Tick(server.GetHost(), game, networkRate);
 			accumulator -= networkRate;
 		}
+
+		timerManager.UpdateTimers(deltaTime);
+
 		server.PollEvents();
 
 		solver.Solve(deltaTime);

@@ -1,6 +1,6 @@
 #include <DuoBoloNetwork/BinarySerialize.h>
 
-void BinarySerializeType(std::vector<uint8_t>& byteArray, std::string& data)
+void BinarySerializeType(std::vector<uint8_t>& byteArray,const std::string& data)
 {
 	BinarySerializeType<std::uint16_t>(byteArray, data.size());
 

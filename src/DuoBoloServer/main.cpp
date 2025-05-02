@@ -175,8 +175,10 @@ int ServerMain(int argc, char* argv[])
 			/* Perform the request, res gets the return code */
 			res = curl_easy_perform(curl);
 			/* Check for errors */
-			if (res != CURLE_OK)
-				spdlog::error("Couldn't post match result...");
+			if (res != CURLE_OK) {
+				const char* err = curl_easy_strerror(res);
+				spdlog::error("Couldn't post match result: {}", err);
+			}
 
 			/* always cleanup */
 			curl_easy_cleanup(curl);

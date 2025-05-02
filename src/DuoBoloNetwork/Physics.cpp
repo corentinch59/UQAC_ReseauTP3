@@ -37,7 +37,7 @@ PhysicsSolver::PhysicsSolver(entt::registry& world) : mEnttWorld(world),
 	if (gPhysicsSolver)
 	{
 		spdlog::error("A physics solver already exists!");
-		throw std::exception("A physics solver already exists!");
+		exit(1);
 	}
 
 	gPhysicsSolver = this;

@@ -140,6 +140,7 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 
 		case Opcode::Auth:
 		{
+			ClientAuthPacket packet = ClientAuthPacket::Deserialize(byteArray, offset);
 
 		}
 	}

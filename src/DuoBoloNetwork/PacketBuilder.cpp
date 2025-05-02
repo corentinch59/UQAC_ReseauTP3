@@ -87,3 +87,12 @@ ENetPacket* PacketBuilder::build_client_shoot(Vector3 position, Vector3 forward)
 
 	return build_packet<ClientShootPacket>(packet, 0);
 }
+
+ENetPacket* PacketBuilder::build_client_auth(std::string username)
+{
+	ClientAuthPacket packet;
+
+	packet.username = username;
+
+	return build_packet<ClientAuthPacket>(packet, ENET_PACKET_FLAG_RELIABLE);
+}

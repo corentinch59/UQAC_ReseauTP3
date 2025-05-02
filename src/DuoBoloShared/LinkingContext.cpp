@@ -137,5 +137,10 @@ void LinkingContext::ProcessPacket(ENetPeer* peer, ENetHost* host, const std::ve
 			
 			break;
 		}
+
+		case Opcode::Auth:
+		{
+
+		}
 	}
 }

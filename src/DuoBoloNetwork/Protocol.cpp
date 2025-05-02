@@ -102,3 +102,16 @@ ClientShootPacket ClientShootPacket::Deserialize(const std::vector<std::uint8_t>
 
 	return packet;
 }
+
+void ClientAuthPacket::Serialize(std::vector<std::uint8_t>& byteArray) const
+{
+	BinarySerializeType(byteArray, username);
+}
+
+ClientAuthPacket ClientAuthPacket::Deserialize(const std::vector<std::uint8_t>& byteArray, std::size_t& offset)
+{
+	ClientAuthPacket packet;
+	packet.username = BinaryDeserialize(byteArray, offset);
+
+	return packet;
+}

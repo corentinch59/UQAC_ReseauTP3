@@ -73,6 +73,13 @@ int ClientMain(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
+	{
+		PacketBuilder builder;
+		ENetPacket* packet = builder.build_client_auth(username);
+		client.SendPacket(packet);
+		enet_packet_dispose(packet);
+	}
+
 	SetupInputActions(game,session);
 
 	auto lastFrame = std::chrono::high_resolution_clock::now();

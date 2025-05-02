@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <raylib.h>
+#include <string>
 
 struct WorldInitPacket
 {
@@ -56,4 +57,14 @@ struct ClientShootPacket
 
 	void Serialize(std::vector<std::uint8_t>& byteArray) const;
 	static ClientShootPacket Deserialize(const std::vector<std::uint8_t>& byteArray, std::size_t& offset);
+};
+
+struct ClientAuthPacket
+{
+	static constexpr Opcode opcode = Opcode::Auth;
+
+	std::string username;
+
+	void Serialize(std::vector<std::uint8_t>& byteArray) const;
+	static ClientAuthPacket Deserialize(const std::vector<std::uint8_t>& byteArray, std::size_t& offset);
 };
